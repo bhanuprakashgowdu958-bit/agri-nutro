@@ -75,9 +75,13 @@ module.exports = async function handler(req, res) {
       } else if (body.action === 'delete' && body.orderId) {
         memoryOrders = memoryOrders.filter(o => o.orderId && o.orderId.toLowerCase() !== body.orderId.toLowerCase());
         return res.status(200).json(memoryOrders);
+      } else if (body.action) {
+        return res.status(200).json(memoryOrders);
       } else {
-        body.lastUpdated = new Date().toISOString();
-        memoryOrders.unshift(body);
+        if (body.farmerName || body.items || body.finalTotal) {
+          body.lastUpdated = new Date().toISOString();
+          memoryOrders.unshift(body);
+        }
         return res.status(200).json(memoryOrders);
       }
     } catch (e) {

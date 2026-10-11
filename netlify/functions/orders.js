@@ -74,9 +74,13 @@ exports.handler = async (event, context) => {
       } else if (body.action === 'delete' && body.orderId) {
         memoryOrders = memoryOrders.filter(o => o.orderId && o.orderId.toLowerCase() !== body.orderId.toLowerCase());
         return { statusCode: 200, headers, body: JSON.stringify(memoryOrders) };
+      } else if (body.action) {
+        return { statusCode: 200, headers, body: JSON.stringify(memoryOrders) };
       } else {
-        body.lastUpdated = new Date().toISOString();
-        memoryOrders.unshift(body);
+        if (body.farmerName || body.items || body.finalTotal) {
+          body.lastUpdated = new Date().toISOString();
+          memoryOrders.unshift(body);
+        }
         return { statusCode: 200, headers, body: JSON.stringify(memoryOrders) };
       }
     } catch (e) {
