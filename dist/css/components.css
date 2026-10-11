@@ -3194,41 +3194,104 @@
 }
 
 /* ==========================================================================
-   18. FLOATING WHATSAPP & DIRECT FARM ADVISORY
+   18. FLOATING AGRO BRAND LOGO & DIRECT FARM ADVISORY
    ========================================================================== */
 .whatsapp-floating-btn {
   position: fixed;
   bottom: 24px;
   right: 24px;
   z-index: 850;
-  width: 58px;
-  height: 58px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+  background: radial-gradient(circle, #0e3b28 0%, #041f14 100%);
   color: #fff;
-  border: none;
-  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.45);
+  border: 2.5px solid #f59e0b;
+  box-shadow: 0 8px 24px rgba(6, 78, 59, 0.55), 0 0 16px rgba(245, 158, 11, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all var(--transition-normal);
+  padding: 0;
+  overflow: visible;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .whatsapp-floating-btn:hover {
-  transform: scale(1.08);
-  box-shadow: 0 8px 26px rgba(37, 211, 102, 0.6);
+  transform: scale(1.12) rotate(2deg);
+  border-color: #fbbf24;
+  box-shadow: 0 12px 36px rgba(6, 78, 59, 0.7), 0 0 28px rgba(245, 158, 11, 0.65);
+}
+
+.agro-floating-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+  pointer-events: none;
 }
 
 .whatsapp-pulse {
   position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 14px;
-  height: 14px;
-  background-color: #ff4757;
-  border: 2px solid #fff;
+  top: -2px;
+  right: -2px;
+  width: 16px;
+  height: 16px;
+  background-color: #ef4444;
+  border: 2px solid #ffffff;
   border-radius: 50%;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.9);
+  animation: pulsePing 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  z-index: 2;
+}
+
+@keyframes pulsePing {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.75);
+  }
+  70% {
+    transform: scale(1.2);
+    box-shadow: 0 0 0 9px rgba(239, 68, 68, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+.agro-floating-tooltip {
+  position: absolute;
+  right: 76px;
+  top: 50%;
+  transform: translateY(-50%) translateX(12px);
+  background: rgba(7, 31, 22, 0.96);
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(10px);
+  z-index: 852;
+}
+
+.whatsapp-floating-btn:hover .agro-floating-tooltip {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+@media (max-width: 768px) {
+  .agro-floating-tooltip {
+    display: none;
+  }
 }
 
 .whatsapp-chat-popup {
