@@ -8,6 +8,7 @@ find_git.ps1
 
 # Local dev server binaries and scripts
 server.exe
+nutri_server.exe
 Server.cs
 server.ps1
 run_server.ps1

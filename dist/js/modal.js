@@ -377,21 +377,16 @@ function handleCheckoutSubmit(e) {
       totalBags: window.cart ? window.cart.getTotalBags() : 1,
       totalWeightKg: window.cart ? window.cart.getTotalWeightKg() : 50,
       finalTotal: window.cart ? window.cart.getFinalTotal() : 0,
-      status: 'Automated Milling & Quality Screened',
+      status: 'Order Confirmed & Logged',
       eta: 'Tomorrow by 4:00 PM (Farmgate Arrival)',
       driverName: 'Ramesh Singh (Agro Hauler #HR-05-AB-4821)',
       driverPhone: '+91 98123 45678',
-      currentStep: 2 // 1: Confirmed, 2: Milling, 3: Dispatched, 4: Delivered
+      currentStep: 1 // 1: Confirmed, 2: Milling, 3: Dispatched, 4: Delivered
     };
 
-    // Store in localStorage for permanent tracking
-    try {
-      const stored = JSON.parse(localStorage.getItem('nutriagro_orders') || '[]');
-      stored.unshift(orderObj);
-      localStorage.setItem('nutriagro_orders', JSON.stringify(stored));
-    } catch (err) {
-      console.warn('Failed saving order to localStorage:', err);
-    }
+    // Store in server and local store for permanent cross-device tracking
+    saveOrder(orderObj);
+    requestNotificationPermission();
 
     // Show Confirmation Screen
     document.getElementById('checkoutFormSection').style.display = 'none';
@@ -413,13 +408,275 @@ function handleCheckoutSubmit(e) {
 }
 
 // ==========================================
-// 14. LIVE ORDER TRACKER & ORDERS MANAGEMENT
+// 14. LIVE ORDER TRACKER & SERVER SYNC ENGINE
 // ==========================================
+function getOrdersApiEndpoint() {
+  if (window.location.hostname.includes('netlify.app')) {
+    return '/.netlify/functions/orders';
+  }
+  return '/api/orders';
+}
+
 function getStoredOrders() {
   try {
     return JSON.parse(localStorage.getItem('nutriagro_orders') || '[]');
   } catch (e) {
     return [];
+  }
+}
+
+function updateAllOrderBadges(count) {
+  const c = typeof count === 'number' ? count : getStoredOrders().length;
+  
+  const headerBadge = document.getElementById('headerOrdersCountBadge');
+  if (headerBadge) {
+    headerBadge.textContent = c;
+    headerBadge.style.display = c > 0 ? 'inline-block' : 'none';
+  }
+
+  const modalBadge = document.getElementById('ordersCountBadge');
+  if (modalBadge) {
+    modalBadge.textContent = c;
+  }
+
+  const navBadge = document.getElementById('navOrdersCountBadge');
+  if (navBadge) {
+    navBadge.textContent = c;
+    navBadge.style.display = c > 0 ? 'inline-block' : 'none';
+  }
+}
+
+async function fetchOrdersFromServer(callback) {
+  try {
+    const res = await fetch(getOrdersApiEndpoint(), { method: 'GET', headers: { 'Accept': 'application/json' } });
+    if (res.ok) {
+      const serverOrders = await res.json();
+      if (Array.isArray(serverOrders) && serverOrders.length > 0) {
+        const local = getStoredOrders();
+        const merged = [...serverOrders];
+        local.forEach(lo => {
+          if (!merged.some(so => so.orderId && so.orderId.toLowerCase() === lo.orderId.toLowerCase())) {
+            merged.push(lo);
+          }
+        });
+        localStorage.setItem('nutriagro_orders', JSON.stringify(merged));
+        updateAllOrderBadges(merged.length);
+        checkCustomerOrderStatusChanges(merged);
+        if (typeof callback === 'function') callback(merged);
+        return merged;
+      }
+    }
+  } catch (err) {}
+  const current = getStoredOrders();
+  updateAllOrderBadges(current.length);
+  if (typeof callback === 'function') callback(current);
+  return current;
+}
+
+async function saveOrder(orderObj) {
+  try {
+    const local = getStoredOrders();
+    local.unshift(orderObj);
+    localStorage.setItem('nutriagro_orders', JSON.stringify(local));
+
+    localStorage.setItem('nutriagro_my_latest_order_id', orderObj.orderId);
+    localStorage.setItem('nutriagro_tracked_status_' + orderObj.orderId, JSON.stringify({
+      currentStep: orderObj.currentStep || 1,
+      status: orderObj.status || 'Order Confirmed & Logged'
+    }));
+
+    updateAllOrderBadges(local.length);
+
+    await fetch(getOrdersApiEndpoint(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderObj)
+    });
+  } catch (err) {
+    console.warn('Save order network notice:', err);
+  }
+  fetchOrdersFromServer();
+}
+
+async function updateOrderStatus(orderId, newStepVal) {
+  const step = parseInt(newStepVal, 10);
+  const orders = getStoredOrders();
+  const match = orders.find(o => o.orderId === orderId);
+  if (!match) return;
+
+  match.currentStep = step;
+  if (step === 1) {
+    match.status = 'Order Confirmed & Logged';
+  } else if (step === 2) {
+    match.status = 'Automated Milling & Quality Screened';
+  } else if (step === 3) {
+    match.status = 'Dispatched on Agro Freight Truck';
+  } else if (step === 4) {
+    match.status = 'Delivered to Farm Gate';
+  }
+  match.lastUpdated = new Date().toISOString();
+
+  localStorage.setItem('nutriagro_orders', JSON.stringify(orders));
+
+  try {
+    await fetch(getOrdersApiEndpoint(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'update_status',
+        orderId: orderId,
+        currentStep: step,
+        status: match.status
+      })
+    });
+  } catch (err) {
+    console.warn('Sync status notice:', err);
+  }
+
+  if (window.cart) {
+    window.cart.showToast(`✅ Order #${orderId} status updated to: ${match.status}!`, 'success');
+  }
+
+  renderOrdersListView(orders);
+}
+
+function manualRefreshOrders() {
+  const btn = document.getElementById('manualRefreshBtn');
+  if (btn) btn.textContent = '⏳ Syncing...';
+  fetchOrdersFromServer((orders) => {
+    if (btn) btn.textContent = '🔄 Refresh';
+    renderOrdersListView(orders);
+    if (window.cart) window.cart.showToast('Orders list refreshed from server!', 'info');
+  });
+}
+
+function playNotificationChime() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const now = ctx.currentTime;
+
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(1318.5, now);
+    gain1.gain.setValueAtTime(0.22, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(now);
+    osc1.stop(now + 0.35);
+
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(1975.5, now + 0.12);
+    gain2.gain.setValueAtTime(0.26, now + 0.12);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(now + 0.12);
+    osc2.stop(now + 0.55);
+  } catch (e) {}
+}
+
+function showCustomerStatusNotificationBanner(order) {
+  let banner = document.getElementById('customerStatusNotificationBanner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'customerStatusNotificationBanner';
+    banner.className = 'customer-status-alert-banner';
+    document.body.appendChild(banner);
+  }
+
+  banner.innerHTML = `
+    <div class="status-alert-left">
+      <span class="status-alert-icon">🔔</span>
+      <div>
+        <div class="status-alert-title">Order Status Updated by NutriAgro Mill!</div>
+        <div class="status-alert-detail">
+          Your Order <strong>#${order.orderId}</strong> is now: 
+          <span class="status-badge-inline">${order.status}</span>
+        </div>
+      </div>
+    </div>
+    <div class="status-alert-actions">
+      <button type="button" class="btn btn-sm btn-gold" onclick="openOrderTrackerModal('${order.orderId}'); dismissCustomerStatusBanner();" style="font-weight: 800; padding: 6px 12px; font-size: 0.8rem;">
+        🛰️ Track Live
+      </button>
+      <button type="button" class="status-alert-close" onclick="dismissCustomerStatusBanner()" aria-label="Close">✕</button>
+    </div>
+  `;
+  banner.style.display = 'flex';
+
+  if (window.Notification && Notification.permission === 'granted') {
+    try {
+      new Notification('NutriAgro Feeds: Order Status Updated', {
+        body: `Your Order #${order.orderId} has been updated to: ${order.status}`,
+        icon: 'assets/images/agro-logo.jpg'
+      });
+    } catch (e) {}
+  }
+}
+
+function dismissCustomerStatusBanner() {
+  const banner = document.getElementById('customerStatusNotificationBanner');
+  if (banner) banner.style.display = 'none';
+}
+
+function checkCustomerOrderStatusChanges(allOrders) {
+  const myOrderId = localStorage.getItem('nutriagro_my_latest_order_id');
+  if (!myOrderId) return;
+
+  const match = allOrders.find(o => o.orderId && o.orderId.toLowerCase() === myOrderId.toLowerCase());
+  if (!match) return;
+
+  const key = 'nutriagro_tracked_status_' + match.orderId;
+  let prev = {};
+  try {
+    prev = JSON.parse(localStorage.getItem(key) || '{}');
+  } catch (e) {}
+
+  if (prev.currentStep && (prev.currentStep !== match.currentStep || prev.status !== match.status)) {
+    localStorage.setItem(key, JSON.stringify({
+      currentStep: match.currentStep,
+      status: match.status
+    }));
+
+    playNotificationChime();
+    showCustomerStatusNotificationBanner(match);
+
+    const trackerModal = document.getElementById('orderTrackerModal');
+    if (trackerModal && trackerModal.classList.contains('active')) {
+      const trackingTab = document.getElementById('trackerLiveTrackingTab');
+      if (trackingTab && trackingTab.style.display !== 'none') {
+        renderOrderTrackingCard(match, allOrders);
+      }
+    }
+  } else if (!prev.currentStep) {
+    localStorage.setItem(key, JSON.stringify({
+      currentStep: match.currentStep,
+      status: match.status
+    }));
+  }
+}
+
+let statusWatcherTimer = null;
+function startOrderStatusWatcher() {
+  if (statusWatcherTimer) clearInterval(statusWatcherTimer);
+  fetchOrdersFromServer();
+
+  statusWatcherTimer = setInterval(() => {
+    fetchOrdersFromServer();
+  }, 4000);
+}
+
+function requestNotificationPermission() {
+  if (window.Notification && Notification.permission === 'default') {
+    try {
+      Notification.requestPermission();
+    } catch (e) {}
   }
 }
 
@@ -913,5 +1170,15 @@ window.renderOrdersListView = renderOrdersListView;
 window.updateOrderStatus = updateOrderStatus;
 window.generateSampleOrder = generateSampleOrder;
 window.trackOrderSubmit = trackOrderSubmit;
+window.manualRefreshOrders = manualRefreshOrders;
+window.dismissCustomerStatusBanner = dismissCustomerStatusBanner;
+window.fetchOrdersFromServer = fetchOrdersFromServer;
+
+// Start order sync & customer watcher immediately
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startOrderStatusWatcher);
+} else {
+  startOrderStatusWatcher();
+}
 
 

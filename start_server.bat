@@ -19,9 +19,13 @@ if %ERRORLEVEL% EQU 0 (
     node dev.js
 ) else (
     echo [WARNING] Node.js not found in PATH.
-    echo Falling back to standalone server.exe...
+    echo Falling back to standalone nutri_server.exe...
     echo.
-    server.exe 8080 "%CD%"
+    if exist nutri_server.exe (
+        nutri_server.exe 8080 "%CD%"
+    ) else (
+        server.exe 8080 "%CD%"
+    )
 )
 
 pause
