@@ -1007,6 +1007,29 @@
     let soundEnabled = true;
     let knownOrderIds = new Set();
     let initialLoadDone = false;
+    let deletedOrderIds = new Set();
+
+    function getDeletedOrderIds() {
+      try {
+        const local = JSON.parse(localStorage.getItem('nutri_deleted_orders') || '[]');
+        const sess = JSON.parse(sessionStorage.getItem('nutri_deleted_orders') || '[]');
+        return new Set([...local, ...sess].filter(Boolean).map(id => String(id).toLowerCase()));
+      } catch (e) {
+        return new Set();
+      }
+    }
+
+    function saveDeletedOrderId(orderId) {
+      if (!orderId) return;
+      const idNorm = String(orderId).toLowerCase();
+      deletedOrderIds = getDeletedOrderIds();
+      deletedOrderIds.add(idNorm);
+      const arr = Array.from(deletedOrderIds);
+      try {
+        localStorage.setItem('nutri_deleted_orders', JSON.stringify(arr));
+        sessionStorage.setItem('nutri_deleted_orders', JSON.stringify(arr));
+      } catch (e) {}
+    }
 
     function getApiEndpoint() {
       if (window.location.hostname.includes('netlify.app')) {
@@ -1128,17 +1151,28 @@
         checkAdminAuth();
         return;
       }
+      deletedOrderIds = getDeletedOrderIds();
       try {
-        const res = await fetch(getApiEndpoint(), { method: 'GET', headers: { 'Accept': 'application/json' } });
+        const res = await fetch(getApiEndpoint() + '?_t=' + Date.now(), {
+          method: 'GET',
+          cache: 'no-store',
+          headers: { 'Accept': 'application/json', 'Cache-Control': 'no-cache, no-store' }
+        });
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data)) {
-            // Strictly filter out any delete actions or invalid records!
-            const cleanOrders = data.filter(o => o && o.orderId && !o.action && (o.farmerName || o.items || o.finalTotal));
+            // Strictly filter out any delete actions, invalid records, or deleted order IDs!
+            deletedOrderIds = getDeletedOrderIds();
+            const cleanOrders = data.filter(o => 
+              o && o.orderId && 
+              !o.action && 
+              (o.farmerName || o.items || o.finalTotal) &&
+              !deletedOrderIds.has(String(o.orderId).toLowerCase())
+            );
 
             // Detect newly arrived orders
             if (initialLoadDone) {
-              const newOrders = cleanOrders.filter(o => o.orderId && !knownOrderIds.has(o.orderId.toLowerCase()));
+              const newOrders = cleanOrders.filter(o => o.orderId && !knownOrderIds.has(String(o.orderId).toLowerCase()));
               if (newOrders.length > 0) {
                 playCashChime();
                 newOrders.forEach(no => {
@@ -1162,6 +1196,7 @@
       }
 
       try {
+        deletedOrderIds = getDeletedOrderIds();
         let rawCached = localStorage.getItem('nutriagro_orders');
         let cached = rawCached !== null ? JSON.parse(rawCached) : null;
         if (cached === null) {
@@ -1186,34 +1221,16 @@
               driverPhone: "+91 98123 45678",
               currentStep: 2,
               lastUpdated: new Date().toISOString()
-            },
-            {
-              orderId: "NUTRI-573104",
-              date: "11 Oct 2026",
-              timestamp: 1791730000000,
-              farmerName: "Annamalai Commercial Poultry",
-              phone: "+91 94432 67890",
-              address: "Udumalpet Highway, Pollachi, Coimbatore, Tamil Nadu - 642001",
-              paymentMethod: "Direct Bank NEFT / RTGS Transfer",
-              items: [
-                { name: "NutriBroil UltraGrow™ 23% Pre-Starter Crumbs", quantity: 6, price: 2150, bagSize: "50kg" }
-              ],
-              totalBags: 6,
-              totalWeightKg: 300,
-              finalTotal: 12900,
-              status: "Dispatched on Agro Freight Truck",
-              eta: "Today by 6:30 PM (En Route)",
-              driverName: "Gurpreet Singh (Truck #PB-10-CZ-9912)",
-              driverPhone: "+91 98721 54321",
-              currentStep: 3,
-              lastUpdated: new Date().toISOString()
             }
           ];
-          localStorage.setItem('nutriagro_orders', JSON.stringify(cached));
-        } else {
-          cached = (cached || []).filter(o => o && o.orderId && !o.action && (o.farmerName || o.items || o.finalTotal));
-          localStorage.setItem('nutriagro_orders', JSON.stringify(cached));
         }
+        cached = (cached || []).filter(o => 
+          o && o.orderId && 
+          !o.action && 
+          (o.farmerName || o.items || o.finalTotal) && 
+          !deletedOrderIds.has(String(o.orderId).toLowerCase())
+        );
+        localStorage.setItem('nutriagro_orders', JSON.stringify(cached));
         allOrders = cached;
         knownOrderIds = new Set(allOrders.map(o => (o.orderId || '').toLowerCase()));
         renderDashboard();
@@ -1268,7 +1285,8 @@
       const container = document.getElementById('ordersListWrap');
       if (!container) return;
 
-      let filtered = allOrders;
+      deletedOrderIds = getDeletedOrderIds();
+      let filtered = allOrders.filter(o => o && o.orderId && !deletedOrderIds.has(String(o.orderId).toLowerCase()));
 
       // Filter by stage
       if (currentFilter !== 'all') {
@@ -1437,15 +1455,35 @@
     }
 
     async function deleteAdminOrder(orderId) {
+      if (!orderId) return;
       if (!confirm(`Are you sure you want to permanently delete Order #${orderId}?\nThis will remove the customer order from the system.`)) return;
-      allOrders = allOrders.filter(o => o && o.orderId && o.orderId.toLowerCase() !== orderId.toLowerCase());
-      knownOrderIds.delete(orderId.toLowerCase());
+
+      const idNorm = String(orderId).toLowerCase();
+      saveDeletedOrderId(orderId);
+      knownOrderIds.delete(idNorm);
+
+      allOrders = allOrders.filter(o => o && o.orderId && String(o.orderId).toLowerCase() !== idNorm);
       localStorage.setItem('nutriagro_orders', JSON.stringify(allOrders));
-      renderDashboard();
+
+      // Instant DOM removal & animation
+      const cardEl = document.getElementById('card-' + orderId);
+      if (cardEl) {
+        cardEl.style.transition = 'all 0.22s ease';
+        cardEl.style.opacity = '0';
+        cardEl.style.transform = 'scale(0.96)';
+        setTimeout(() => {
+          if (cardEl && cardEl.parentNode) cardEl.remove();
+          renderDashboard();
+        }, 180);
+      } else {
+        renderDashboard();
+      }
+
+      updateKPICounters();
       showToast(`🗑️ Order #${orderId} deleted permanently.`, 'info');
 
       try {
-        const res = await fetch(getApiEndpoint(), {
+        const res = await fetch(getApiEndpoint() + '?_t=' + Date.now(), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1456,13 +1494,19 @@
         if (res.ok) {
           const updated = await res.json();
           if (Array.isArray(updated)) {
-            allOrders = updated.filter(o => o && o.orderId && !o.action && (o.farmerName || o.items || o.finalTotal));
+            deletedOrderIds = getDeletedOrderIds();
+            allOrders = updated.filter(o => 
+              o && o.orderId && 
+              !o.action && 
+              (o.farmerName || o.items || o.finalTotal) && 
+              !deletedOrderIds.has(String(o.orderId).toLowerCase())
+            );
             localStorage.setItem('nutriagro_orders', JSON.stringify(allOrders));
             renderDashboard();
           }
         }
       } catch (err) {
-        console.warn('Backend delete sync error:', err);
+        console.warn('Backend delete sync note:', err);
       }
     }
 

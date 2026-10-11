@@ -22,27 +22,6 @@ let memoryOrders = [
     driverPhone: "+91 98123 45678",
     currentStep: 2,
     lastUpdated: "2026-10-11T23:30:00.000Z"
-  },
-  {
-    orderId: "NUTRI-573104",
-    date: "11 Oct 2026",
-    timestamp: 1791730000000,
-    farmerName: "Annamalai Commercial Poultry",
-    phone: "+91 94432 67890",
-    address: "Udumalpet Highway, Pollachi, Coimbatore, Tamil Nadu - 642001",
-    paymentMethod: "Direct Bank NEFT / RTGS Transfer",
-    items: [
-      { name: "NutriBroil UltraGrow™ 23% Pre-Starter Crumbs", quantity: 6, price: 2150, bagSize: "50kg" }
-    ],
-    totalBags: 6,
-    totalWeightKg: 300,
-    finalTotal: 12900,
-    status: "Dispatched on Agro Freight Truck",
-    eta: "Today by 6:30 PM (En Route)",
-    driverName: "Gurpreet Singh (Truck #PB-10-CZ-9912)",
-    driverPhone: "+91 98721 54321",
-    currentStep: 3,
-    lastUpdated: "2026-10-11T23:35:00.000Z"
   }
 ];
 
@@ -50,6 +29,9 @@ module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
   if (req.method === 'OPTIONS') {

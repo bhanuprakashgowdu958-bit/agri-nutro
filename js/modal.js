@@ -417,9 +417,21 @@ function getOrdersApiEndpoint() {
   return '/api/orders';
 }
 
+function getDeletedOrderIds() {
+  try {
+    const local = JSON.parse(localStorage.getItem('nutri_deleted_orders') || '[]');
+    const sess = JSON.parse(sessionStorage.getItem('nutri_deleted_orders') || '[]');
+    return new Set([...local, ...sess].filter(Boolean).map(id => String(id).toLowerCase()));
+  } catch (e) {
+    return new Set();
+  }
+}
+
 function getStoredOrders() {
   try {
-    return JSON.parse(localStorage.getItem('nutriagro_orders') || '[]');
+    const deletedIds = getDeletedOrderIds();
+    const raw = JSON.parse(localStorage.getItem('nutriagro_orders') || '[]');
+    return (raw || []).filter(o => o && o.orderId && !o.action && !deletedIds.has(String(o.orderId).toLowerCase()));
   } catch (e) {
     return [];
   }
@@ -447,23 +459,27 @@ function updateAllOrderBadges(count) {
 }
 
 async function fetchOrdersFromServer(callback) {
+  const deletedIds = getDeletedOrderIds();
   try {
-    const res = await fetch(getOrdersApiEndpoint(), { method: 'GET', headers: { 'Accept': 'application/json' } });
+    const res = await fetch(getOrdersApiEndpoint() + '?_t=' + Date.now(), {
+      method: 'GET',
+      cache: 'no-store',
+      headers: { 'Accept': 'application/json', 'Cache-Control': 'no-cache, no-store' }
+    });
     if (res.ok) {
       const serverOrders = await res.json();
-      if (Array.isArray(serverOrders) && serverOrders.length > 0) {
-        const local = getStoredOrders();
-        const merged = [...serverOrders];
-        local.forEach(lo => {
-          if (!merged.some(so => so.orderId && so.orderId.toLowerCase() === lo.orderId.toLowerCase())) {
-            merged.push(lo);
-          }
-        });
-        localStorage.setItem('nutriagro_orders', JSON.stringify(merged));
-        updateAllOrderBadges(merged.length);
-        checkCustomerOrderStatusChanges(merged);
-        if (typeof callback === 'function') callback(merged);
-        return merged;
+      if (Array.isArray(serverOrders)) {
+        const cleanServer = serverOrders.filter(o => 
+          o && o.orderId && 
+          !o.action && 
+          (o.farmerName || o.items || o.finalTotal) && 
+          !deletedIds.has(String(o.orderId).toLowerCase())
+        );
+        localStorage.setItem('nutriagro_orders', JSON.stringify(cleanServer));
+        updateAllOrderBadges(cleanServer.length);
+        checkCustomerOrderStatusChanges(cleanServer);
+        if (typeof callback === 'function') callback(cleanServer);
+        return cleanServer;
       }
     }
   } catch (err) {}
