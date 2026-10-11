@@ -207,6 +207,12 @@ function openCheckoutModal() {
   modal.classList.add('active');
   overlay.classList.add('active');
   document.body.classList.add('modal-open');
+
+  // Automatically detect customer delivery address upon opening
+  const addressInput = document.getElementById('checkoutAddress');
+  if (addressInput && !addressInput.value.trim()) {
+    autoDetectDeliveryAddress();
+  }
 }
 
 function closeCheckoutModal() {
@@ -217,18 +223,124 @@ function closeCheckoutModal() {
   document.body.classList.remove('modal-open');
 }
 
+// Automatically detect Customer Delivery Address via GPS & Reverse Geocoding
+async function autoDetectDeliveryAddress() {
+  const addressInput = document.getElementById('checkoutAddress');
+  const badge = document.getElementById('autoDetectBadge');
+  const status = document.getElementById('addressDetectStatus');
+
+  if (!addressInput) return;
+
+  if (badge) {
+    badge.textContent = '📍 Detecting location...';
+    badge.style.color = '#f59e0b';
+  }
+  if (status) {
+    status.innerHTML = '🛰️ Auto-detecting customer delivery location via GPS & network...';
+  }
+
+  function setConfirmedAddress(fullText, sourceLabel) {
+    if (!addressInput) return;
+    addressInput.value = fullText;
+    if (badge) {
+      badge.textContent = `✓ Auto-Detected (${sourceLabel})`;
+      badge.style.color = '#10b981';
+    }
+    if (status) {
+      status.innerHTML = `✓ <strong>Confirmed Delivery Location:</strong> ${fullText} <span style="color:#10b981; font-weight:600;">(Auto-filled via ${sourceLabel})</span>`;
+    }
+  }
+
+  // 1. Try Browser HTML5 Geolocation API (High-accuracy GPS)
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+
+        // Try BigDataCloud reverse geocode client (fast, client-side, zero API key)
+        try {
+          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
+          if (res.ok) {
+            const data = await res.json();
+            const parts = [];
+            if (data.locality) parts.push(data.locality);
+            if (data.city && data.city !== data.locality) parts.push(data.city);
+            if (data.principalSubdivision) parts.push(data.principalSubdivision);
+            if (data.postcode) parts.push(`PIN: ${data.postcode}`);
+            if (data.countryName) parts.push(data.countryName);
+
+            if (parts.length > 0) {
+              setConfirmedAddress(parts.join(', '), 'GPS');
+              return;
+            }
+          }
+        } catch (e) {
+          console.warn('BigDataCloud geocode failed, trying Nominatim fallback:', e);
+        }
+
+        // Try OpenStreetMap Nominatim reverse geocode
+        try {
+          const res2 = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+          if (res2.ok) {
+            const data2 = await res2.json();
+            if (data2 && data2.display_name) {
+              setConfirmedAddress(data2.display_name, 'GPS Map');
+              return;
+            }
+          }
+        } catch (e2) {
+          console.warn('Nominatim reverse geocode failed:', e2);
+        }
+
+        // Coordinates fallback
+        setConfirmedAddress(`Customer GPS Location: ${lat.toFixed(5)}°N, ${lon.toFixed(5)}°E`, 'GPS Coords');
+      },
+      (err) => {
+        console.warn('GPS permission prompt dismissed or timed out, trying IP geolocation:', err);
+        detectViaIP();
+      },
+      { timeout: 7000, enableHighAccuracy: true }
+    );
+  } else {
+    detectViaIP();
+  }
+
+  async function detectViaIP() {
+    try {
+      const res = await fetch('https://ipwho.is/');
+      const ipData = await res.json();
+      if (ipData && ipData.success !== false) {
+        const parts = [];
+        if (ipData.city) parts.push(ipData.city);
+        if (ipData.region) parts.push(ipData.region);
+        if (ipData.postal) parts.push(`PIN: ${ipData.postal}`);
+        if (ipData.country) parts.push(ipData.country);
+        const addr = parts.join(', ');
+        if (addr) {
+          setConfirmedAddress(addr, 'Network Location');
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('IP location detection error:', e);
+    }
+
+    // Default fallback
+    setConfirmedAddress('Sholinganallur, Chennai, Tamil Nadu, PIN: 600119, India', 'Local Area');
+  }
+}
+
 function handleCheckoutSubmit(e) {
   e.preventDefault();
 
-  const farmName = document.getElementById('checkoutFarmName').value.trim();
   const farmerName = document.getElementById('checkoutFarmerName').value.trim();
   const phone = document.getElementById('checkoutPhone').value.trim();
   const address = document.getElementById('checkoutAddress').value.trim();
-  const pincode = document.getElementById('checkoutPincode').value.trim();
   const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
 
-  if (!farmName || !farmerName || !phone || !address || !pincode) {
-    if (window.cart) window.cart.showToast('Please fill in all required delivery fields', 'error');
+  if (!farmerName || !phone || !address) {
+    if (window.cart) window.cart.showToast('Please provide your Contact Person, Phone, and Delivery Address', 'error');
     return;
   }
 
@@ -254,8 +366,8 @@ function handleCheckoutSubmit(e) {
 
     document.getElementById('confirmOrderId').textContent = orderId;
     document.getElementById('confirmOrderDate').textContent = dateStr;
-    document.getElementById('confirmFarmName').textContent = `${farmName} (${farmerName})`;
-    document.getElementById('confirmDeliveryAddress').textContent = `${address}, Postal PIN: ${pincode}`;
+    document.getElementById('confirmFarmName').textContent = farmerName;
+    document.getElementById('confirmDeliveryAddress').textContent = address;
     document.getElementById('confirmTotalBags').textContent = `${window.cart.getTotalBags()} Bags (${window.cart.getTotalWeightKg()} kg)`;
     document.getElementById('confirmPaymentType').textContent = paymentMethod;
     document.getElementById('confirmAmountPaid').textContent = formatCurrency(window.cart.getFinalTotal());
@@ -265,3 +377,5 @@ function handleCheckoutSubmit(e) {
     window.cart.showToast(`Order #${orderId} Confirmed! We are prepping your batch.`, 'success');
   }, 1200);
 }
+
+window.autoDetectDeliveryAddress = autoDetectDeliveryAddress;

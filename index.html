@@ -915,33 +915,33 @@
           
           <!-- Left: Address & Dispatch -->
           <div>
-            <h4 style="font-size: 1rem; margin-bottom: 14px; color: var(--color-primary);">1. Farm Location & Contact</h4>
+            <h4 style="font-size: 1rem; margin-bottom: 14px; color: var(--color-primary);">1. Contact & Auto-Detected Delivery Address</h4>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
-              <div>
-                <label style="display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 4px;">Farm / Business Name *</label>
-                <input type="text" id="checkoutFarmName" required class="calc-input" placeholder="e.g. Kisan Agro Dairy Farm" />
-              </div>
               <div>
                 <label style="display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 4px;">Primary Contact Person *</label>
                 <input type="text" id="checkoutFarmerName" required class="calc-input" placeholder="e.g. Rajesh Sharma" />
               </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
               <div>
                 <label style="display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 4px;">Driver Dispatch Phone *</label>
                 <input type="tel" id="checkoutPhone" required class="calc-input" placeholder="e.g. +91 98765 43210" />
               </div>
-              <div>
-                <label style="display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 4px;">Postal PIN Code (6 Digits) *</label>
-                <input type="text" id="checkoutPincode" required class="calc-input" placeholder="e.g. 132001" maxlength="6" />
-              </div>
             </div>
 
             <div style="margin-bottom: 20px;">
-              <label style="display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 4px;">Delivery Address (Barn/Gate) *</label>
-              <textarea id="checkoutAddress" required rows="2" class="calc-input" placeholder="e.g. Farm Gate #2, GT Road Agro Corridor, Karnal, Haryana"></textarea>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <label style="font-size: 0.82rem; font-weight: 700; margin: 0;">
+                  Delivery Address *
+                  <span id="autoDetectBadge" style="font-size: 0.74rem; font-weight: 600; color: #10b981; margin-left: 6px;">📍 Auto-Detecting...</span>
+                </label>
+                <button type="button" id="detectLocationBtn" onclick="autoDetectDeliveryAddress()" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.4); color: #065f46; font-size: 0.74rem; font-weight: 700; padding: 3px 10px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s ease;">
+                  <span>🔄</span> Detect Again
+                </button>
+              </div>
+              <textarea id="checkoutAddress" required rows="2" class="calc-input" placeholder="Auto-detecting delivery address as per your customer location..."></textarea>
+              <div id="addressDetectStatus" style="font-size: 0.74rem; color: var(--color-dark-muted); margin-top: 4px;">
+                📍 Delivery address is automatically detected from your current location. No manual typing required.
+              </div>
             </div>
 
             <h4 style="font-size: 1rem; margin-bottom: 10px; color: var(--color-primary);">2. Commercial Payment Mode</h4>
@@ -1027,11 +1027,11 @@
           <span id="confirmOrderDate">Today</span>
         </div>
         <div class="receipt-line">
-          <span>Destination Farm:</span>
+          <span>Contact Person:</span>
           <span id="confirmFarmName"></span>
         </div>
         <div class="receipt-line">
-          <span>Drop Location:</span>
+          <span>Delivery Address:</span>
           <span id="confirmDeliveryAddress"></span>
         </div>
         <div class="receipt-line">
