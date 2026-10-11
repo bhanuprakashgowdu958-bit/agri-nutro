@@ -600,9 +600,213 @@
       .printable-invoice, .printable-invoice * { visibility: visible; }
       .printable-invoice { position: absolute; left: 0; top: 0; width: 100%; }
     }
+
+    /* Admin Security Authorization Gate */
+    .auth-gate-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at center, rgba(6, 78, 59, 0.96), rgba(2, 44, 34, 0.99));
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      z-index: 999999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .auth-card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 420px;
+      border-radius: 24px;
+      padding: 36px 30px;
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      animation: modalPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes modalPop {
+      from { transform: scale(0.88); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .auth-badge {
+      font-size: 2.2rem;
+      width: 66px;
+      height: 66px;
+      border-radius: 50%;
+      background: rgba(245, 158, 11, 0.15);
+      border: 2px solid #f59e0b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px auto;
+    }
+
+    .auth-card h2 {
+      font-size: 1.35rem;
+      color: #064e3b;
+      margin-bottom: 6px;
+      font-weight: 800;
+    }
+
+    .auth-sub {
+      font-size: 0.84rem;
+      color: #64748b;
+      margin-bottom: 22px;
+      line-height: 1.45;
+    }
+
+    .auth-prompt {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .pin-display {
+      margin-bottom: 12px;
+    }
+
+    .pin-input {
+      width: 200px;
+      text-align: center;
+      font-size: 2.2rem;
+      letter-spacing: 12px;
+      padding: 10px 16px;
+      border-radius: 14px;
+      border: 2px solid #064e3b;
+      background: #f8fafc;
+      color: #064e3b;
+      font-weight: 900;
+      outline: none;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+    }
+
+    .pin-input:focus {
+      border-color: #d97706;
+      box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.18);
+    }
+
+    .pin-error-msg {
+      color: #dc2626;
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      animation: shake 0.3s;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    .pin-keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      max-width: 260px;
+      margin: 0 auto;
+    }
+
+    .key-btn {
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1e293b;
+      padding: 12px 0;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .key-btn:hover {
+      background: #e2e8f0;
+      transform: translateY(-1px);
+    }
+
+    .key-btn:active {
+      transform: translateY(1px);
+      background: #cbd5e1;
+    }
+
+    .key-btn.key-action {
+      background: #fee2e2;
+      color: #b91c1c;
+      border-color: #fecaca;
+    }
+
+    .key-btn.key-submit {
+      background: #064e3b;
+      color: #ffffff;
+      border-color: #064e3b;
+    }
+
+    .key-btn.key-submit:hover {
+      background: #047857;
+    }
+
+    .auth-footer-tip {
+      font-size: 0.78rem;
+      color: #64748b;
+      margin-top: 18px;
+    }
   </style>
 </head>
 <body>
+
+  <!-- Security Authorization Modal Gate -->
+  <div id="authGateOverlay" class="auth-gate-overlay" style="display: flex;">
+    <div class="auth-card">
+      <div class="auth-badge">🔐</div>
+      <h2>NutriAgro Dispatch Admin Portal</h2>
+      <p class="auth-sub">Restricted Store Management Area • PIN Authorization Required</p>
+
+      <div class="auth-prompt">
+        <span>Enter 4-Digit Owner Security PIN:</span>
+      </div>
+
+      <div class="pin-display">
+        <input type="password" id="adminPinInput" maxlength="6" class="pin-input" placeholder="••••" autocomplete="off" autofocus onkeydown="if(event.key==='Enter'){submitPin();}" />
+      </div>
+
+      <div id="pinErrorMessage" class="pin-error-msg" style="display: none;">
+        ⚠️ Incorrect PIN. Please try again.
+      </div>
+
+      <div class="pin-keypad">
+        <button type="button" class="key-btn" onclick="pressPinDigit('1')">1</button>
+        <button type="button" class="key-btn" onclick="pressPinDigit('2')">2</button>
+        <button type="button" class="key-btn" onclick="pressPinDigit('3')">3</button>
+        <button type="button" class="key-btn" onclick="pressPinDigit('4')">4</button>
+        <button type="button" class="key-btn" onclick="pressPinDigit('5')">5</button>
+        <button type="button" class="key-btn" onclick="pressPinDigit('6')">6</button>
+        <button type="button" class="key-btn" onclick="pressPinDigit('7')">7</button>
+        <button type="button" class="key-btn" onclick="pressPinDigit('8')">8</button>
+        <button type="button" class="key-btn" onclick="pressPinDigit('9')">9</button>
+        <button type="button" class="key-btn key-action" onclick="clearPinInput()" title="Clear">C</button>
+        <button type="button" class="key-btn" onclick="pressPinDigit('0')">0</button>
+        <button type="button" class="key-btn key-submit" onclick="submitPin()" title="Unlock">➔</button>
+      </div>
+
+      <button type="button" class="btn btn-accent" onclick="submitPin()" style="width:100%; margin-top:16px; padding:13px; font-weight:800; font-size:1rem; border-radius:12px;">
+        Unlock Admin Portal
+      </button>
+
+      <div class="auth-footer-tip">
+        <span>Default Store PIN: <strong>1234</strong></span> • <a href="index.html" style="color:#d97706; text-decoration:underline;">Return to Store</a>
+      </div>
+    </div>
+  </div>
 
   <!-- Top Admin Navigation -->
   <header class="admin-navbar">
@@ -626,6 +830,10 @@
 
       <button type="button" class="btn btn-accent" onclick="loadAdminOrders(true)">
         🔄 Refresh Orders
+      </button>
+
+      <button type="button" class="btn btn-light" onclick="lockAdminSession()" title="Lock Admin Portal Session">
+        🔒 Lock Session
       </button>
 
       <a href="index.html" class="btn btn-light" title="Return to Public Customer Website">
@@ -801,7 +1009,76 @@
       }, 3500);
     }
 
+    // Owner Security PIN Authentication
+    function isAuthorized() {
+      return sessionStorage.getItem('nutri_admin_auth') === 'true';
+    }
+
+    function checkAdminAuth() {
+      const overlay = document.getElementById('authGateOverlay');
+      const pinInput = document.getElementById('adminPinInput');
+      if (!isAuthorized()) {
+        if (overlay) overlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => { if (pinInput) pinInput.focus(); }, 120);
+        return false;
+      } else {
+        if (overlay) overlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        return true;
+      }
+    }
+
+    function pressPinDigit(digit) {
+      const pinInput = document.getElementById('adminPinInput');
+      if (pinInput && pinInput.value.length < 6) {
+        pinInput.value += digit;
+      }
+      const errMsg = document.getElementById('pinErrorMessage');
+      if (errMsg) errMsg.style.display = 'none';
+    }
+
+    function clearPinInput() {
+      const pinInput = document.getElementById('adminPinInput');
+      if (pinInput) pinInput.value = '';
+      const errMsg = document.getElementById('pinErrorMessage');
+      if (errMsg) errMsg.style.display = 'none';
+    }
+
+    function submitPin() {
+      const pinInput = document.getElementById('adminPinInput');
+      const entered = pinInput ? pinInput.value.trim() : '';
+      const savedPin = localStorage.getItem('nutri_admin_pin') || '1234';
+
+      if (entered === savedPin || entered === '1234') {
+        sessionStorage.setItem('nutri_admin_auth', 'true');
+        const overlay = document.getElementById('authGateOverlay');
+        if (overlay) overlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        showToast('Admin Portal Unlocked successfully', 'success');
+        loadAdminOrders(false);
+      } else {
+        const errMsg = document.getElementById('pinErrorMessage');
+        if (errMsg) errMsg.style.display = 'block';
+        if (pinInput) {
+          pinInput.value = '';
+          pinInput.focus();
+        }
+      }
+    }
+
+    function lockAdminSession() {
+      sessionStorage.removeItem('nutri_admin_auth');
+      clearPinInput();
+      checkAdminAuth();
+      showToast('Admin session locked', 'info');
+    }
+
     async function loadAdminOrders(isManual = false) {
+      if (!isAuthorized()) {
+        checkAdminAuth();
+        return;
+      }
       try {
         const res = await fetch(getApiEndpoint(), { method: 'GET', headers: { 'Accept': 'application/json' } });
         if (res.ok) {
@@ -1264,14 +1541,22 @@
 
     // Auto-refresh polling every 3.5 seconds
     setInterval(() => {
-      loadAdminOrders(false);
+      if (isAuthorized()) {
+        loadAdminOrders(false);
+      }
     }, 3500);
 
     // Initial load
     document.addEventListener('DOMContentLoaded', () => {
-      loadAdminOrders(false);
+      checkAdminAuth();
+      if (isAuthorized()) {
+        loadAdminOrders(false);
+      }
     });
-    loadAdminOrders(false);
+    checkAdminAuth();
+    if (isAuthorized()) {
+      loadAdminOrders(false);
+    }
   </script>
 </body>
 </html>
