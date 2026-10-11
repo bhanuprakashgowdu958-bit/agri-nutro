@@ -413,25 +413,29 @@ function handleCheckoutSubmit(e) {
 }
 
 // ==========================================
-// 14. LIVE ORDER TRACKER SYSTEM
+// 14. LIVE ORDER TRACKER & ORDERS MANAGEMENT
 // ==========================================
+function getStoredOrders() {
+  try {
+    return JSON.parse(localStorage.getItem('nutriagro_orders') || '[]');
+  } catch (e) {
+    return [];
+  }
+}
+
 function openOrderTrackerModal(targetOrderId) {
   const modal = document.getElementById('orderTrackerModal');
   const overlay = document.getElementById('modalOverlay');
   if (!modal || !overlay) return;
 
-  // Retrieve stored orders
-  let orders = [];
-  try {
-    orders = JSON.parse(localStorage.getItem('nutriagro_orders') || '[]');
-  } catch (e) {
-    orders = [];
-  }
-
-  const container = document.getElementById('orderTrackerResultContainer');
-  const inputEl = document.getElementById('orderTrackerInput');
+  const orders = getStoredOrders();
+  const countBadge = document.getElementById('ordersCountBadge');
+  if (countBadge) countBadge.textContent = orders.length;
 
   if (targetOrderId) {
+    // If a specific order ID was requested (e.g. from checkout or direct track button)
+    switchTrackerTab('tracking');
+    const inputEl = document.getElementById('orderTrackerInput');
     if (inputEl) inputEl.value = targetOrderId;
     const match = orders.find(o => o.orderId.toLowerCase() === targetOrderId.toLowerCase());
     if (match) {
@@ -439,11 +443,9 @@ function openOrderTrackerModal(targetOrderId) {
     } else {
       renderSampleTrackingOrder(targetOrderId, orders);
     }
-  } else if (orders.length > 0) {
-    if (inputEl) inputEl.value = orders[0].orderId;
-    renderOrderTrackingCard(orders[0], orders);
   } else {
-    renderEmptyOrderTrackerState(orders);
+    // Default when opening from navigation menu: Open the Orders List!
+    switchTrackerTab('list');
   }
 
   modal.classList.add('active');
@@ -459,6 +461,253 @@ function closeOrderTrackerModal() {
   document.body.classList.remove('modal-open');
 }
 
+function switchTrackerTab(tabName) {
+  const listTab = document.getElementById('trackerOrdersListTab');
+  const trackingTab = document.getElementById('trackerLiveTrackingTab');
+  const btnList = document.getElementById('tabBtnOrdersList');
+  const btnTracking = document.getElementById('tabBtnLiveTracking');
+  const orders = getStoredOrders();
+
+  const countBadge = document.getElementById('ordersCountBadge');
+  if (countBadge) countBadge.textContent = orders.length;
+
+  if (tabName === 'list') {
+    if (listTab) listTab.style.display = 'block';
+    if (trackingTab) trackingTab.style.display = 'none';
+    if (btnList) btnList.classList.add('active');
+    if (btnTracking) btnTracking.classList.remove('active');
+    renderOrdersListView(orders);
+  } else {
+    if (listTab) listTab.style.display = 'none';
+    if (trackingTab) trackingTab.style.display = 'block';
+    if (btnList) btnList.classList.remove('active');
+    if (btnTracking) btnTracking.classList.add('active');
+    
+    // If tracking tab has no card yet, render the latest order
+    const container = document.getElementById('orderTrackerResultContainer');
+    if (container && (!container.innerHTML.trim() || container.innerHTML.includes('No Orders Placed Yet'))) {
+      if (orders.length > 0) {
+        const inputEl = document.getElementById('orderTrackerInput');
+        if (inputEl) inputEl.value = orders[0].orderId;
+        renderOrderTrackingCard(orders[0], orders);
+      } else {
+        renderEmptyOrderTrackerState(orders);
+      }
+    }
+  }
+}
+
+function renderOrdersListView(orders, searchQuery = '') {
+  const listContainer = document.getElementById('trackerOrdersListTab');
+  if (!listContainer) return;
+
+  const countBadge = document.getElementById('ordersCountBadge');
+  if (countBadge) countBadge.textContent = orders.length;
+
+  // Filter if searchQuery provided
+  let filteredOrders = orders;
+  if (searchQuery && searchQuery.trim()) {
+    const q = searchQuery.trim().toLowerCase();
+    filteredOrders = orders.filter(o => 
+      (o.orderId && o.orderId.toLowerCase().includes(q)) ||
+      (o.farmerName && o.farmerName.toLowerCase().includes(q)) ||
+      (o.phone && o.phone.toLowerCase().includes(q)) ||
+      (o.address && o.address.toLowerCase().includes(q))
+    );
+  }
+
+  if (orders.length === 0) {
+    listContainer.innerHTML = `
+      <div style="text-align: center; padding: 40px 20px; background: var(--color-gray-50); border: 1.5px dashed var(--color-gray-300); border-radius: var(--radius-lg);">
+        <div style="font-size: 2.8rem; margin-bottom: 12px;">📋</div>
+        <h3 style="font-size: 1.25rem; margin-bottom: 6px; color: var(--color-dark);">No Orders Placed Yet</h3>
+        <p style="font-size: 0.88rem; color: var(--color-dark-muted); max-width: 480px; margin: 0 auto 20px auto;">
+          When orders are submitted through Direct Farm Checkout, they will appear here in your Received Orders List with live dispatch controls.
+        </p>
+        <button type="button" class="btn btn-primary" onclick="generateSampleOrder()" style="padding: 10px 22px;">
+          ➕ Generate Sample Customer Order
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  // Calculate totals
+  const totalBags = orders.reduce((sum, o) => sum + (o.totalBags || 1), 0);
+  const totalAmount = orders.reduce((sum, o) => sum + (o.finalTotal || 0), 0);
+
+  let ordersCardsHtml = '';
+  if (filteredOrders.length === 0) {
+    ordersCardsHtml = `
+      <div style="text-align:center; padding:30px; color:var(--color-dark-muted); background:#f8fafc; border-radius:var(--radius-md);">
+        No orders match "<strong>${searchQuery}</strong>". <button type="button" onclick="renderOrdersListView(getStoredOrders(), '')" style="background:none; border:none; color:var(--color-primary); font-weight:700; cursor:pointer;">Clear search</button>
+      </div>
+    `;
+  } else {
+    ordersCardsHtml = filteredOrders.map(order => {
+      const step = order.currentStep || 2;
+      const statusBadge = step === 1 
+        ? '<span style="background:rgba(59,130,246,0.15); color:#2563eb; border:1px solid rgba(59,130,246,0.3); padding:4px 10px; border-radius:14px; font-size:0.76rem; font-weight:700;">🌾 1. Order Confirmed</span>'
+        : (step === 2 
+          ? '<span style="background:rgba(245,158,11,0.15); color:#d97706; border:1px solid rgba(245,158,11,0.3); padding:4px 10px; border-radius:14px; font-size:0.76rem; font-weight:700;">⚙️ 2. Automated Milling</span>'
+          : (step === 3 
+            ? '<span style="background:rgba(16,185,129,0.15); color:#059669; border:1px solid rgba(16,185,129,0.3); padding:4px 10px; border-radius:14px; font-size:0.76rem; font-weight:700;">🚚 3. Truck Dispatched</span>'
+            : '<span style="background:rgba(16,185,129,0.25); color:#047857; border:1px solid rgba(16,185,129,0.4); padding:4px 10px; border-radius:14px; font-size:0.76rem; font-weight:800;">🏡 4. Delivered to Farm</span>'
+          )
+        );
+
+      let itemsSummary = '';
+      if (order.items && order.items.length > 0) {
+        itemsSummary = order.items.map(i => `${i.quantity}× ${i.name} (${i.bagSize || '50kg'})`).join(', ');
+      } else {
+        itemsSummary = `${order.totalBags || 1} Bags (${order.totalWeightKg || 50} kg)`;
+      }
+
+      return `
+        <div class="order-list-item-card">
+          <!-- Order Card Header -->
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px; border-bottom: 1px solid var(--color-gray-200); padding-bottom: 10px; margin-bottom: 12px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 1.15rem; font-weight: 800; color: var(--color-primary); cursor: pointer;" onclick="openOrderTrackerModal('${order.orderId}')" title="Click to view live tracking">
+                  #${order.orderId}
+                </span>
+                <span style="font-size: 0.78rem; color: var(--color-dark-muted);">· Placed: ${order.date || 'Today'}</span>
+              </div>
+            </div>
+            <div>
+              ${statusBadge}
+            </div>
+          </div>
+
+          <!-- Customer & Destination Details -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 0.84rem; margin-bottom: 14px;">
+            <div>
+              <span style="color: var(--color-dark-muted); font-size: 0.75rem; display: block; font-weight: 700;">CUSTOMER & PHONE:</span>
+              <strong style="font-size: 0.95rem; color: var(--color-dark);">${order.farmerName || 'Customer'}</strong>
+              <div style="color: #047857; font-weight: 600; margin-top: 2px;">📞 ${order.phone || 'N/A'}</div>
+              <div style="color: var(--color-dark-muted); font-size: 0.78rem; margin-top: 4px;">📍 ${order.address || 'Detected Location'}</div>
+            </div>
+            <div>
+              <span style="color: var(--color-dark-muted); font-size: 0.75rem; display: block; font-weight: 700;">ORDER VALUE & PACKAGING:</span>
+              <strong style="font-size: 1.05rem; color: var(--color-primary);">₹${Math.round(order.finalTotal || 0).toLocaleString('en-IN')}</strong>
+              <div style="font-size: 0.78rem; color: var(--color-dark-muted); margin-top: 2px;">
+                ${order.totalBags || 1} Bags (${order.totalWeightKg || 50} kg) · ${order.paymentMethod || 'COD'}
+              </div>
+              <div style="font-size: 0.78rem; color: #4b5563; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${itemsSummary}">
+                📦 ${itemsSummary}
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Controls & Status Updater -->
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; background: var(--color-gray-50); border-radius: var(--radius-md); padding: 10px 14px; border: 1px solid var(--color-gray-200);">
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <button type="button" class="btn btn-sm btn-primary" onclick="openOrderTrackerModal('${order.orderId}')" style="padding: 6px 14px; font-size: 0.8rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
+                <span>🛰️</span> Track Live Status
+              </button>
+              <a href="https://wa.me/${order.phone ? order.phone.replace(/\D/g,'') : '919876543210'}?text=Hello%20${encodeURIComponent(order.farmerName || 'Customer')},%20your%20NutriAgro%20Order%20${order.orderId}%20is%20${encodeURIComponent(order.status || 'in progress')}.%20ETA:%20${encodeURIComponent(order.eta || 'Tomorrow')}." target="_blank" class="btn btn-sm btn-secondary" style="padding: 6px 12px; font-size: 0.8rem; background: #25d366; color: #fff; border-color: #25d366; display: inline-flex; align-items: center; gap: 4px;">
+                <span>📲</span> WhatsApp Customer
+              </a>
+            </div>
+
+            <!-- Manage / Update Stage -->
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 0.78rem;">
+              <span style="color: var(--color-dark-muted); font-weight: 700;">Update Status:</span>
+              <select onchange="updateOrderStatus('${order.orderId}', this.value)" style="padding: 5px 8px; font-size: 0.78rem; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: 600; background: #fff; cursor: pointer;">
+                <option value="1" ${step === 1 ? 'selected' : ''}>🌾 1. Confirmed</option>
+                <option value="2" ${step === 2 ? 'selected' : ''}>⚙️ 2. Milling & QA</option>
+                <option value="3" ${step === 3 ? 'selected' : ''}>🚚 3. Dispatched</option>
+                <option value="4" ${step === 4 ? 'selected' : ''}>🏡 4. Delivered</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  listContainer.innerHTML = `
+    <!-- Top Statistics Strip -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: var(--radius-md); padding: 12px 18px; margin-bottom: 16px;">
+      <div style="display: flex; gap: 18px; flex-wrap: wrap; font-size: 0.85rem;">
+        <div>📦 Total Orders: <strong style="color: var(--color-primary);">${orders.length}</strong></div>
+        <div>🌾 Total Bags: <strong>${totalBags} Bags</strong></div>
+        <div>💰 Total Revenue: <strong style="color: var(--color-primary);">₹${Math.round(totalAmount).toLocaleString('en-IN')}</strong></div>
+      </div>
+      <div>
+        <button type="button" class="btn btn-sm btn-secondary" onclick="generateSampleOrder()" style="padding: 4px 10px; font-size: 0.75rem;">
+          + Add Test Order
+        </button>
+      </div>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div style="margin-bottom: 16px;">
+      <input type="text" class="calc-input" placeholder="🔍 Search orders by Order ID, Customer Name, or Phone..." value="${searchQuery}" oninput="renderOrdersListView(getStoredOrders(), this.value)" style="margin: 0; padding: 10px 14px; font-size: 0.85rem;" />
+    </div>
+
+    <!-- Cards List -->
+    <div style="max-height: 480px; overflow-y: auto; padding-right: 4px;">
+      ${ordersCardsHtml}
+    </div>
+  `;
+}
+
+function updateOrderStatus(orderId, newStepVal) {
+  const step = parseInt(newStepVal, 10);
+  const orders = getStoredOrders();
+  const match = orders.find(o => o.orderId === orderId);
+  if (!match) return;
+
+  match.currentStep = step;
+  if (step === 1) {
+    match.status = 'Order Confirmed & Logged';
+  } else if (step === 2) {
+    match.status = 'Automated Milling & Quality Screened';
+  } else if (step === 3) {
+    match.status = 'Dispatched on Agro Freight Truck';
+  } else if (step === 4) {
+    match.status = 'Delivered to Farm Gate';
+  }
+
+  localStorage.setItem('nutriagro_orders', JSON.stringify(orders));
+  if (window.cart) window.cart.showToast(`Order #${orderId} status updated to Step ${step}!`, 'success');
+  renderOrdersListView(orders);
+}
+
+function generateSampleOrder() {
+  const sampleId = 'NUTRI-' + Math.floor(100000 + Math.random() * 900000);
+  const dateStr = new Date().toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' });
+  const sampleOrder = {
+    orderId: sampleId,
+    date: dateStr,
+    timestamp: Date.now(),
+    farmerName: 'Kisan Agro Dairy Farm',
+    phone: '+91 98765 43210',
+    address: 'Sholinganallur, Chennai, Tamil Nadu, PIN: 600119, India',
+    paymentMethod: 'Farmgate Delivery (COD / Cheque on Site)',
+    items: [
+      { name: 'NutriBov LactaMax™ High-Yield Dairy Feed', quantity: 2, price: 1850, bagSize: '50kg' },
+      { name: 'NutriBov CalfGrow™ 20% Starter Pellets', quantity: 1, price: 2050, bagSize: '50kg' }
+    ],
+    totalBags: 3,
+    totalWeightKg: 150,
+    finalTotal: 5750,
+    status: 'Automated Milling & Quality Screened',
+    eta: 'Tomorrow by 4:00 PM (Farmgate Arrival)',
+    driverName: 'Ramesh Singh (Agro Hauler #HR-05-AB-4821)',
+    driverPhone: '+91 98123 45678',
+    currentStep: 2
+  };
+
+  const stored = getStoredOrders();
+  stored.unshift(sampleOrder);
+  localStorage.setItem('nutriagro_orders', JSON.stringify(stored));
+  if (window.cart) window.cart.showToast(`Sample order #${sampleId} added to orders list!`, 'success');
+  renderOrdersListView(stored);
+}
+
 function trackOrderSubmit() {
   const input = document.getElementById('orderTrackerInput');
   const query = input ? input.value.trim() : '';
@@ -468,22 +717,15 @@ function trackOrderSubmit() {
     return;
   }
 
-  let orders = [];
-  try {
-    orders = JSON.parse(localStorage.getItem('nutriagro_orders') || '[]');
-  } catch (e) {
-    orders = [];
-  }
-
+  const orders = getStoredOrders();
   const match = orders.find(o => 
-    o.orderId.toLowerCase().includes(query.toLowerCase()) || 
+    (o.orderId && o.orderId.toLowerCase().includes(query.toLowerCase())) || 
     (o.phone && o.phone.replace(/\D/g, '').includes(query.replace(/\D/g, '')))
   );
 
   if (match) {
     renderOrderTrackingCard(match, orders);
   } else {
-    // Render dynamic simulated tracking for valid looking IDs
     renderSampleTrackingOrder(query, orders);
   }
 }
@@ -494,7 +736,13 @@ function renderOrderTrackingCard(order, allOrders) {
 
   const currentStep = order.currentStep || 2;
   const statusColor = currentStep >= 3 ? '#10b981' : '#f59e0b';
-  const statusBadgeText = currentStep === 1 ? 'Batch Registered' : (currentStep === 2 ? '⚙️ Automated Milling & QA Screen' : (currentStep === 3 ? '🚚 Dispatched on Freight Truck' : '🏡 Delivered to Farm'));
+  const statusBadgeText = currentStep === 1 
+    ? '🌾 1. Order Confirmed' 
+    : (currentStep === 2 
+      ? '⚙️ 2. Automated Milling & QA Screen' 
+      : (currentStep === 3 
+        ? '🚚 3. Truck Dispatched' 
+        : '🏡 4. Delivered to Farm'));
 
   let itemsHtml = '';
   if (order.items && order.items.length > 0) {
@@ -505,32 +753,18 @@ function renderOrderTrackingCard(order, allOrders) {
       </div>
     `).join('');
   } else {
-    itemsHtml = `<div style="font-size:0.85rem; color:var(--color-dark-muted);">${order.totalBags} Feed Bags (${order.totalWeightKg} kg)</div>`;
-  }
-
-  let historyHtml = '';
-  if (allOrders && allOrders.length > 1) {
-    historyHtml = `
-      <div style="margin-top: 24px; border-top: 1px solid var(--color-gray-200); padding-top: 18px;">
-        <h4 style="font-size: 0.95rem; margin-bottom: 12px; color: var(--color-dark);">Your Other Farm Orders:</h4>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          ${allOrders.filter(o => o.orderId !== order.orderId).map(o => `
-            <div style="display: flex; justify-content: space-between; align-items: center; background: #fff; border: 1px solid var(--color-gray-200); border-radius: var(--radius-md); padding: 10px 14px; font-size: 0.84rem;">
-              <div>
-                <strong>${o.orderId}</strong> · <span style="color:var(--color-dark-muted);">${o.date}</span>
-                <div style="font-size: 0.76rem; color: #047857;">${o.totalBags} Bags (₹${Math.round(o.finalTotal).toLocaleString('en-IN')})</div>
-              </div>
-              <button type="button" class="btn btn-sm btn-secondary" onclick="openOrderTrackerModal('${o.orderId}')" style="padding: 4px 12px; font-size: 0.78rem;">
-                Track
-              </button>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    `;
+    itemsHtml = `<div style="font-size:0.85rem; color:var(--color-dark-muted);">${order.totalBags || 1} Feed Bags (${order.totalWeightKg || 50} kg)</div>`;
   }
 
   container.innerHTML = `
+    <!-- Top Back to Orders List Button -->
+    <div style="margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+      <button type="button" class="btn btn-sm btn-secondary" onclick="switchTrackerTab('list')" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; padding: 6px 14px;">
+        ← Back to All Orders List (${allOrders.length})
+      </button>
+      <span style="font-size: 0.78rem; color: var(--color-dark-muted);">Live Freight Tracking</span>
+    </div>
+
     <!-- Active Order Card -->
     <div style="background: #ffffff; border: 1.5px solid var(--color-gray-200); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); padding: 22px; overflow: hidden;">
       
@@ -538,7 +772,7 @@ function renderOrderTrackingCard(order, allOrders) {
       <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid var(--color-gray-200); padding-bottom: 14px; margin-bottom: 18px;">
         <div>
           <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; color: var(--color-dark-muted);">Order Reference</span>
-          <div style="font-size: 1.3rem; font-weight: 800; color: var(--color-primary);">${order.orderId}</div>
+          <div style="font-size: 1.35rem; font-weight: 800; color: var(--color-primary);">${order.orderId}</div>
           <div style="font-size: 0.78rem; color: var(--color-dark-muted);">Placed on: ${order.date || 'Today'}</div>
         </div>
         <div style="text-align: right;">
@@ -611,20 +845,18 @@ function renderOrderTrackingCard(order, allOrders) {
         </div>
       </div>
 
-      <!-- Order Items Detail Accordion -->
+      <!-- Order Items Detail -->
       <div style="margin-bottom: 12px;">
         <span style="font-size: 0.78rem; font-weight: 700; color: var(--color-dark); display: block; margin-bottom: 6px;">Feed Bags in this Dispatch:</span>
         <div style="background: #fff; border: 1px solid var(--color-gray-200); border-radius: var(--radius-md); padding: 10px 14px;">
           ${itemsHtml}
           <div style="display: flex; justify-content: space-between; padding-top: 8px; margin-top: 6px; font-size: 0.92rem; font-weight: 800; color: var(--color-dark);">
-            <span>Total (${order.totalBags} Bags / ${order.totalWeightKg} kg):</span>
-            <span style="color: var(--color-primary);">₹${Math.round(order.finalTotal).toLocaleString('en-IN')}</span>
+            <span>Total (${order.totalBags || 1} Bags / ${order.totalWeightKg || 50} kg):</span>
+            <span style="color: var(--color-primary);">₹${Math.round(order.finalTotal || 0).toLocaleString('en-IN')}</span>
           </div>
         </div>
       </div>
 
-      <!-- History of other orders -->
-      ${historyHtml}
     </div>
   `;
 }
@@ -662,12 +894,12 @@ function renderEmptyOrderTrackerState(allOrders) {
   container.innerHTML = `
     <div style="text-align: center; padding: 36px 20px; background: var(--color-gray-50); border: 1.5px dashed var(--color-gray-300); border-radius: var(--radius-lg);">
       <div style="font-size: 2.5rem; margin-bottom: 12px;">🌾</div>
-      <h3 style="font-size: 1.15rem; margin-bottom: 6px; color: var(--color-dark);">No Orders Placed Yet on This Browser</h3>
+      <h3 style="font-size: 1.15rem; margin-bottom: 6px; color: var(--color-dark);">No Active Orders to Track</h3>
       <p style="font-size: 0.85rem; color: var(--color-dark-muted); max-width: 440px; margin: 0 auto 18px auto;">
-        When you place an order in the checkout, your batch will automatically appear here with live GPS freight tracking and milling updates.
+        You can search any order ID above or switch to the Orders List tab to view all placed orders.
       </p>
-      <button type="button" class="btn btn-primary btn-sm" onclick="renderSampleTrackingOrder('NUTRI-839201', [])" style="padding: 8px 18px;">
-        👁️ View Sample Live Order Tracking
+      <button type="button" class="btn btn-secondary btn-sm" onclick="switchTrackerTab('list')" style="padding: 8px 18px;">
+        📋 View Orders List
       </button>
     </div>
   `;
@@ -676,5 +908,10 @@ function renderEmptyOrderTrackerState(allOrders) {
 window.autoDetectDeliveryAddress = autoDetectDeliveryAddress;
 window.openOrderTrackerModal = openOrderTrackerModal;
 window.closeOrderTrackerModal = closeOrderTrackerModal;
+window.switchTrackerTab = switchTrackerTab;
+window.renderOrdersListView = renderOrdersListView;
+window.updateOrderStatus = updateOrderStatus;
+window.generateSampleOrder = generateSampleOrder;
 window.trackOrderSubmit = trackOrderSubmit;
+
 

@@ -2845,6 +2845,67 @@
   }
 }
 
+/* Order Tracker Tabs & Orders List Styles */
+.order-tracker-tabs {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  border-bottom: 2px solid var(--color-gray-200);
+  padding-bottom: 6px;
+}
+
+.tracker-tab-btn {
+  background: none;
+  border: none;
+  padding: 10px 18px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--color-dark-muted);
+  cursor: pointer;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  border-bottom: 3px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.tracker-tab-btn:hover {
+  color: var(--color-primary);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.tracker-tab-btn.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.tracker-count-badge {
+  background: var(--color-primary);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 12px;
+}
+
+.order-list-item-card {
+  background: #ffffff;
+  border: 1.5px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.25s ease;
+}
+
+.order-list-item-card:hover {
+  border-color: rgba(16, 185, 129, 0.6);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
 .checkout-grid {
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
