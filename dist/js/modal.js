@@ -348,7 +348,7 @@ function handleCheckoutSubmit(e) {
   const originalText = submitBtn.innerHTML;
   submitBtn.disabled = true;
   submitBtn.innerHTML = `
-    <span class="spinner"></span> Processing Farm Order...
+    <span class="spinner"></span> Processing Order...
   `;
 
   setTimeout(() => {
@@ -358,6 +358,40 @@ function handleCheckoutSubmit(e) {
     // Generate Order ID
     const orderId = 'NUTRI-' + Math.floor(100000 + Math.random() * 900000);
     const dateStr = new Date().toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' });
+
+    // Build order object for tracking
+    const orderObj = {
+      orderId: orderId,
+      date: dateStr,
+      timestamp: Date.now(),
+      farmerName: farmerName,
+      phone: phone,
+      address: address,
+      paymentMethod: paymentMethod,
+      items: (window.cart && window.cart.items) ? window.cart.items.map(item => ({
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        bagSize: item.bagSize
+      })) : [],
+      totalBags: window.cart ? window.cart.getTotalBags() : 1,
+      totalWeightKg: window.cart ? window.cart.getTotalWeightKg() : 50,
+      finalTotal: window.cart ? window.cart.getFinalTotal() : 0,
+      status: 'Automated Milling & Quality Screened',
+      eta: 'Tomorrow by 4:00 PM (Farmgate Arrival)',
+      driverName: 'Ramesh Singh (Agro Hauler #HR-05-AB-4821)',
+      driverPhone: '+91 98123 45678',
+      currentStep: 2 // 1: Confirmed, 2: Milling, 3: Dispatched, 4: Delivered
+    };
+
+    // Store in localStorage for permanent tracking
+    try {
+      const stored = JSON.parse(localStorage.getItem('nutriagro_orders') || '[]');
+      stored.unshift(orderObj);
+      localStorage.setItem('nutriagro_orders', JSON.stringify(stored));
+    } catch (err) {
+      console.warn('Failed saving order to localStorage:', err);
+    }
 
     // Show Confirmation Screen
     document.getElementById('checkoutFormSection').style.display = 'none';
@@ -378,4 +412,269 @@ function handleCheckoutSubmit(e) {
   }, 1200);
 }
 
+// ==========================================
+// 14. LIVE ORDER TRACKER SYSTEM
+// ==========================================
+function openOrderTrackerModal(targetOrderId) {
+  const modal = document.getElementById('orderTrackerModal');
+  const overlay = document.getElementById('modalOverlay');
+  if (!modal || !overlay) return;
+
+  // Retrieve stored orders
+  let orders = [];
+  try {
+    orders = JSON.parse(localStorage.getItem('nutriagro_orders') || '[]');
+  } catch (e) {
+    orders = [];
+  }
+
+  const container = document.getElementById('orderTrackerResultContainer');
+  const inputEl = document.getElementById('orderTrackerInput');
+
+  if (targetOrderId) {
+    if (inputEl) inputEl.value = targetOrderId;
+    const match = orders.find(o => o.orderId.toLowerCase() === targetOrderId.toLowerCase());
+    if (match) {
+      renderOrderTrackingCard(match, orders);
+    } else {
+      renderSampleTrackingOrder(targetOrderId, orders);
+    }
+  } else if (orders.length > 0) {
+    if (inputEl) inputEl.value = orders[0].orderId;
+    renderOrderTrackingCard(orders[0], orders);
+  } else {
+    renderEmptyOrderTrackerState(orders);
+  }
+
+  modal.classList.add('active');
+  overlay.classList.add('active');
+  document.body.classList.add('modal-open');
+}
+
+function closeOrderTrackerModal() {
+  const modal = document.getElementById('orderTrackerModal');
+  const overlay = document.getElementById('modalOverlay');
+  if (modal) modal.classList.remove('active');
+  if (overlay) overlay.classList.remove('active');
+  document.body.classList.remove('modal-open');
+}
+
+function trackOrderSubmit() {
+  const input = document.getElementById('orderTrackerInput');
+  const query = input ? input.value.trim() : '';
+
+  if (!query) {
+    if (window.cart) window.cart.showToast('Please enter an Order ID or Phone number', 'info');
+    return;
+  }
+
+  let orders = [];
+  try {
+    orders = JSON.parse(localStorage.getItem('nutriagro_orders') || '[]');
+  } catch (e) {
+    orders = [];
+  }
+
+  const match = orders.find(o => 
+    o.orderId.toLowerCase().includes(query.toLowerCase()) || 
+    (o.phone && o.phone.replace(/\D/g, '').includes(query.replace(/\D/g, '')))
+  );
+
+  if (match) {
+    renderOrderTrackingCard(match, orders);
+  } else {
+    // Render dynamic simulated tracking for valid looking IDs
+    renderSampleTrackingOrder(query, orders);
+  }
+}
+
+function renderOrderTrackingCard(order, allOrders) {
+  const container = document.getElementById('orderTrackerResultContainer');
+  if (!container) return;
+
+  const currentStep = order.currentStep || 2;
+  const statusColor = currentStep >= 3 ? '#10b981' : '#f59e0b';
+  const statusBadgeText = currentStep === 1 ? 'Batch Registered' : (currentStep === 2 ? '⚙️ Automated Milling & QA Screen' : (currentStep === 3 ? '🚚 Dispatched on Freight Truck' : '🏡 Delivered to Farm'));
+
+  let itemsHtml = '';
+  if (order.items && order.items.length > 0) {
+    itemsHtml = order.items.map(it => `
+      <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed var(--color-gray-200); font-size: 0.85rem;">
+        <span><strong>${it.quantity}×</strong> ${it.name} (${it.bagSize || '50kg'})</span>
+        <strong>₹${Math.round(it.price * it.quantity).toLocaleString('en-IN')}</strong>
+      </div>
+    `).join('');
+  } else {
+    itemsHtml = `<div style="font-size:0.85rem; color:var(--color-dark-muted);">${order.totalBags} Feed Bags (${order.totalWeightKg} kg)</div>`;
+  }
+
+  let historyHtml = '';
+  if (allOrders && allOrders.length > 1) {
+    historyHtml = `
+      <div style="margin-top: 24px; border-top: 1px solid var(--color-gray-200); padding-top: 18px;">
+        <h4 style="font-size: 0.95rem; margin-bottom: 12px; color: var(--color-dark);">Your Other Farm Orders:</h4>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          ${allOrders.filter(o => o.orderId !== order.orderId).map(o => `
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #fff; border: 1px solid var(--color-gray-200); border-radius: var(--radius-md); padding: 10px 14px; font-size: 0.84rem;">
+              <div>
+                <strong>${o.orderId}</strong> · <span style="color:var(--color-dark-muted);">${o.date}</span>
+                <div style="font-size: 0.76rem; color: #047857;">${o.totalBags} Bags (₹${Math.round(o.finalTotal).toLocaleString('en-IN')})</div>
+              </div>
+              <button type="button" class="btn btn-sm btn-secondary" onclick="openOrderTrackerModal('${o.orderId}')" style="padding: 4px 12px; font-size: 0.78rem;">
+                Track
+              </button>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = `
+    <!-- Active Order Card -->
+    <div style="background: #ffffff; border: 1.5px solid var(--color-gray-200); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); padding: 22px; overflow: hidden;">
+      
+      <!-- Card Header -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid var(--color-gray-200); padding-bottom: 14px; margin-bottom: 18px;">
+        <div>
+          <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; color: var(--color-dark-muted);">Order Reference</span>
+          <div style="font-size: 1.3rem; font-weight: 800; color: var(--color-primary);">${order.orderId}</div>
+          <div style="font-size: 0.78rem; color: var(--color-dark-muted);">Placed on: ${order.date || 'Today'}</div>
+        </div>
+        <div style="text-align: right;">
+          <span style="display: inline-block; background: rgba(245, 158, 11, 0.15); color: ${statusColor}; font-weight: 700; font-size: 0.8rem; padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(245, 158, 11, 0.3);">
+            ${statusBadgeText}
+          </span>
+          <div style="font-size: 0.76rem; color: #059669; font-weight: 600; margin-top: 4px;">ETA: ${order.eta || 'Tomorrow by 4:00 PM'}</div>
+        </div>
+      </div>
+
+      <!-- 4-Stage Visual Progress Stepper -->
+      <div class="order-track-stepper-wrap" style="margin-bottom: 22px;">
+        <div class="order-track-stepper">
+          
+          <div class="track-step completed">
+            <div class="track-step-circle">✓</div>
+            <div class="track-step-info">
+              <strong>1. Order Confirmed</strong>
+              <small>Logged & Verified</small>
+            </div>
+          </div>
+
+          <div class="track-step ${currentStep >= 2 ? (currentStep === 2 ? 'active' : 'completed') : ''}">
+            <div class="track-step-circle">${currentStep > 2 ? '✓' : '⚙️'}</div>
+            <div class="track-step-info">
+              <strong>2. Milling & Bagging</strong>
+              <small>Pellets in Production</small>
+            </div>
+          </div>
+
+          <div class="track-step ${currentStep >= 3 ? (currentStep === 3 ? 'active' : 'completed') : ''}">
+            <div class="track-step-circle">${currentStep > 3 ? '✓' : '🚚'}</div>
+            <div class="track-step-info">
+              <strong>3. Truck Dispatched</strong>
+              <small>En Route to Farm</small>
+            </div>
+          </div>
+
+          <div class="track-step ${currentStep >= 4 ? 'completed' : ''}">
+            <div class="track-step-circle">🏡</div>
+            <div class="track-step-info">
+              <strong>4. Farm Arrival</strong>
+              <small>Unloaded at Barn</small>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Logistics Driver & Destination Box -->
+      <div style="background: var(--color-gray-50); border: 1px solid var(--color-gray-200); border-radius: var(--radius-md); padding: 14px; margin-bottom: 18px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.84rem;">
+          <div>
+            <span style="color: var(--color-dark-muted); font-size: 0.75rem; display: block;">Contact & Destination:</span>
+            <strong>${order.farmerName || 'Customer'}</strong> (${order.phone || ''})
+            <div style="font-size: 0.78rem; color: var(--color-dark-muted); margin-top: 2px;">📍 ${order.address || 'Detected Farm Location'}</div>
+          </div>
+          <div>
+            <span style="color: var(--color-dark-muted); font-size: 0.75rem; display: block;">Assigned Freight Logistics:</span>
+            <strong>${order.driverName || 'Ramesh Singh (Truck #HR-05-AB-4821)'}</strong>
+            <div style="display: flex; gap: 8px; margin-top: 6px;">
+              <a href="tel:${order.driverPhone ? order.driverPhone.replace(/\s+/g,'') : '+919812345678'}" class="btn btn-sm btn-secondary" style="padding: 3px 8px; font-size: 0.74rem;">
+                📞 Call Driver
+              </a>
+              <a href="https://wa.me/919812345678?text=Hello%20Driver,%20inquiring%20about%20my%20NutriAgro%20Order%20${order.orderId}" target="_blank" class="btn btn-sm btn-secondary" style="padding: 3px 8px; font-size: 0.74rem; background: #25d366; color: #fff; border-color: #25d366;">
+                📲 WhatsApp
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Items Detail Accordion -->
+      <div style="margin-bottom: 12px;">
+        <span style="font-size: 0.78rem; font-weight: 700; color: var(--color-dark); display: block; margin-bottom: 6px;">Feed Bags in this Dispatch:</span>
+        <div style="background: #fff; border: 1px solid var(--color-gray-200); border-radius: var(--radius-md); padding: 10px 14px;">
+          ${itemsHtml}
+          <div style="display: flex; justify-content: space-between; padding-top: 8px; margin-top: 6px; font-size: 0.92rem; font-weight: 800; color: var(--color-dark);">
+            <span>Total (${order.totalBags} Bags / ${order.totalWeightKg} kg):</span>
+            <span style="color: var(--color-primary);">₹${Math.round(order.finalTotal).toLocaleString('en-IN')}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- History of other orders -->
+      ${historyHtml}
+    </div>
+  `;
+}
+
+function renderSampleTrackingOrder(searchedId, allOrders) {
+  const sampleOrder = {
+    orderId: searchedId.toUpperCase().startsWith('NUTRI-') ? searchedId.toUpperCase() : `NUTRI-${searchedId.toUpperCase()}`,
+    date: 'Today',
+    timestamp: Date.now(),
+    farmerName: 'Valued Farm Customer',
+    phone: '+91 98765 43210',
+    address: 'Farm Gate #1, Regional Agro Corridor, Customer Location',
+    paymentMethod: 'Farmgate Delivery (COD / Cheque on Site)',
+    items: [
+      { name: 'NutriBov LactaMax™ High-Yield Dairy Feed', quantity: 2, price: 1850, bagSize: '50kg' },
+      { name: 'NutriBov CalfGrow™ 20% Starter Pellets', quantity: 1, price: 2050, bagSize: '50kg' }
+    ],
+    totalBags: 3,
+    totalWeightKg: 150,
+    finalTotal: 5750,
+    status: 'Automated Milling & Quality Screened',
+    eta: 'Tomorrow by 4:00 PM (Farmgate Arrival)',
+    driverName: 'Ramesh Singh (Agro Hauler #HR-05-AB-4821)',
+    driverPhone: '+91 98123 45678',
+    currentStep: 2
+  };
+
+  renderOrderTrackingCard(sampleOrder, allOrders);
+}
+
+function renderEmptyOrderTrackerState(allOrders) {
+  const container = document.getElementById('orderTrackerResultContainer');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div style="text-align: center; padding: 36px 20px; background: var(--color-gray-50); border: 1.5px dashed var(--color-gray-300); border-radius: var(--radius-lg);">
+      <div style="font-size: 2.5rem; margin-bottom: 12px;">🌾</div>
+      <h3 style="font-size: 1.15rem; margin-bottom: 6px; color: var(--color-dark);">No Orders Placed Yet on This Browser</h3>
+      <p style="font-size: 0.85rem; color: var(--color-dark-muted); max-width: 440px; margin: 0 auto 18px auto;">
+        When you place an order in the checkout, your batch will automatically appear here with live GPS freight tracking and milling updates.
+      </p>
+      <button type="button" class="btn btn-primary btn-sm" onclick="renderSampleTrackingOrder('NUTRI-839201', [])" style="padding: 8px 18px;">
+        👁️ View Sample Live Order Tracking
+      </button>
+    </div>
+  `;
+}
+
 window.autoDetectDeliveryAddress = autoDetectDeliveryAddress;
+window.openOrderTrackerModal = openOrderTrackerModal;
+window.closeOrderTrackerModal = closeOrderTrackerModal;
+window.trackOrderSubmit = trackOrderSubmit;
+

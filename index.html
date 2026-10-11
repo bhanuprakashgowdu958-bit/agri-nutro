@@ -32,6 +32,8 @@
       <div class="top-bar-right">
         <span>📞 Farm Advisory Hotline: <a href="tel:18008904567" style="color:#fff; text-decoration:underline;"><strong>1800-890-4567 (Toll-Free India)</strong></a></span>
         <span>•</span>
+        <a href="javascript:void(0)" onclick="openOrderTrackerModal()" style="color:#f59e0b; font-weight:700;">📦 Track Orders</a>
+        <span>•</span>
         <a href="#calculatorSection">Herd Ration Calculator</a>
       </div>
     </div>
@@ -63,8 +65,14 @@
           <li><a href="#dealerSection" class="nav-link">Dealers & Mills</a></li>
           <li><a href="#testimonialsSection" class="nav-link">Farmer Results</a></li>
           <li><a href="#faqSection" class="nav-link">FAQs</a></li>
+          <li><a href="javascript:void(0)" onclick="openOrderTrackerModal()" class="nav-link" style="color: #f59e0b; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">📦 Track Orders</a></li>
           <li class="mobile-only-nav-item">
-            <button type="button" class="btn btn-secondary btn-sm" onclick="openBulkTonnageModal(); toggleMobileNav();" style="width: 100%; justify-content: center; margin-top: 10px;">
+            <button type="button" class="btn btn-sm" onclick="openOrderTrackerModal(); toggleMobileNav();" style="width: 100%; justify-content: center; margin-top: 10px; background: rgba(245, 158, 11, 0.15); color: #d97706; border: 1.5px solid rgba(245, 158, 11, 0.5); font-weight: 700;">
+              📦 Track Placed Orders
+            </button>
+          </li>
+          <li class="mobile-only-nav-item">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="openBulkTonnageModal(); toggleMobileNav();" style="width: 100%; justify-content: center; margin-top: 8px;">
               🚛 Bulk Tanker Inquiry (10+ MT)
             </button>
           </li>
@@ -76,6 +84,11 @@
         <span class="currency-badge-india" title="All feed prices shown in Indian Rupees (₹ INR)">
           🇮🇳 ₹ INR (Incl. GST)
         </span>
+
+        <!-- Order Tracker Header Button -->
+        <button type="button" class="btn btn-sm order-track-nav-btn" onclick="openOrderTrackerModal()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; border-radius: 20px; background: rgba(245, 158, 11, 0.12); color: #d97706; border: 1.5px solid rgba(245, 158, 11, 0.5); padding: 7px 14px; cursor: pointer;" title="Track customer orders placed on this farm site">
+          <span>📦</span> Track Orders
+        </button>
 
         <button type="button" class="btn btn-secondary btn-sm" onclick="openBulkTonnageModal()" style="display: inline-flex;">
           Bulk Tanker (10+ MT)
@@ -995,8 +1008,8 @@
                 </div>
               </div>
 
-              <button type="submit" class="btn btn-primary" id="checkoutSubmitBtn" style="width: 100%; margin-top: 20px; padding: 14px;">
-                Confirm & Place Farm Order
+              <button type="submit" class="btn btn-primary" id="checkoutSubmitBtn" style="width: 100%; margin-top: 20px; padding: 14px; font-size: 1.05rem; font-weight: 800; letter-spacing: 0.02em;">
+                Confirm Order
               </button>
 
               <div style="font-size: 0.74rem; color: var(--color-gray-500); text-align: center; margin-top: 10px;">
@@ -1048,9 +1061,49 @@
         </div>
       </div>
 
-      <div style="display: flex; justify-content: center; gap: 14px;">
-        <button type="button" class="btn btn-primary" onclick="closeCheckoutModal()">Back to Homepage</button>
+      <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-top: 20px;">
+        <button type="button" class="btn btn-primary" onclick="closeCheckoutModal(); openOrderTrackerModal();" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-color: #d97706; color: #fff; font-weight: 700;">
+          📦 Track Order Status Live
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="closeCheckoutModal()">Back to Homepage</button>
         <button type="button" class="btn btn-secondary" onclick="window.print()">Print Farm Invoice</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       13B. LIVE FARM ORDER TRACKER MODAL
+       ========================================== -->
+  <div class="checkout-modal order-tracker-modal" id="orderTrackerModal" role="dialog" aria-modal="true" aria-labelledby="orderTrackerTitle" style="max-width: 780px;">
+    <button type="button" class="modal-close-corner" onclick="closeOrderTrackerModal()" aria-label="Close modal">✕</button>
+
+    <div style="padding: 28px 32px 0 32px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+        <span style="font-size: 1.6rem;">📦</span>
+        <h2 id="orderTrackerTitle" style="font-size: 1.55rem; margin: 0; color: var(--color-dark);">Live Farm Order Tracker</h2>
+      </div>
+      <p style="font-size: 0.9rem; color: var(--color-dark-muted); margin: 0;">
+        Track real-time feed batch milling, agro-freight dispatch, and driver farmgate delivery.
+      </p>
+    </div>
+
+    <div style="padding: 20px 32px 32px 32px;">
+      <!-- Search & Lookup Bar -->
+      <div style="background: var(--color-gray-50); border: 1px solid var(--color-gray-200); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 24px;">
+        <label style="display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 8px; color: var(--color-dark);">
+          Enter Order ID or Registered Phone Number:
+        </label>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <input type="text" id="orderTrackerInput" class="calc-input" placeholder="e.g. NUTRI-742918 or +91 98765 43210" style="margin: 0; flex: 1; min-width: 220px;" onkeypress="if(event.key === 'Enter'){ trackOrderSubmit(); }" />
+          <button type="button" class="btn btn-primary" onclick="trackOrderSubmit()" style="padding: 10px 22px; white-space: nowrap; font-weight: 700;">
+            Track Order
+          </button>
+        </div>
+      </div>
+
+      <!-- Tracking Results & Order History Container -->
+      <div id="orderTrackerResultContainer">
+        <!-- Injected via JavaScript -->
       </div>
     </div>
   </div>
