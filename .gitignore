@@ -1,0 +1,14 @@
+# Test & temporary files
+*.png
+*.zip
+*.log
+.profile/
+find_git_installed.ps1
+find_git.ps1
+
+# Local dev server binaries and scripts
+server.exe
+Server.cs
+server.ps1
+run_server.ps1
+dev.js

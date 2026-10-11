@@ -1,0 +1,589 @@
+/* ==========================================================================
+   NUTRIAGRO FEEDS - FULL RESPONSIVE DESIGN SYSTEM
+   Automatic Layout Adjustment for Mobile (320px-600px),
+   Tablets (601px-1024px), Laptops (1025px-1280px), & Desktops (>1280px)
+   ========================================================================== */
+
+/* Universal Mobile-Safe Containment */
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden !important;
+  position: relative;
+  margin: 0;
+  padding: 0;
+  -webkit-text-size-adjust: 100%;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--container-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+  box-sizing: border-box;
+}
+
+.mobile-only-nav-item {
+  display: none;
+}
+
+/* ==========================================================================
+   1. LAPTOPS & LARGE TABLETS (max-width: 1100px)
+   ========================================================================== */
+@media (max-width: 1100px) {
+  .hero-container {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+
+  .hero-visual-card {
+    max-width: 580px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .calculator-wrapper {
+    grid-template-columns: 1fr;
+    padding: 28px 20px;
+  }
+
+  .quality-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .testimonial-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+  }
+}
+
+/* ==========================================================================
+   2. TABLETS & SMALL SCREENS (max-width: 860px)
+   ========================================================================== */
+@media (max-width: 860px) {
+  .mobile-only-nav-item {
+    display: block;
+  }
+
+  .site-header {
+    height: auto;
+    position: relative;
+    width: 100%;
+    z-index: 1000;
+  }
+
+  .header-inner {
+    height: 66px;
+    padding: 0 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .brand-logo-link {
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .brand-icon-box {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+  }
+
+  .brand-name {
+    font-size: 1.15rem;
+    white-space: nowrap;
+  }
+
+  .brand-tagline {
+    display: none;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  /* Hide Desktop-only Header Buttons on Mobile */
+  .header-actions .btn.btn-secondary,
+  .currency-badge-india {
+    display: none !important;
+  }
+
+  .mobile-menu-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    background: #f1f6f3;
+    border: 1px solid var(--color-gray-300);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    cursor: pointer;
+    color: var(--color-primary-dark);
+    height: 38px;
+    width: 38px;
+  }
+
+  .header-cart-btn {
+    padding: 6px 12px;
+    height: 38px;
+  }
+
+  .main-nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background: #ffffff;
+    border-bottom: 3px solid var(--color-primary);
+    box-shadow: 0 12px 28px rgba(18, 77, 50, 0.18);
+    z-index: 1000;
+  }
+
+  .main-nav.active {
+    display: block;
+  }
+
+  .main-nav.active .main-nav-list {
+    display: flex;
+    flex-direction: column;
+    padding: 16px 20px;
+    gap: 10px;
+  }
+
+  .main-nav.active .nav-link {
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--color-gray-100);
+    display: block;
+  }
+
+  .hero-heading {
+    font-size: 2.3rem;
+    line-height: 1.25;
+  }
+
+  .hero-value-props {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .modal-content-grid, .checkout-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .modal-gallery {
+    padding: 12px;
+  }
+
+  .modal-big-img {
+    max-height: 220px;
+  }
+
+  .catalog-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .catalog-search-sort-group {
+    max-width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .species-carousel {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .hero-slider-inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .hero-slide-info {
+    align-items: center;
+    text-align: center;
+  }
+
+  .hero-slider-nav {
+    max-width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ==========================================================================
+   3. MOBILE PHONES (max-width: 600px)
+   ========================================================================== */
+@media (max-width: 600px) {
+  /* Announcement Bar Mobile Optimization */
+  .top-announcement-bar {
+    padding: 6px 12px;
+    font-size: 0.74rem;
+  }
+
+  .top-bar-right {
+    display: none;
+  }
+
+  .top-bar-content {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .top-bar-left {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+    gap: 4px;
+  }
+
+  .top-bar-tag {
+    font-size: 0.68rem;
+    padding: 2px 6px;
+  }
+
+  /* Spacers & Section Titles */
+  .section-spacer {
+    padding-top: 40px;
+    padding-bottom: 40px;
+  }
+
+  .section-title {
+    font-size: 1.75rem;
+  }
+
+  .section-subtitle {
+    font-size: 0.95rem;
+  }
+
+  /* Hero Section Mobile Polish */
+  .hero-section {
+    padding: 24px 0 20px 0;
+  }
+
+  .hero-badge-pill {
+    font-size: 0.72rem;
+    padding: 4px 10px;
+  }
+
+  .hero-heading {
+    font-size: 1.85rem;
+    margin-bottom: 12px;
+  }
+
+  .hero-description {
+    font-size: 0.94rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+
+  .hero-cta-group {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .hero-cta-group .btn {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 20px;
+    font-size: 0.95rem;
+  }
+
+  .hero-stat-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .hero-slider-bar {
+    padding-top: 10px;
+    margin-top: 8px;
+  }
+
+  .hero-slider-inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+  }
+
+  .hero-slide-tag {
+    font-size: 9.5px;
+  }
+
+  .hero-slide-desc {
+    font-size: 11.5px;
+    max-width: 290px;
+  }
+
+  .hero-slider-nav {
+    padding: 4px 6px;
+    gap: 4px;
+    max-width: 100%;
+    width: auto;
+    box-sizing: border-box;
+    justify-content: center;
+  }
+
+  .hero-slide-btn {
+    width: 26px;
+    height: 26px;
+    font-size: 14px;
+  }
+
+  .hero-slide-playpause {
+    width: 24px;
+    height: 24px;
+    font-size: 9px;
+  }
+
+  .hero-slide-dots {
+    gap: 3px;
+  }
+
+  .hero-dot {
+    padding: 3px 6px;
+    font-size: 10.5px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero-dot:not(.active) .hero-dot-name {
+    display: none;
+  }
+
+  .hero-dot.active {
+    padding: 3px 9px;
+  }
+
+  /* Google Weather Card on Mobile */
+  .google-weather-card {
+    padding: 12px;
+    border-radius: 16px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .gw-header {
+    margin-bottom: 6px;
+  }
+
+  .gw-loc-title {
+    max-width: 125px;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .gw-main-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .gw-temp-value {
+    font-size: 34px;
+  }
+
+  .gw-temp-unit {
+    font-size: 15px;
+    top: -12px;
+  }
+
+  .gw-meta-col {
+    font-size: 11px;
+  }
+
+  .gw-hourly-svg {
+    height: 75px;
+  }
+
+  .gw-daily-strip {
+    gap: 2px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .gw-daily-strip::-webkit-scrollbar {
+    display: none;
+  }
+
+  .gw-day-col {
+    min-width: 40px;
+    padding: 3px 2px 5px 2px;
+    font-size: 10.5px;
+  }
+
+  .gw-thi-alert {
+    font-size: 10.5px;
+    padding: 6px 10px;
+  }
+
+  /* E-Commerce Products & Grids */
+  .products-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .product-card {
+    border-radius: var(--radius-md);
+  }
+
+  .product-img-wrap {
+    height: 180px;
+  }
+
+  .quality-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .dealers-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .calculator-card {
+    padding: 16px;
+  }
+
+  .calc-form-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .calc-result-box {
+    padding: 16px;
+  }
+
+  /* Mobile Full-Width Cart Drawer */
+  .cart-drawer-overlay {
+    z-index: 9998 !important;
+  }
+
+  .cart-drawer {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    right: -100vw !important;
+    z-index: 9999 !important;
+    box-shadow: none !important;
+  }
+
+  .cart-drawer.active {
+    right: 0 !important;
+  }
+
+  .cart-drawer-header {
+    padding: 16px 18px !important;
+  }
+
+  .cart-items-scroll {
+    padding: 12px 16px !important;
+  }
+
+  .cart-drawer-footer {
+    padding: 16px !important;
+  }
+
+  /* Gemini AI Agronomist Modal Fullscreen on Mobile */
+  .gemini-chat-modal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100% !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    border: none !important;
+    z-index: 99999 !important;
+  }
+
+  .gemini-floating-btn {
+    bottom: 16px;
+    right: 16px;
+    padding: 10px 14px;
+    font-size: 0.84rem;
+  }
+
+  .whatsapp-float-btn {
+    bottom: 74px;
+    right: 16px;
+    width: 46px;
+    height: 46px;
+  }
+
+  /* Footer Mobile */
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+
+  /* Smooth mobile backgrounds */
+  #productsSection,
+  .calculator-section,
+  #testimonialsSection {
+    background-attachment: scroll !important;
+  }
+}
+
+/* ==========================================================================
+   4. EXTRA SMALL PHONES (max-width: 380px)
+   ========================================================================== */
+@media (max-width: 380px) {
+  .brand-name {
+    font-size: 1.02rem;
+  }
+
+  .hero-heading {
+    font-size: 1.65rem;
+  }
+
+  .gw-temp-value {
+    font-size: 28px;
+  }
+
+  .gw-day-col {
+    min-width: 36px;
+  }
+
+  .hero-dot {
+    padding: 2px 4px;
+    font-size: 9.5px;
+  }
+}

@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NutriAgro Feeds™ | Commercial Livestock Feeds & Animal Nutrition</title>
+  <meta name="description" content="NutriAgro Feeds - Premium commercial feeds for Dairy Cattle, Poultry Broilers, Layers, Aquaculture, Swine, and Ruminants. Lab-tested formulations engineered for maximum yield, health, and optimal FCR." />
+  <meta name="keywords" content="NutriAgro feeds, animal feed, dairy cattle feed, poultry broiler feed, layer mash, fish floating pellets, pig grower feed, sheep feed, livestock nutrition" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+</head>
+<body>
+
+  <!-- 1. Top Announcement Bar -->
+  <aside class="top-announcement-bar" aria-label="Special Offers">
+    <div class="top-bar-content">
+      <div class="top-bar-left">
+        <span class="top-bar-tag">Harvest Special</span>
+        <span>🌾 <strong>Free Farmgate Freight Delivery</strong> on 15+ bags | All batches 100% Aflatoxin-Screened</span>
+      </div>
+      <div class="top-bar-right">
+        <span>📞 Farm Advisory Hotline: <a href="tel:18008904567" style="color:#fff; text-decoration:underline;"><strong>1800-890-4567 (Toll-Free India)</strong></a></span>
+        <span>•</span>
+        <a href="#calculatorSection">Herd Ration Calculator</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 2. Main Site Header -->
+  <header class="site-header" id="siteHeader">
+    <div class="container header-inner">
+      <a href="#" class="brand-logo-link" id="brandLogo">
+        <div class="brand-icon-box">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a10 10 0 0 1 10 10c0 5.5-4.5 10-10 10S2 17.5 2 12A10 10 0 0 1 12 2z"/>
+            <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+            <path d="M12 6v6"/>
+            <path d="M9 9l3-3 3 3"/>
+          </svg>
+        </div>
+        <div class="brand-text-wrap">
+          <span class="brand-name">Nutri<span>Agro</span> Feeds™</span>
+          <span class="brand-tagline">Commercial Livestock Feeds</span>
+        </div>
+      </a>
+
+      <nav class="main-nav" aria-label="Main Navigation">
+        <ul class="main-nav-list">
+          <li><a href="#productsSection" class="nav-link">Feed Catalog</a></li>
+          <li><a href="#calculatorSection" class="nav-link">Ration Calculator</a></li>
+          <li><a href="#qualitySection" class="nav-link">Lab Specs & Quality</a></li>
+          <li><a href="#dealerSection" class="nav-link">Dealers & Mills</a></li>
+          <li><a href="#testimonialsSection" class="nav-link">Farmer Results</a></li>
+          <li><a href="#faqSection" class="nav-link">FAQs</a></li>
+          <li class="mobile-only-nav-item">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="openBulkTonnageModal(); toggleMobileNav();" style="width: 100%; justify-content: center; margin-top: 10px;">
+              🚛 Bulk Tanker Inquiry (10+ MT)
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <!-- India Rupee Currency Pill -->
+        <span class="currency-badge-india" title="All feed prices shown in Indian Rupees (₹ INR)">
+          🇮🇳 ₹ INR (Incl. GST)
+        </span>
+
+        <button type="button" class="btn btn-secondary btn-sm" onclick="openBulkTonnageModal()" style="display: inline-flex;">
+          Bulk Tanker (10+ MT)
+        </button>
+        <button type="button" class="header-cart-btn" data-action="open-cart" id="headerCartBtn" aria-label="View Shopping Cart">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="9" cy="21" r="1"/>
+            <circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
+          </svg>
+          <span class="cart-count-badge" style="display: none;">0</span>
+          <span class="cart-header-total">₹0</span>
+        </button>
+
+        <!-- Mobile Navigation Menu Toggle -->
+        <button type="button" class="mobile-menu-btn" id="mobileMenuToggle" aria-label="Toggle navigation menu" onclick="toggleMobileNav()">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="mainContent">
+
+    <!-- 3. Hero Section with Dynamic Sliding Cattle Backgrounds -->
+    <section class="hero-section" id="heroSection">
+      <!-- Background Slider Track (0.85s smooth slide transition) -->
+      <div class="hero-bg-slider" id="heroBgSlider" aria-hidden="true">
+        <div class="hero-bg-track" id="heroBgTrack">
+          <div class="hero-bg-slide active" style="background-image: url('assets/images/cattle-slide-1.jpg');"></div>
+          <div class="hero-bg-slide" style="background-image: url('assets/images/cattle-slide-2.jpg');"></div>
+          <div class="hero-bg-slide" style="background-image: url('assets/images/cattle-slide-3.jpg');"></div>
+          <div class="hero-bg-slide" style="background-image: url('assets/images/cattle-slide-4.jpg');"></div>
+          <div class="hero-bg-slide" style="background-image: url('assets/images/hero-farm.jpg');"></div>
+        </div>
+      </div>
+      <div class="hero-bg-overlay"></div>
+      <div class="container hero-container">
+        
+        <!-- Left Hero Content -->
+        <div class="hero-content">
+          <div class="hero-pill-badge">
+            <span class="hero-pill-dot"></span>
+            <span>Fresh Mill Batches • 100% Non-Hormonal Formulations</span>
+          </div>
+          
+          <h1 class="hero-heading">
+            Next-Gen Animal Feeds Engineered for <span>Maximum Yield & Optimal FCR</span>
+          </h1>
+          
+          <p class="hero-lead-text">
+            Scientifically balanced complete diets for dairy cattle, poultry broilers, laying hens, aquaculture, swine, and ruminants. High-density proteins and bio-active minerals that maximize farm profitability.
+          </p>
+
+          <div class="hero-cta-group">
+            <a href="#productsSection" class="btn btn-gold" id="heroShopBtn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
+              <span>Explore Feed Catalog</span>
+            </a>
+            <a href="#calculatorSection" class="btn btn-secondary" id="heroCalcBtn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
+              <span>Calculate Herd Ration</span>
+            </a>
+          </div>
+
+          <div class="hero-value-props">
+            <div class="hero-prop-card">
+              <div class="hero-prop-icon">📈</div>
+              <div class="hero-prop-text">
+                <h5>+18% to 24%</h5>
+                <p>Average Yield Boost</p>
+              </div>
+            </div>
+            <div class="hero-prop-card">
+              <div class="hero-prop-icon">🔬</div>
+              <div class="hero-prop-text">
+                <h5>GMP+ & ISO 9001</h5>
+                <p>Certified Processing</p>
+              </div>
+            </div>
+            <div class="hero-prop-card">
+              <div class="hero-prop-icon">🚚</div>
+              <div class="hero-prop-text">
+                <h5>Direct Farmgate</h5>
+                <p>Palletized Freight</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Hero Live Farm Weather Widget (Exact Google Weather Layout) -->
+        <div class="google-weather-card" id="googleWeatherCard">
+          <!-- Google Header: Blue dot, Location, Choose area, 3-dots -->
+          <div class="gw-header">
+            <div class="gw-header-left">
+              <span class="gw-blue-dot" title="Location automatically detected with 100% precision"></span>
+              <span id="gwLocationTitle" class="gw-loc-title">TNHB, Sholinganallur, Chennai</span>
+              <span class="gw-header-dot">•</span>
+              <button type="button" class="gw-choose-area-btn" onclick="openChooseAreaModal()">Choose area</button>
+            </div>
+            <div class="gw-header-right">
+              <button type="button" class="gw-menu-btn" onclick="openChooseAreaModal()" title="Options">⋮</button>
+            </div>
+          </div>
+
+          <!-- Google Main Condition Row -->
+          <div class="gw-main-condition">
+            <div class="gw-main-left">
+              <div class="gw-condition-icon-wrap" id="gwConditionIcon">
+                <!-- SVG Weather Icon -->
+                <svg viewBox="0 0 64 64" width="56" height="56"><path d="M36 12a16 16 0 1014 22 18 18 0 01-14-22z" fill="#4285f4"/><path d="M22 46h24a10 10 0 000-20 12 12 0 00-23-4 9 9 0 00-1 24z" fill="#dadce0"/></svg>
+              </div>
+              <div class="gw-temp-block">
+                <span class="gw-temp-val" id="gwCurrentTemp">28</span>
+                <span class="gw-temp-units">
+                  <button type="button" class="gw-unit-btn gw-unit-c active" onclick="setWeatherUnit('C')">°C</button>
+                  <span class="gw-unit-sep">|</span>
+                  <button type="button" class="gw-unit-btn gw-unit-f" onclick="setWeatherUnit('F')">°F</button>
+                </span>
+                <div class="gw-temp-range-tag" id="gwTempRangeTag" style="display: none;">High: 33° • Low: 27°</div>
+              </div>
+              <div class="gw-details-list">
+                <div class="gw-detail-item">Precipitation: <span id="gwPrecipVal">4%</span></div>
+                <div class="gw-detail-item">Humidity: <span id="gwHumidityVal">80%</span></div>
+                <div class="gw-detail-item">Wind: <span id="gwWindVal">11 km/h</span></div>
+              </div>
+            </div>
+
+            <div class="gw-main-right">
+              <div class="gw-weather-label">Weather</div>
+              <div class="gw-time-str" id="gwDateTimeStr">Sunday, 5:00 am</div>
+              <div class="gw-condition-desc" id="gwConditionDesc">Partly cloudy</div>
+            </div>
+          </div>
+
+          <!-- Forecast Metric Tabs: Temperature | Precipitation | Wind -->
+          <div class="gw-tabs-bar">
+            <button type="button" class="gw-tab active" id="gwTabTemp" onclick="switchGwForecastTab('temp')">Temperature</button>
+            <button type="button" class="gw-tab" id="gwTabPrecip" onclick="switchGwForecastTab('precip')">Precipitation</button>
+            <button type="button" class="gw-tab" id="gwTabWind" onclick="switchGwForecastTab('wind')">Wind</button>
+          </div>
+
+          <!-- Hourly Forecast Graph with Yellow Curve -->
+          <div class="gw-graph-wrap">
+            <svg id="gwHourlySvg" viewBox="0 0 540 96" preserveAspectRatio="none" class="gw-hourly-svg"></svg>
+          </div>
+
+          <!-- 7-Day Weekly Forecast Strip (Sun, Mon, Tue, Wed, Thu, Fri, Sat) -->
+          <div class="gw-daily-strip" id="gwDailyStrip">
+            <!-- Dynamically populated via js/weather.js -->
+          </div>
+
+          <!-- Google Weather Footer with THI Agro Note -->
+          <div class="gw-footer">
+            <div class="gw-footer-left">
+              <span class="gw-thi-status" id="gwThiIndicator">
+                <span class="gw-thi-dot">●</span>
+                <span id="gwThiText">Livestock THI: 70 • Comfort Zone</span>
+              </span>
+            </div>
+            <div class="gw-footer-right">
+              <a href="javascript:void(0)" onclick="detectUserLocationDirect()" class="gw-footer-link">Google Weather</a>
+              <span class="gw-footer-dot">•</span>
+              <a href="javascript:void(0)" onclick="openChooseAreaModal()" class="gw-footer-link">Feedback</a>
+            </div>
+          </div>
+
+          <!-- Choose Area Modal Popup (Google Style) -->
+          <div class="gw-area-modal" id="chooseAreaModal" style="display: none;">
+            <div class="gw-area-modal-content">
+              <div class="gw-area-modal-header">
+                <h4>Choose Weather Location</h4>
+                <button type="button" class="gw-modal-close-btn" onclick="closeChooseAreaModal()">✕</button>
+              </div>
+              <form onsubmit="event.preventDefault(); searchCustomArea();" class="gw-area-search-form">
+                <div class="gw-area-input-wrap">
+                  <span class="gw-search-icon">🔍</span>
+                  <input type="text" id="chooseAreaInput" placeholder="Search city or district (e.g. Sholinganallur, Chennai, Karnal)..." autocomplete="off" />
+                  <button type="submit" class="gw-area-search-submit">Search</button>
+                </div>
+              </form>
+              <div class="gw-quick-locs">
+                <span class="gw-quick-label">Popular Areas:</span>
+                <button type="button" class="gw-loc-chip" onclick="searchCustomArea('Sholinganallur, Chennai')">Sholinganallur, Chennai</button>
+                <button type="button" class="gw-loc-chip" onclick="searchCustomArea('Chennai')">Chennai</button>
+                <button type="button" class="gw-loc-chip" onclick="searchCustomArea('Namakkal')">Namakkal</button>
+                <button type="button" class="gw-loc-chip" onclick="searchCustomArea('Karnal')">Karnal</button>
+                <button type="button" class="gw-loc-chip" onclick="searchCustomArea('Anand')">Anand</button>
+                <button type="button" class="gw-loc-chip" onclick="searchCustomArea('Pune')">Pune</button>
+              </div>
+              <div class="gw-detect-action">
+                <button type="button" class="gw-gps-detect-btn" onclick="autoDetectCustomerLocation(); closeChooseAreaModal();">
+                  🎯 Auto-Detect My Current GPS Location
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+    </section>
+
+    <!-- 4. Species Quick Jump Bar -->
+    <section class="species-bar-section" aria-label="Livestock Species Categories">
+      <div class="container">
+        <div class="species-carousel">
+          <div class="species-quick-card" onclick="filterFromHero('all')">
+            <span class="species-quick-icon">🌿</span>
+            <div class="species-quick-info">
+              <h4>All Species</h4>
+              <span>Complete Catalog</span>
+            </div>
+          </div>
+          <div class="species-quick-card" onclick="filterFromHero('cattle')">
+            <span class="species-quick-icon">🐄</span>
+            <div class="species-quick-info">
+              <h4>Dairy & Beef Cattle</h4>
+              <span>LactaMax & Calf Starters</span>
+            </div>
+          </div>
+          <div class="species-quick-card" onclick="filterFromHero('poultry')">
+            <span class="species-quick-icon">🐔</span>
+            <div class="species-quick-info">
+              <h4>Poultry Flock</h4>
+              <span>Broiler & Layer Feeds</span>
+            </div>
+          </div>
+          <div class="species-quick-card" onclick="filterFromHero('aqua')">
+            <span class="species-quick-icon">🐟</span>
+            <div class="species-quick-info">
+              <h4>Aquaculture</h4>
+              <span>Floating Fish Pellets</span>
+            </div>
+          </div>
+          <div class="species-quick-card" onclick="filterFromHero('swine')">
+            <span class="species-quick-icon">🐖</span>
+            <div class="species-quick-info">
+              <h4>Swine & Pigs</h4>
+              <span>High ADG Grower Rations</span>
+            </div>
+          </div>
+          <div class="species-quick-card" onclick="filterFromHero('goat')">
+            <span class="species-quick-icon">🐐</span>
+            <div class="species-quick-info">
+              <h4>Goats & Sheep</h4>
+              <span>Copper-Safe Rations</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Product Catalog Section -->
+    <section class="section-spacer" id="productsSection">
+      <div class="container">
+        
+        <header class="section-header">
+          <span class="section-tag">Guaranteed Farm Formulations</span>
+          <h2 class="section-title">Commercial Livestock Feed Catalog</h2>
+          <p class="section-subtitle">
+            Order standard 25 kg or 50 kg farm bags directly online. Enjoy automatic multi-bag discounts, free farmgate freight on 15+ bags, and certified batch analysis.
+          </p>
+        </header>
+
+        <!-- Catalog Filter Toolbar -->
+        <div class="catalog-toolbar">
+          <div class="category-tabs-group" role="tablist">
+            <button type="button" class="category-tab-btn active" data-category="all">All Feeds</button>
+            <button type="button" class="category-tab-btn" data-category="cattle">🐄 Cattle</button>
+            <button type="button" class="category-tab-btn" data-category="poultry">🐔 Poultry</button>
+            <button type="button" class="category-tab-btn" data-category="aqua">🐟 Aquaculture</button>
+            <button type="button" class="category-tab-btn" data-category="swine">🐖 Swine</button>
+            <button type="button" class="category-tab-btn" data-category="goat">🐐 Goat & Sheep</button>
+          </div>
+
+          <div class="catalog-search-sort-group">
+            <div class="search-input-wrap">
+              <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              <input type="text" id="catalogSearchInput" class="search-input" placeholder="Search feed by formula, protein %, or stage..." aria-label="Search feed catalog" />
+            </div>
+
+            <select id="catalogSortSelect" class="sort-select" aria-label="Sort products">
+              <option value="featured">Sort: Featured</option>
+              <option value="protein-desc">Protein %: High to Low</option>
+              <option value="rating-desc">Farmer Rating: Highest</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px; font-size: 0.88rem; color: var(--color-gray-500);" id="catalogResultsCount">
+          Showing 8 commercial feed formulas
+        </div>
+
+        <!-- Dynamic Products Grid -->
+        <div class="products-grid" id="productsGrid">
+          <!-- Rendered dynamically by app.js -->
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 6. Interactive Herd Feed Ration Calculator Section -->
+    <section class="section-spacer calculator-section" id="calculatorSection">
+      <div class="container">
+        
+        <header class="section-header">
+          <span class="section-tag">Interactive Agritech Tool</span>
+          <h2 class="section-title">Herd Feed Requirement & Ration Calculator</h2>
+          <p class="section-subtitle">
+            Eliminate guesswork. Input your animal species, herd/flock count, and target duration to get exact tonnage, bag counts, estimated cost, and direct ordering.
+          </p>
+        </header>
+
+        <div class="calculator-wrapper">
+          
+          <!-- Left Inputs Column -->
+          <div class="calc-inputs-column">
+            <h3>Configure Your Herd / Flock Parameters</h3>
+            <p>Our agronomists calibrated these ratios based on NRC (National Research Council) livestock nutrient requirements.</p>
+
+            <div class="calc-form-group">
+              <label for="calcSpecies" class="calc-form-label">Livestock Category & Production Goal</label>
+              <select id="calcSpecies" class="calc-select" aria-label="Select Species"></select>
+            </div>
+
+            <div class="calc-form-group">
+              <div class="calc-form-label">
+                <span>Herd / Flock Size</span>
+                <span><strong id="calcAnimalCountVal"></strong> <span id="calcUnitLabel">animals</span></span>
+              </div>
+              <input type="number" id="calcAnimalCount" class="calc-input" value="25" min="1" max="10000" />
+              <input type="range" id="calcSliderCount" class="calc-slider" value="25" min="1" max="200" step="1" />
+            </div>
+
+            <div class="calc-form-group">
+              <label for="calcDuration" class="calc-form-label">Feeding Period Duration</label>
+              <select id="calcDuration" class="calc-select" aria-label="Select Duration">
+                <option value="7">7 Days (Weekly Ration)</option>
+                <option value="14">14 Days (Bi-Weekly Batch)</option>
+                <option value="30" selected>30 Days (Full Month Supply)</option>
+                <option value="60">60 Days (Seasonal Strategic Reserve)</option>
+              </select>
+            </div>
+
+            <div style="background: var(--color-gray-100); border-radius: var(--radius-md); padding: 14px; font-size: 0.85rem; color: var(--color-dark-muted);">
+              💡 <strong>Pro Tip:</strong> Orders of 10+ bags automatically receive a 5% discount, 25+ bags receive 10%, and 50+ bags receive 15% plus free farm delivery!
+            </div>
+          </div>
+
+          <!-- Right Output Column -->
+          <div class="calc-output-column">
+            <div>
+              <div class="calc-output-header">
+                <h4>Calculated Nutrition Requirement</h4>
+                <p style="font-size: 0.82rem; color: #cadbd2; margin: 0;">Calibrated for optimal health & maximum conversion</p>
+              </div>
+
+              <div class="calc-metrics-grid">
+                <div class="calc-metric-card">
+                  <div class="calc-metric-title">Total Feed Volume</div>
+                  <div class="calc-metric-val" id="calcTotalKg">6,375 kg</div>
+                </div>
+                <div class="calc-metric-card">
+                  <div class="calc-metric-title">Standard Bags (50kg)</div>
+                  <div class="calc-metric-val" id="calcTotalBags">128 Bags</div>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 16px; font-size: 0.85rem; color: #d8f5ee;">
+                Daily Allocation: <strong id="calcDailyIntake">8.5 kg/day per cow</strong>
+              </div>
+
+              <!-- Recommended Product Box -->
+              <div class="calc-rec-product-box">
+                <img src="assets/images/cattle-feed.jpg" alt="Recommended Feed" class="calc-rec-img" id="calcRecProductImg" />
+                <div class="calc-rec-info">
+                  <span id="calcRecFcrBadge">Recommended Formulation</span>
+                  <h5 id="calcRecProductName">NutriBov LactaMax™ High-Yield Dairy Feed</h5>
+                  <span id="calcRecProductProtein">22% Crude Protein</span>
+                  <div style="font-weight: 700; color: #fff; margin-top: 4px;" id="calcRecProductPrice">₹1,850 / 50kg bag</div>
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 20px; padding: 12px; background: rgba(255,255,255,0.08); border-radius: var(--radius-sm);">
+                <span style="font-size: 0.85rem; color: #cadbd2;">Estimated Total Cost:</span>
+                <div id="calcEstimatedCost" style="font-size: 1.35rem; color: #ffcb65; text-align: right;">
+                  <strong>₹0</strong>
+                </div>
+              </div>
+            </div>
+
+            <button type="button" class="btn-calc-add" id="calcAddRationBtn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
+              <span>Add Calculated Ration to Order Cart</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 7. Certified Quality & Lab Assurance Section -->
+    <section class="section-spacer quality-section" id="qualitySection">
+      <div class="container">
+        
+        <header class="section-header">
+          <span class="section-tag">Scientific Rigor</span>
+          <h2 class="section-title">Zero Compromise on Farm Nutritional Purity</h2>
+          <p class="section-subtitle">
+            Our state-of-the-art milling technology and analytical laboratory test every incoming raw material and finished pellet batch before it leaves the plant.
+          </p>
+        </header>
+
+        <div class="quality-grid">
+          <div class="quality-card">
+            <div class="quality-icon-wrap">🛡️</div>
+            <h4>Zero Aflatoxin Guarantee</h4>
+            <p>Every grain silo is subjected to LC-MS/MS chromatography ensuring 0% harmful mycotoxin or mold contamination.</p>
+          </div>
+
+          <div class="quality-card">
+            <div class="quality-icon-wrap">🔬</div>
+            <h4>NIR Spectrophotometry</h4>
+            <p>Near-infrared spectrometry verifies accurate Crude Protein, Fat, Lysine, and Digestible Energy in every 500kg batch.</p>
+          </div>
+
+          <div class="quality-card">
+            <div class="quality-icon-wrap">⚙️</div>
+            <h4>Steam Hydro-Thermal Conditioning</h4>
+            <p>High-pressure steam conditioning gelatinizes starches, boosting digestibility while neutralizing anti-nutritional factors.</p>
+          </div>
+
+          <div class="quality-card">
+            <div class="quality-icon-wrap">📦</div>
+            <h4>Triple-Layer Woven Packaging</h4>
+            <p>Moisture-barrier UV-stabilized woven polypropylene bags preserve micronutrient potency and shelf life up to 180 days.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 8. Testimonials & Case Studies -->
+    <section class="section-spacer" id="testimonialsSection">
+      <div class="container">
+        
+        <header class="section-header">
+          <span class="section-tag">Verified Farmer Proof</span>
+          <h2 class="section-title">Proven Field Results Across 1,200+ Farms</h2>
+          <p class="section-subtitle">
+            Real commercial agricultural operations that scaled milk output, bird weight, and herd health with NutriAgro feed rations.
+          </p>
+        </header>
+
+        <div class="testimonial-grid">
+          <div class="testimonial-card">
+            <p class="testimonial-quote">
+              "We transitioned our 180-head Murrah buffalo and HF cross herd to NutriBov LactaMax 6 months ago. Our average daily milk yield jumped from 21.2L to 24.8L per animal with butterfat holding steady at 4.2% SNF. The live yeast buffer completely eliminated acidosis."
+            </p>
+            <div class="testimonial-author-row">
+              <div class="author-avatar">GS</div>
+              <div class="author-details">
+                <h5>Sardar Gurpreet Singh</h5>
+                <span>Karnal Green Acres Dairy, 180 Milking Cattle, Haryana</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card">
+            <p class="testimonial-quote">
+              "In commercial poultry broilers, FCR determines your entire batch profit. With AviGrow Finisher, our flock achieved a 2.35kg liveweight at Day 35 with an astonishing 1.48 Feed Conversion Ratio. Feed wastage dropped to near zero."
+            </p>
+            <div class="testimonial-author-row">
+              <div class="author-avatar">RP</div>
+              <div class="author-details">
+                <h5>Rameshwar Patel</h5>
+                <span>Patel Agro Commercial Broiler Farms (50,000 Birds/Cycle), Anand, Gujarat</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card">
+            <p class="testimonial-quote">
+              "Finding a floating pellet that doesn't cloud fish ponds was our biggest hurdle in the delta until AquaVital Max. The pellets float for over 35 minutes, pond ammonia dropped by 40%, and harvest weight was reached two weeks earlier."
+            </p>
+            <div class="testimonial-author-row">
+              <div class="author-avatar">VR</div>
+              <div class="author-details">
+                <h5>K. Venkatesh Rao</h5>
+                <span>Godavari Delta Aqua Hatchery & Fish Farms, Bhimavaram, AP</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 9. Frequently Asked Questions -->
+    <section class="section-spacer faq-section" id="faqSection">
+      <div class="container">
+        
+        <header class="section-header">
+          <span class="section-tag">Got Questions?</span>
+          <h2 class="section-title">Frequently Asked Questions</h2>
+          <p class="section-subtitle">
+            Essential guidelines on transitioning animal feed, commercial bulk discounts, and freight deliveries.
+          </p>
+        </header>
+
+        <div class="faq-container">
+          <div class="faq-item active">
+            <button class="faq-question">
+              <span>How should I introduce a new NutriAgro feed formula to my herd?</span>
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                We strongly recommend a 7-day gradual transition protocol: Days 1-2 (75% old feed, 25% NutriAgro), Days 3-4 (50% old feed, 50% NutriAgro), Days 5-6 (25% old feed, 75% NutriAgro), and Day 7 onwards (100% NutriAgro). This allows rumen and intestinal microflora to adapt smoothly without stress or drop in yield.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              <span>What bulk discounts and free delivery terms apply?</span>
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                Orders of 10+ bags receive an automatic 5% multi-bag discount. Orders of 25+ bags receive 10%, and full tonnage orders (50+ bags) receive 15%. All orders of 15 bags or more qualify for <strong>100% Free Farmgate Freight Delivery</strong> directly to your property or barn gate.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              <span>What is the shelf life and proper storage condition?</span>
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                All NutriAgro feeds carry a certified 180-day shelf life from the date of milling. Store bags on wooden pallets in a cool, well-ventilated dry barn off concrete floors, protected from direct sunlight, rodent ingress, and dampness.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              <span>Can I request a custom bulk formulation or tanker delivery?</span>
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                Yes! For commercial farms feeding over 50 metric tons monthly, our animal nutritionists can formulate custom protein-energy specifications and deliver via pneumatic bulk tankers. Contact our Farm Advisory hotline at 1800-890-4567 (Toll-Free India) for custom commercial contracts.
+              </div>
+            </div>
+          </div>
+        </div>
+
+    <!-- 10. Regional Dealer Depots & Feed Mill Network -->
+    <section class="section-spacer dealer-section" id="dealerSection">
+      <div class="container">
+        
+        <header class="section-header">
+          <span class="section-tag">Depot & Mill Network</span>
+          <h2 class="section-title">Locate Authorized Feed Dealers & Stockists</h2>
+          <p class="section-subtitle">
+            Need urgent bags today or want to inspect batch samples in person? Find our certified regional feed mill silos and authorized agricultural stockists.
+          </p>
+        </header>
+
+        <div class="dealer-search-box">
+          <div class="search-input-wrap">
+            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" id="dealerSearchInput" class="search-input" placeholder="Search by city, agricultural district, or postal PIN code..." aria-label="Search dealers" />
+          </div>
+        </div>
+
+        <div class="dealer-grid" id="dealerListContainer">
+          <!-- Populated dynamically by app.js -->
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 10. Site Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="brand-text-wrap" style="margin-bottom: 14px;">
+            <span class="brand-name" style="color: #fff;">Nutri<span style="color: #2ed573;">Agro</span> Feeds™</span>
+            <span class="brand-tagline" style="color: #a7c5b6;">Commercial Livestock Feeds</span>
+          </div>
+          <p>
+            Precision animal nutrition engineered for high conversion rates, veterinary-grade herd wellness, and commercial farm profitability. ISO 9001:2015 & GMP+ Certified.
+          </p>
+          <div class="footer-contact-line">
+            <span>📍 Central Mill & Silo: Plot 42, GT Road Agro Industrial Corridor, Karnal, Haryana 132001, India</span>
+          </div>
+          <div class="footer-contact-line">
+            <span>📞 Advisory Line: <a href="tel:18008904567" style="color:#2ed573; text-decoration:underline;">1800-890-4567 (Toll-Free India)</a> (Mon - Sat 7am - 7pm IST)</span>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Livestock Categories</h4>
+          <ul class="footer-links">
+            <li><a href="#productsSection" onclick="filterFromHero('cattle')">Dairy Cattle LactaMax™</a></li>
+            <li><a href="#productsSection" onclick="filterFromHero('cattle')">CalfGrow™ Starter</a></li>
+            <li><a href="#productsSection" onclick="filterFromHero('poultry')">AviGrow™ Broiler Finisher</a></li>
+            <li><a href="#productsSection" onclick="filterFromHero('poultry')">AviGrow™ EggMax Layer</a></li>
+            <li><a href="#productsSection" onclick="filterFromHero('aqua')">AquaVital™ Floating Fish</a></li>
+            <li><a href="#productsSection" onclick="filterFromHero('swine')">PorciGain™ Swine Grower</a></li>
+            <li><a href="#productsSection" onclick="filterFromHero('goat')">CapraPlus™ Goat & Sheep</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Farmer Resources</h4>
+          <ul class="footer-links">
+            <li><a href="#calculatorSection">Herd Ration Calculator</a></li>
+            <li><a href="#qualitySection">Guaranteed Lab Analysis</a></li>
+            <li><a href="#testimonialsSection">Farm Case Studies</a></li>
+            <li><a href="#faqSection">Feed Transition Guide</a></li>
+            <li><a href="#faqSection">Bulk Tonnage Rates</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Farmgate Newsletter</h4>
+          <p style="font-size: 0.86rem; color: #9cb5aa; margin-bottom: 12px;">
+            Receive seasonal grain price outlooks, harvest updates, and special commercial discounts.
+          </p>
+          <form onsubmit="event.preventDefault(); window.cart.showToast('Thank you for subscribing to NutriAgro Farm Dispatch!', 'success');" style="display: flex; gap: 8px;">
+            <input type="email" required placeholder="Enter farm email..." style="flex:1; padding: 10px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); color: #fff; font-size: 0.85rem;" />
+            <button type="submit" class="btn btn-gold" style="padding: 10px 14px;">Join</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>© 2026 NutriAgro Feeds India Pvt. Ltd. All rights reserved. Registered with FSSAI & BIS Livestock Feed Standards (India).</div>
+        <div style="display: flex; gap: 20px;">
+          <a href="#" style="color: #7d968b;">Privacy Policy</a>
+          <a href="#" style="color: #7d968b;">Commercial Terms</a>
+          <a href="#" style="color: #7d968b;">MSDS & Feed Safety</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==========================================
+       11. SLIDE-OUT CART DRAWER & OVERLAY
+       ========================================== -->
+  <div class="cart-drawer-overlay" id="cartOverlay"></div>
+  
+  <aside class="cart-drawer" id="cartDrawer" aria-label="Shopping Cart">
+    <div class="cart-drawer-header">
+      <h3 class="cart-drawer-title">
+        <span>Order Cart</span>
+        <span class="badge badge-brand cart-count-badge" style="display: none;">0</span>
+      </h3>
+      <button type="button" class="close-btn" id="closeCartBtn" aria-label="Close cart">✕</button>
+    </div>
+
+    <!-- Free Freight Progress Bar -->
+    <div class="freight-progress-box">
+      <div id="freightProgressText" style="font-size: 0.82rem; color: var(--color-primary-dark);">
+        Add <strong>15 bags</strong> for <strong>Free Farmgate Freight</strong>
+      </div>
+      <div class="freight-progress-bar-bg">
+        <div class="freight-progress-fill" id="freightProgressFill" style="width: 0%;"></div>
+      </div>
+    </div>
+
+    <!-- Items List / Empty State -->
+    <div class="cart-items-scroll">
+      <div class="cart-empty-state" id="cartEmptyState">
+        <div class="cart-empty-icon">🌾</div>
+        <h4>Your feed order is empty</h4>
+        <p style="font-size: 0.88rem; margin: 8px 0 20px 0;">Add 25kg or 50kg bags from our catalog or calculate your herd ration to begin.</p>
+        <a href="#productsSection" class="btn btn-primary" onclick="cart.closeDrawer()">Browse Feed Catalog</a>
+      </div>
+      <div id="cartItemsList"></div>
+    </div>
+
+    <!-- Cart Footer with Pricing & Checkout -->
+    <div class="cart-drawer-footer" id="cartFooter" style="display: none;">
+      <!-- Promo Code Form -->
+      <form class="cart-promo-form" id="cartPromoForm">
+        <input type="text" id="cartPromoInput" class="cart-promo-input" placeholder="Promo code (e.g. FARMFRESH10)" />
+        <button type="submit" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.82rem;">Apply</button>
+      </form>
+
+      <!-- Financial Summary Lines -->
+      <div class="cart-summary-lines">
+        <div class="summary-line">
+          <span>Total Order Weight:</span>
+          <strong id="cartTotalWeight">0 kg</strong>
+        </div>
+        <div class="summary-line">
+          <span>Items Subtotal:</span>
+          <span id="cartSubtotalAmount">₹0</span>
+        </div>
+        <div class="summary-line" id="cartDiscountRow" style="display: none; color: var(--color-success);">
+          <span id="cartDiscountLabel">Tier Discount:</span>
+          <strong id="cartDiscountAmount">-₹0</strong>
+        </div>
+        <div class="summary-line">
+          <span>Farmgate Freight Delivery:</span>
+          <span id="cartShippingAmount">₹450</span>
+        </div>
+        <div class="summary-line total-line">
+          <span>Order Total:</span>
+          <span id="cartTotalAmount">₹0</span>
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-primary btn-checkout" id="proceedToCheckoutBtn">
+        <span>Proceed to Farm Checkout</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ==========================================
+       12. PRODUCT DETAILS & LAB SPECS MODAL
+       ========================================== -->
+  <div class="modal-overlay" id="modalOverlay"></div>
+
+  <div class="product-modal" id="productDetailModal" role="dialog" aria-modal="true" aria-labelledby="modalProductName">
+    <button type="button" class="modal-close-corner" onclick="closeProductModal()" aria-label="Close modal">✕</button>
+    
+    <div class="modal-content-grid">
+      <!-- Left Image Column -->
+      <div class="modal-gallery">
+        <img src="" alt="" id="modalProductImg" class="modal-big-img" />
+      </div>
+
+      <!-- Right Details Column -->
+      <div class="modal-info-col">
+        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+          <span class="badge badge-brand" id="modalProductCategory">Dairy Cattle</span>
+          <span class="badge badge-protein" id="modalProductForm">Pellet (6mm)</span>
+        </div>
+
+        <h2 id="modalProductName">Product Title</h2>
+        <div style="font-size: 0.86rem; color: var(--color-gray-500); margin-bottom: 12px;" id="modalProductStage">Stage</div>
+        <div style="font-size: 0.9rem; color: var(--color-primary); font-weight: 700; margin-bottom: 14px;" id="modalProductHighlight">★ Highlight</div>
+
+        <p style="font-size: 0.92rem; color: var(--color-dark-muted); line-height: 1.5; margin-bottom: 16px;" id="modalProductDesc"></p>
+
+        <!-- Price & Bag Size -->
+        <div class="modal-price-row">
+          <div class="modal-price-val" id="modalProductPrice">₹1,850</div>
+          <span style="font-size: 0.85rem; color: var(--color-gray-500);">/ bag</span>
+        </div>
+
+        <div class="modal-pkg-selector">
+          <span style="font-size: 0.82rem; font-weight: 700;">Select Commercial Packaging:</span>
+          <div class="modal-pkg-buttons">
+            <button type="button" class="modal-pkg-btn" id="modalSize25kg" onclick="selectModalBagSize('25kg')">25 kg Bag</button>
+            <button type="button" class="modal-pkg-btn active" id="modalSize50kg" onclick="selectModalBagSize('50kg')">50 kg Bag (Standard)</button>
+          </div>
+        </div>
+
+        <!-- Add to Cart Controls -->
+        <div style="display: flex; gap: 12px; margin-bottom: 24px; align-items: center;">
+          <div class="qty-stepper" style="height: 44px;">
+            <button type="button" class="qty-btn" style="width: 36px; height: 42px;" onclick="document.getElementById('modalQtyInput').value = Math.max(1, parseInt(document.getElementById('modalQtyInput').value) - 1)">−</button>
+            <input type="number" id="modalQtyInput" class="qty-input" value="1" min="1" max="500" style="width: 48px; height: 42px;" />
+            <button type="button" class="qty-btn" style="width: 36px; height: 42px;" onclick="document.getElementById('modalQtyInput').value = parseInt(document.getElementById('modalQtyInput').value) + 1">+</button>
+          </div>
+          <button type="button" class="btn btn-primary" style="flex: 1; height: 44px;" onclick="addModalProductToCart()">
+            Add to Order Cart
+          </button>
+        </div>
+
+        <!-- Nutrition Specs Tab -->
+        <div>
+          <h4 style="font-size: 1rem; border-bottom: 2px solid var(--color-primary); padding-bottom: 6px; margin-bottom: 12px;">
+            🔬 Guaranteed Nutritional Analysis
+          </h4>
+          <table class="specs-table">
+            <tbody id="modalNutritionTableBody"></tbody>
+          </table>
+        </div>
+
+        <!-- Key Agritech Benefits -->
+        <div style="margin-top: 18px;">
+          <h4 style="font-size: 0.95rem; margin-bottom: 10px;">Proven Herd Benefits</h4>
+          <ul class="modal-benefits-list" id="modalBenefitsList"></ul>
+        </div>
+
+        <!-- Feeding Protocol -->
+        <div style="background: var(--color-gray-50); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--color-gray-200); margin-top: 16px;">
+          <h5 style="font-size: 0.88rem; margin-bottom: 4px;">Feeding Instructions</h5>
+          <p style="font-size: 0.82rem; margin: 0;" id="modalFeedingGuide"></p>
+        </div>
+
+        <!-- Ingredients List -->
+        <div style="margin-top: 14px; font-size: 0.8rem; color: var(--color-gray-500);">
+          <strong>Full Formula Ingredients:</strong> <span id="modalIngredients"></span>
+        </div>
+
+        <!-- Download Specsheet Link -->
+        <div style="margin-top: 20px; text-align: right;">
+          <button type="button" class="btn btn-subtle" onclick="downloadDatasheetSimulation()">
+            📄 Download Certified Spec Sheet (PDF)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       13. FARM CHECKOUT & ORDER CONFIRMATION MODAL
+       ========================================== -->
+  <div class="checkout-modal" id="checkoutModal" role="dialog" aria-modal="true" aria-labelledby="checkoutModalTitle">
+    <button type="button" class="modal-close-corner" onclick="closeCheckoutModal()" aria-label="Close modal">✕</button>
+
+    <!-- Phase 1: Input Form -->
+    <div id="checkoutFormSection">
+      <div style="padding: 24px 36px 0 36px;">
+        <h2 id="checkoutModalTitle" style="font-size: 1.55rem; margin-bottom: 6px;">Direct Farm Delivery Checkout</h2>
+        <p style="font-size: 0.9rem; color: var(--color-dark-muted);">Enter your commercial farm destination and preferred delivery unloading.</p>
+      </div>
+
+      <form id="checkoutForm">
+        <div class="checkout-grid">
+          
+          <!-- Left: Address & Dispatch -->
+          <div>
+            <h4 style="font-size: 1rem; margin-bottom: 14px; color: var(--color-primary);">1. Farm Location & Contact</h4>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 4px;">Farm / Business Name *</label>
+                <input type="text" id="checkoutFarmName" required class="calc-input" placeholder="e.g. Kisan Agro Dairy Farm" />
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 4px;">Primary Contact Person *</label>
+                <input type="text" id="checkoutFarmerName" required class="calc-input" placeholder="e.g. Rajesh Sharma" />
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 4px;">Driver Dispatch Phone *</label>
+                <input type="tel" id="checkoutPhone" required class="calc-input" placeholder="e.g. +91 98765 43210" />
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 4px;">Postal PIN Code (6 Digits) *</label>
+                <input type="text" id="checkoutPincode" required class="calc-input" placeholder="e.g. 132001" maxlength="6" />
+              </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+              <label style="display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 4px;">Delivery Address (Barn/Gate) *</label>
+              <textarea id="checkoutAddress" required rows="2" class="calc-input" placeholder="e.g. Farm Gate #2, GT Road Agro Corridor, Karnal, Haryana"></textarea>
+            </div>
+
+            <h4 style="font-size: 1rem; margin-bottom: 10px; color: var(--color-primary);">2. Commercial Payment Mode</h4>
+            <div class="checkout-payment-opts">
+              <label class="payment-radio-label">
+                <input type="radio" name="paymentMethod" value="Farmgate Delivery (COD / Cheque on Site)" checked />
+                <span>💵 Cash / Cheque on Farmgate Delivery (COD)</span>
+              </label>
+              <label class="payment-radio-label">
+                <input type="radio" name="paymentMethod" value="Instant UPI (Google Pay / PhonePe / Paytm)" />
+                <span>📲 Instant UPI / QR (Google Pay, PhonePe, Paytm)</span>
+              </label>
+              <label class="payment-radio-label">
+                <input type="radio" name="paymentMethod" value="Commercial NetBanking / NEFT / RTGS Transfer" />
+                <span>🏛️ Commercial NetBanking (NEFT / RTGS / IMPS)</span>
+              </label>
+              <label class="payment-radio-label">
+                <input type="radio" name="paymentMethod" value="Credit / Debit Commercial Card" />
+                <span>💳 Credit / Debit Card (Visa, RuPay, Mastercard)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Right: Summary Box -->
+          <div>
+            <div class="checkout-summary-box">
+              <h4 style="font-size: 1.05rem; margin-bottom: 12px;">Order Summary</h4>
+              
+              <div id="checkoutSummaryItems" style="margin-bottom: 14px; max-height: 180px; overflow-y: auto;"></div>
+
+              <div style="font-size: 0.85rem; border-top: 1px solid var(--color-gray-300); padding-top: 10px; margin-top: 10px;">
+                <div class="checkout-summary-row">
+                  <span>Gross Weight:</span>
+                  <strong id="checkoutTotalWeight">0 kg</strong>
+                </div>
+                <div class="checkout-summary-row">
+                  <span>Subtotal:</span>
+                  <span id="checkoutSubtotal">₹0</span>
+                </div>
+                <div class="checkout-summary-row" style="color: var(--color-success);">
+                  <span>Discounts Applied:</span>
+                  <strong id="checkoutDiscount">-₹0</strong>
+                </div>
+                <div class="checkout-summary-row">
+                  <span>Freight Delivery:</span>
+                  <span id="checkoutShipping">FREE</span>
+                </div>
+                <div class="checkout-summary-row" style="font-size: 1.15rem; font-weight: 800; color: var(--color-dark); margin-top: 8px; border-top: 1px solid var(--color-gray-300); padding-top: 8px;">
+                  <span>Final Total:</span>
+                  <span id="checkoutFinalTotal" style="color: var(--color-primary);">₹0</span>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary" id="checkoutSubmitBtn" style="width: 100%; margin-top: 20px; padding: 14px;">
+                Confirm & Place Farm Order
+              </button>
+
+              <div style="font-size: 0.74rem; color: var(--color-gray-500); text-align: center; margin-top: 10px;">
+                🔒 All orders guaranteed by NutriAgro Feed Quality Assurance.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </form>
+    </div>
+
+    <!-- Phase 2: Order Confirmed Screen -->
+    <div id="checkoutSuccessSection" class="checkout-success-view" style="display: none;">
+      <div class="success-check-badge">✓</div>
+      <h2 style="font-size: 1.8rem; margin-bottom: 6px;">Farm Order Confirmed!</h2>
+      <p style="color: var(--color-dark-muted); max-width: 520px; margin: 0 auto 24px auto;">
+        Your order has been queued at our automated milling plant. Our dispatch driver will contact you prior to farm arrival.
+      </p>
+
+      <div class="receipt-card">
+        <div class="receipt-line">
+          <span>Order Confirmation Reference:</span>
+          <strong id="confirmOrderId">AGR-839201</strong>
+        </div>
+        <div class="receipt-line">
+          <span>Order Date:</span>
+          <span id="confirmOrderDate">Today</span>
+        </div>
+        <div class="receipt-line">
+          <span>Destination Farm:</span>
+          <span id="confirmFarmName"></span>
+        </div>
+        <div class="receipt-line">
+          <span>Drop Location:</span>
+          <span id="confirmDeliveryAddress"></span>
+        </div>
+        <div class="receipt-line">
+          <span>Total Packaging:</span>
+          <strong id="confirmTotalBags"></strong>
+        </div>
+        <div class="receipt-line">
+          <span>Payment Mode:</span>
+          <span id="confirmPaymentType"></span>
+        </div>
+        <div class="receipt-line" style="border-top: 1px dashed var(--color-gray-300); padding-top: 8px; margin-top: 8px; font-size: 1.05rem;">
+          <span>Total Invoiced:</span>
+          <strong id="confirmAmountPaid" style="color: var(--color-primary);">₹0</strong>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: center; gap: 14px;">
+        <button type="button" class="btn btn-primary" onclick="closeCheckoutModal()">Back to Homepage</button>
+        <button type="button" class="btn btn-secondary" onclick="window.print()">Print Farm Invoice</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       14. FEED COMPARISON FLOATING BAR & MODAL
+       ========================================== -->
+  <div class="compare-floating-bar" id="compareFloatingBar">
+    <span class="compare-count-text" id="compareCountText">0 feeds selected</span>
+    <button type="button" class="btn btn-gold btn-sm" onclick="openCompareModal()">
+      ⚖️ Compare Formulations
+    </button>
+    <button type="button" class="btn btn-subtle btn-sm" onclick="clearCompareSelection()" style="color:#fff; background: rgba(255,255,255,0.15);">
+      Clear
+    </button>
+  </div>
+
+  <div class="compare-modal" id="compareModal" role="dialog" aria-modal="true" aria-labelledby="compareModalTitle">
+    <button type="button" class="modal-close-corner" onclick="closeCompareModal()" aria-label="Close modal">✕</button>
+    <div style="margin-bottom: 20px;">
+      <span class="section-tag">Direct Formula Comparison</span>
+      <h2 id="compareModalTitle" style="font-size: 1.55rem; margin-top: 6px;">Side-by-Side Feed Analysis</h2>
+      <p style="font-size: 0.88rem; color: var(--color-dark-muted);">Compare guaranteed nutritional analysis, form factors, energy density, and pricing.</p>
+    </div>
+    <div id="compareTableContent" style="overflow-x: auto;"></div>
+  </div>
+
+  <!-- ==========================================
+       15. BULK TONNAGE (10+ MT) INQUIRY MODAL
+       ========================================== -->
+  <div class="bulk-modal" id="bulkTonnageModal" role="dialog" aria-modal="true" aria-labelledby="bulkModalTitle">
+    <button type="button" class="modal-close-corner" onclick="closeBulkTonnageModal()" aria-label="Close modal">✕</button>
+    <div style="margin-bottom: 20px;">
+      <span class="section-tag">Commercial Agro Contracts</span>
+      <h2 id="bulkModalTitle" style="font-size: 1.55rem; margin-top: 6px;">Commercial Bulk Tonnage Request</h2>
+      <p style="font-size: 0.88rem; color: var(--color-dark-muted);">For agricultural facilities ordering 10 to 100+ Metric Tons via bulk pneumatic tanker or palletized flatbed freight.</p>
+    </div>
+
+    <form id="bulkTonnageForm">
+      <div style="margin-bottom: 14px;">
+        <label style="display:block; font-size:0.84rem; font-weight:700; margin-bottom:4px;">Farm / Feedlot Enterprise Name *</label>
+        <input type="text" id="bulkFarmName" required class="calc-input" placeholder="e.g. Balaji Agro Commercial Cattle & Poultry Farms" />
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+        <div>
+          <label style="display:block; font-size:0.84rem; font-weight:700; margin-bottom:4px;">Target Livestock Species *</label>
+          <select id="bulkSpecies" class="calc-select">
+            <option value="Dairy Cattle">Dairy Cattle</option>
+            <option value="Poultry Broiler">Poultry Broiler</option>
+            <option value="Poultry Layer">Poultry Layer</option>
+            <option value="Aquaculture">Aquaculture (Fish/Shrimp)</option>
+            <option value="Swine">Swine / Pigs</option>
+            <option value="Goat & Sheep">Goats & Sheep</option>
+          </select>
+        </div>
+        <div>
+          <label style="display:block; font-size:0.84rem; font-weight:700; margin-bottom:4px;">Estimated Volume (Metric Tons) *</label>
+          <select id="bulkTonnageVal" class="calc-select">
+            <option value="10 - 20 MT">10 - 20 Metric Tons</option>
+            <option value="20 - 50 MT">20 - 50 Metric Tons</option>
+            <option value="50 - 100 MT">50 - 100 Metric Tons</option>
+            <option value="100+ MT (Monthly Contract)">100+ MT (Monthly Contract)</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+        <div>
+          <label style="display:block; font-size:0.84rem; font-weight:700; margin-bottom:4px;">Dispatch Contact Phone *</label>
+          <input type="tel" id="bulkContactPhone" required class="calc-input" placeholder="e.g. +91 98765 43210" />
+        </div>
+        <div>
+          <label style="display:block; font-size:0.84rem; font-weight:700; margin-bottom:4px;">Silo / Unloading Type *</label>
+          <select id="bulkUnloadType" class="calc-select">
+            <option value="Pneumatic Tanker (Blower Pipe)">Pneumatic Tanker (Blower Pipe)</option>
+            <option value="1-Ton Super Sacks (Jumbo Bags)">1-Ton Super Sacks (Jumbo Bags)</option>
+            <option value="50kg Bags on Wrapped Pallets">50kg Bags on Wrapped Pallets</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 18px;">
+        <label style="display:block; font-size:0.84rem; font-weight:700; margin-bottom:4px;">Destination Silo Address & Delivery Notes</label>
+        <textarea id="bulkNotes" rows="2" class="calc-input" placeholder="Provide farm silo location, PIN code, and truck approach road notes..."></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px;">
+        Submit Commercial Bulk Tonnage Inquiry
+      </button>
+    </form>
+  </div>
+
+  <!-- ==========================================
+       16. FLOATING WHATSAPP & DIRECT FARM ADVISORY
+       ========================================== -->
+  <button type="button" class="whatsapp-floating-btn" id="whatsappFloatingBtn" aria-label="Farm Advisory on WhatsApp">
+    <span class="whatsapp-pulse"></span>
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2zm0 18.15c-1.49 0-2.94-.4-4.22-1.16l-.3-.18-3.12.82.83-3.04-.2-.32a8.19 8.19 0 01-1.26-4.36c0-4.52 3.68-8.2 8.2-8.2 2.19 0 4.25.85 5.8 2.4 1.55 1.55 2.4 3.61 2.4 5.8 0 4.52-3.68 8.2-8.2 8.2zm4.5-6.15c-.25-.12-1.46-.72-1.69-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.79.98-.14.17-.29.19-.54.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.39-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.17-.25.25-.41.08-.17.04-.31-.02-.43s-.56-1.35-.77-1.85c-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.23.25-.87.85-.87 2.08 0 1.22.89 2.41 1.02 2.58.12.17 1.76 2.68 4.25 3.76.59.26 1.06.41 1.42.52.6.19 1.14.16 1.57.1.48-.07 1.46-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.06-.11-.23-.17-.48-.29z"/>
+    </svg>
+  </button>
+
+  <div class="whatsapp-chat-popup" id="whatsappChatPopup">
+    <div class="whatsapp-popup-header">
+      <div>
+        <h4>🌾 NutriAgro Farm Support</h4>
+        <p>● Live: Senior Animal Nutritionist</p>
+      </div>
+      <button type="button" id="closeWhatsappPopup" style="background:none; border:none; color:#fff; font-size:1.2rem; cursor:pointer;">✕</button>
+    </div>
+    <div class="whatsapp-popup-body">
+      <p style="font-size:0.84rem; color:var(--color-dark-muted); margin-bottom:12px;">
+        Need instant feeding advice or want to confirm your order details directly on WhatsApp?
+      </p>
+
+      <button type="button" class="whatsapp-btn-action" onclick="sendCartViaWhatsApp()">
+        <span>📲 Send Current Cart to WhatsApp</span>
+      </button>
+
+      <div style="border-top: 1px dashed var(--color-gray-300); padding-top: 10px; margin-top: 10px;">
+        <label style="display:block; font-size:0.78rem; font-weight:700; margin-bottom:4px; color:var(--color-dark);">Ask a Feeding Question:</label>
+        <input type="text" id="whatsappAgronomistQuery" placeholder="e.g. Broiler starter to finisher ratio..." style="width:100%; padding:8px; border:1px solid var(--color-gray-300); border-radius:var(--radius-sm); font-size:0.82rem; margin-bottom:8px;" onkeydown="if(event.key==='Enter'){event.preventDefault();openGeminiChat(this.value);}" />
+        <button type="button" class="btn btn-secondary btn-sm" onclick="openGeminiChat(document.getElementById('whatsappAgronomistQuery').value)" style="width:100%; display:flex; align-items:center; justify-content:center; gap:6px;">
+          <span>✨</span> Chat with Agronomist
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       17. GEMINI AI AGRONOMIST CHAT MODAL
+       ========================================== -->
+  <div class="gemini-chat-modal" id="geminiChatModal" role="dialog" aria-modal="true" aria-labelledby="geminiModalTitle">
+    <div class="gemini-modal-header">
+      <div class="gemini-header-left">
+        <div class="gemini-avatar-wrap">
+          <div class="gemini-avatar">🌾</div>
+          <span class="gemini-status-online" title="Online & Ready"></span>
+        </div>
+        <div>
+          <div class="gemini-title-row">
+            <h3 id="geminiModalTitle" class="gemini-header-title">Dr. Thorne • NutriAgro Agronomist</h3>
+          </div>
+          <p class="gemini-header-subtitle">Senior Livestock Nutritionist • 24/7 Feeding Advisory</p>
+        </div>
+      </div>
+      <div class="gemini-header-actions">
+        <button type="button" class="gemini-header-btn" onclick="toggleGeminiSettings()" title="Settings" aria-label="Settings">
+          ⚙️
+        </button>
+        <button type="button" class="gemini-header-btn gemini-close-btn" onclick="closeGeminiChat()" title="Close Chat" aria-label="Close Chat">
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- API Key Settings Drawer (Optional for custom key) -->
+    <div class="gemini-settings-bar" id="geminiSettingsBar" style="display: none;">
+      <div class="gemini-settings-inner">
+        <div class="gemini-settings-info">
+          <strong>NutriAgro AI Advisor Settings:</strong>
+          <span>Connected to high-performance Nutrition Intelligence Engine.</span>
+        </div>
+        <div class="gemini-settings-inputs">
+          <input type="password" id="geminiApiKeyInput" placeholder="Custom API Key (optional)..." class="gemini-key-input" />
+          <button type="button" class="btn btn-primary btn-xs" onclick="saveGeminiApiKey()">Save Key</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Agronomy Topics / Suggestion Chips -->
+    <div class="gemini-quick-chips" id="geminiQuickChips">
+      <button type="button" class="gemini-chip" onclick="sendQuickPrompt('How do I increase milk fat and SNF in dairy cows with NutriAgro feed?')">
+        🐄 Milk Fat & Yield
+      </button>
+      <button type="button" class="gemini-chip" onclick="sendQuickPrompt('What is the best broiler feeding schedule to reach 1.48 FCR?')">
+        🐔 Broiler 1.48 FCR
+      </button>
+      <button type="button" class="gemini-chip" onclick="sendQuickPrompt('How can I prevent egg breakage and improve layer shell quality?')">
+        🥚 Layer Eggshell Strength
+      </button>
+      <button type="button" class="gemini-chip" onclick="sendQuickPrompt('What are the optimal feeding times and rates for AquaVital floating pellets?')">
+        🐟 Aqua Floating Pellets
+      </button>
+      <button type="button" class="gemini-chip" onclick="sendQuickPrompt('What is the safe 7-day feed transition protocol to avoid rumen acidosis?')">
+        🔄 7-Day Feed Transition
+      </button>
+    </div>
+
+    <!-- Messages Container -->
+    <div class="gemini-chat-messages" id="geminiChatMessages">
+      <div class="gemini-msg gemini-msg-ai">
+        <div class="gemini-msg-avatar">✨</div>
+        <div class="gemini-msg-content">
+          <h4 class="gemini-msg-heading">Hello Farmer! I am Dr. Thorne, your AI Agronomist.</h4>
+          <p>I am calibrated specifically on <strong>NutriAgro's commercial animal nutrition scientific benchmarks</strong>.</p>
+          <p>Ask me anything regarding:</p>
+          <ul>
+            <li><strong>Dairy & Cattle</strong>: Daily ration calculations, boosting milk butterfat & SNF, transition protocols.</li>
+            <li><strong>Broilers & Layers</strong>: Achieving 1.48 FCR, phase-feeding crumbles vs pellets, eggshell calcium ratios.</li>
+            <li><strong>Aquaculture</strong>: Floating pellet protein percentages, biomass calculations, dissolved oxygen safety.</li>
+            <li><strong>Swine, Goats & Sheep</strong>: Average Daily Gain (ADG) targets and strict copper toxicity prevention.</li>
+          </ul>
+          <p style="margin-bottom:0; font-size:0.84rem; color:var(--color-primary-dark); font-weight:600;">How can I assist your herd or flock today?</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Input Form -->
+    <form class="gemini-chat-input-wrap" onsubmit="handleGeminiChatSubmit(event)">
+      <div class="gemini-input-container">
+        <textarea
+          id="geminiChatInput"
+          placeholder="Ask Dr. Thorne anything (e.g. Broiler starter protein %, goat feed ratio)..."
+          rows="1"
+          onkeydown="handleGeminiInputKeydown(event)"
+        ></textarea>
+        <button type="submit" id="geminiSendBtn" class="gemini-send-btn" title="Send Question" aria-label="Send Question">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+          </svg>
+        </button>
+      </div>
+      <div class="gemini-chat-footer-disclaimer">
+        <span>🌾 NutriAgro™ Agronomy Advisory Science • 24/7 Expert Support</span>
+      </div>
+    </form>
+  </div>
+
+  <!-- 18. Toast Notifications Container -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/calculator.js"></script>
+  <script src="js/modal.js"></script>
+  <script src="js/weather.js"></script>
+  <script src="js/gemini.js"></script>
+  <script src="js/hero-slider.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>

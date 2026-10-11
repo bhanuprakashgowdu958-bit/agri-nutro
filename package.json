@@ -1,0 +1,23 @@
+{
+  "name": "nutriagro-animal-feeds",
+  "version": "1.0.0",
+  "description": "Commercial Livestock Feed & Animal Nutrition E-Commerce Web Application (India Edition)",
+  "main": "index.html",
+  "scripts": {
+    "start": "node dev.js",
+    "dev": "node dev.js",
+    "serve": "node dev.js"
+  },
+  "keywords": [
+    "animal-feed",
+    "livestock",
+    "cattle",
+    "poultry",
+    "aquaculture",
+    "agritech",
+    "ecommerce",
+    "india"
+  ],
+  "author": "NutriAgro Feeds India Pvt. Ltd.",
+  "license": "ISC"
+}
