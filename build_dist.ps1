@@ -13,6 +13,7 @@ New-Item -ItemType Directory -Path $dist | Out-Null
 Copy-Item -Path (Join-Path $root "assets") -Destination $dist -Recurse
 Copy-Item -Path (Join-Path $root "css") -Destination $dist -Recurse
 Copy-Item -Path (Join-Path $root "js") -Destination $dist -Recurse
+if (Test-Path (Join-Path $root "admin.html")) { Copy-Item -Path (Join-Path $root "admin.html") -Destination $dist }
 if (Test-Path (Join-Path $root "orders.json")) { Copy-Item -Path (Join-Path $root "orders.json") -Destination $dist }
 if (Test-Path (Join-Path $root "api")) { Copy-Item -Path (Join-Path $root "api") -Destination $dist -Recurse }
 if (Test-Path (Join-Path $root "netlify")) { Copy-Item -Path (Join-Path $root "netlify") -Destination $dist -Recurse }

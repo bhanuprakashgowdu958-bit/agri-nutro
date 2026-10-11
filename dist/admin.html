@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NutriAgro Feeds™ — Central Admin & Order Dispatch Operations Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #064e3b;
+      --primary-light: #047857;
+      --primary-dark: #022c22;
+      --accent: #f59e0b;
+      --accent-dark: #d97706;
+      --bg-base: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --border-dark: #cbd5e1;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --success: #10b981;
+      --info: #3b82f6;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --radius: 10px;
+      --radius-lg: 16px;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg-base);
+      color: var(--text-main);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Admin Navigation Bar */
+    .admin-navbar {
+      background: linear-gradient(135deg, #022c22 0%, #064e3b 100%);
+      color: #ffffff;
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      border-bottom: 2px solid var(--accent);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .brand-badge-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(245, 158, 11, 0.18);
+      border: 1.5px solid var(--accent);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+
+    .brand-text h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    .brand-text h1 span { color: var(--accent); }
+    .brand-text p {
+      font-size: 0.76rem;
+      color: #9cb5aa;
+      margin: 0;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .status-pill-live {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #6ee7b7;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 10px #10b981;
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.7; }
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .btn-light {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .btn-light:hover {
+      background: rgba(255, 255, 255, 0.22);
+      transform: translateY(-1px);
+    }
+
+    .btn-accent {
+      background: var(--accent);
+      color: #0f172a;
+    }
+    .btn-accent:hover {
+      background: #d97706;
+      color: #ffffff;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background: var(--primary-light);
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.78rem;
+    }
+
+    .btn-whatsapp {
+      background: #25d366;
+      color: #ffffff;
+      border: 1px solid #1ebc57;
+    }
+    .btn-whatsapp:hover {
+      background: #1ebc57;
+      color: #ffffff;
+    }
+
+    /* Main Container */
+    .admin-container {
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px 20px 60px 20px;
+      flex: 1;
+    }
+
+    /* KPI Summary Cards Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .kpi-icon-box {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+
+    .kpi-val {
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: var(--text-main);
+      font-family: 'Outfit', sans-serif;
+      line-height: 1.1;
+    }
+
+    .kpi-label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-top: 3px;
+    }
+
+    /* Controls Bar: Search, Filters, Add Sample */
+    .controls-strip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .search-input-wrap {
+      flex: 1;
+      min-width: 280px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 14px 10px 38px;
+      border-radius: 8px;
+      border: 1px solid var(--border-dark);
+      font-size: 0.88rem;
+      background: #f8fafc;
+      transition: all 0.2s;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(6, 78, 59, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1rem;
+      color: var(--text-muted);
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover {
+      background: #e2e8f0;
+      color: var(--text-main);
+    }
+
+    .filter-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    /* Orders Section Header */
+    .section-title-wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding: 0 4px;
+    }
+
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Order Cards List */
+    .orders-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .order-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      box-shadow: var(--shadow);
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .order-card:hover {
+      border-color: rgba(6, 78, 59, 0.4);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .order-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .order-id-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .order-id-text {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -0.01em;
+    }
+
+    .order-date-text {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Status Badges */
+    .status-badge {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-badge-1 {
+      background: rgba(59, 130, 246, 0.12);
+      color: #2563eb;
+      border: 1px solid rgba(59, 130, 246, 0.35);
+    }
+
+    .status-badge-2 {
+      background: rgba(245, 158, 11, 0.14);
+      color: #d97706;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .status-badge-3 {
+      background: rgba(139, 92, 246, 0.14);
+      color: #7c3aed;
+      border: 1px solid rgba(139, 92, 246, 0.4);
+    }
+
+    .status-badge-4 {
+      background: rgba(16, 185, 129, 0.16);
+      color: #047857;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    /* Order Details Grid */
+    .order-details-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 20px;
+      margin-bottom: 16px;
+      font-size: 0.88rem;
+    }
+
+    @media (max-width: 860px) {
+      .order-details-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .detail-block {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+
+    .detail-heading {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .customer-name {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text-main);
+      display: block;
+    }
+
+    .customer-phone {
+      color: #047857;
+      font-weight: 700;
+      margin-top: 2px;
+      display: inline-block;
+      text-decoration: none;
+    }
+
+    .customer-phone:hover { text-decoration: underline; }
+
+    .customer-addr {
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    .feed-items-list {
+      margin-top: 6px;
+      font-size: 0.82rem;
+      color: #334155;
+    }
+
+    .feed-item-pill {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: inline-block;
+      margin-right: 6px;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
+    .order-total-num {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--primary);
+      font-family: 'Outfit', sans-serif;
+    }
+
+    /* Card Footer / Actions Strip */
+    .order-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      background: #ffffff;
+    }
+
+    .status-select-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-dropdown {
+      padding: 8px 12px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      border-radius: 8px;
+      border: 1.5px solid var(--border-dark);
+      background: #ffffff;
+      color: var(--text-main);
+      cursor: pointer;
+      outline: none;
+    }
+
+    .status-dropdown:focus {
+      border-color: var(--primary);
+    }
+
+    .action-btns-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Toast Notification */
+    .admin-toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .admin-toast {
+      background: #0f172a;
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      border-left: 4px solid var(--accent);
+      animation: toastSlide 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    @keyframes toastSlide {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      background: #ffffff;
+      border: 2px dashed var(--border-dark);
+      border-radius: var(--radius-lg);
+    }
+
+    /* Print Invoice Styles */
+    @media print {
+      body * { visibility: hidden; }
+      .printable-invoice, .printable-invoice * { visibility: visible; }
+      .printable-invoice { position: absolute; left: 0; top: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Admin Navigation -->
+  <header class="admin-navbar">
+    <a href="admin.html" class="brand-wrap">
+      <div class="brand-badge-icon">🌾</div>
+      <div class="brand-text">
+        <h1>Nutri<span>Agro</span> Feeds Admin Hub</h1>
+        <p>Live Mill Operations & Farmgate Dispatch</p>
+      </div>
+    </a>
+
+    <div class="nav-actions">
+      <div class="status-pill-live">
+        <span class="pulse-dot"></span>
+        <span id="syncStatusText">Server Live Connected</span>
+      </div>
+
+      <button type="button" class="btn btn-light" id="soundToggleBtn" onclick="toggleSoundAlerts()">
+        <span id="soundIcon">🔔</span> Sound Alerts: <strong id="soundState">ON</strong>
+      </button>
+
+      <button type="button" class="btn btn-accent" onclick="loadAdminOrders(true)">
+        🔄 Refresh Orders
+      </button>
+
+      <a href="index.html" class="btn btn-light" title="Return to Public Customer Website">
+        ← Customer Website
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="admin-container">
+
+    <!-- KPI Metric Cards Grid -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon-box" style="background: rgba(6, 78, 59, 0.1); color: var(--primary);">📦</div>
+        <div>
+          <div class="kpi-val" id="kpiTotalOrders">0</div>
+          <div class="kpi-label">Total Placed Orders</div>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon-box" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-dark);">💰</div>
+        <div>
+          <div class="kpi-val" id="kpiTotalRevenue">₹0</div>
+          <div class="kpi-label">Total Revenue Value</div>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon-box" style="background: rgba(16, 185, 129, 0.12); color: var(--success);">🌾</div>
+        <div>
+          <div class="kpi-val" id="kpiTotalBags">0</div>
+          <div class="kpi-label">Total 50kg Bags</div>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon-box" style="background: rgba(59, 130, 246, 0.12); color: #2563eb;">🌾</div>
+        <div>
+          <div class="kpi-val" id="kpiConfirmed">0</div>
+          <div class="kpi-label">1. Confirmed Queue</div>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon-box" style="background: rgba(245, 158, 11, 0.12); color: #d97706;">⚙️</div>
+        <div>
+          <div class="kpi-val" id="kpiMilling">0</div>
+          <div class="kpi-label">2. In Milling & QA</div>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon-box" style="background: rgba(139, 92, 246, 0.12); color: #7c3aed;">🚚</div>
+        <div>
+          <div class="kpi-val" id="kpiDispatched">0</div>
+          <div class="kpi-label">3. Truck Dispatched</div>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon-box" style="background: rgba(16, 185, 129, 0.15); color: #047857;">🏡</div>
+        <div>
+          <div class="kpi-val" id="kpiDelivered">0</div>
+          <div class="kpi-label">4. Farmgate Delivered</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Controls Strip: Search & Stage Filtering -->
+    <section class="controls-strip">
+      <div class="search-input-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="adminSearchInput" class="search-input" placeholder="Search by Order ID (#NUTRI-...), Customer Name, Phone, or City..." oninput="filterOrders()" />
+      </div>
+
+      <div class="filter-tabs">
+        <button type="button" class="filter-btn active" data-filter="all" onclick="setFilter('all')">All (<span id="countAll">0</span>)</button>
+        <button type="button" class="filter-btn" data-filter="1" onclick="setFilter('1')">🌾 Confirmed (<span id="countConfirmed">0</span>)</button>
+        <button type="button" class="filter-btn" data-filter="2" onclick="setFilter('2')">⚙️ Milling (<span id="countMilling">0</span>)</button>
+        <button type="button" class="filter-btn" data-filter="3" onclick="setFilter('3')">🚚 Dispatched (<span id="countDispatched">0</span>)</button>
+        <button type="button" class="filter-btn" data-filter="4" onclick="setFilter('4')">🏡 Delivered (<span id="countDelivered">0</span>)</button>
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <button type="button" class="btn btn-sm btn-primary" onclick="createSampleOrderAdmin()">
+          ➕ Add Test Order
+        </button>
+        <button type="button" class="btn btn-sm btn-light" style="background:#e2e8f0; color:#334155;" onclick="exportOrdersToCSV()">
+          📥 Export CSV
+        </button>
+      </div>
+    </section>
+
+    <!-- Orders Section -->
+    <section>
+      <div class="section-title-wrap">
+        <div class="section-title">
+          <span>📋</span> Received Customer Orders List
+        </div>
+        <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">
+          Auto-syncing every 4 seconds • Updating status automatically alerts customers
+        </span>
+      </div>
+
+      <!-- Container where cards are injected -->
+      <div id="ordersListWrap" class="orders-container">
+        <!-- Injected via JavaScript -->
+      </div>
+    </section>
+
+  </main>
+
+  <div class="admin-toast-container" id="toastContainer"></div>
+
+  <!-- Client JavaScript for Admin Operations -->
+  <script>
+    let allOrders = [];
+    let currentFilter = 'all';
+    let searchQuery = '';
+    let soundEnabled = true;
+    let knownOrderIds = new Set();
+    let initialLoadDone = false;
+
+    function getApiEndpoint() {
+      if (window.location.hostname.includes('netlify.app')) {
+        return '/.netlify/functions/orders';
+      }
+      return '/api/orders';
+    }
+
+    // Audio Chime Synthesizer
+    function playCashChime() {
+      if (!soundEnabled) return;
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const now = ctx.currentTime;
+
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(987.77, now);
+        osc.frequency.exponentialRampToValueAtTime(1318.51, now + 0.1);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.5);
+      } catch (e) {}
+    }
+
+    function toggleSoundAlerts() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('soundState').textContent = soundEnabled ? 'ON' : 'OFF';
+      document.getElementById('soundIcon').textContent = soundEnabled ? '🔔' : '🔕';
+      showToast(soundEnabled ? '🔔 Sound notifications enabled' : '🔕 Sound muted', 'info');
+    }
+
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'admin-toast';
+      toast.innerHTML = `<span>${type === 'success' ? '✅' : '🔔'}</span> <span>${msg}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    async function loadAdminOrders(isManual = false) {
+      try {
+        const res = await fetch(getApiEndpoint(), { method: 'GET', headers: { 'Accept': 'application/json' } });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            // Detect newly arrived orders
+            if (initialLoadDone) {
+              const newOrders = data.filter(o => o.orderId && !knownOrderIds.has(o.orderId.toLowerCase()));
+              if (newOrders.length > 0) {
+                playCashChime();
+                newOrders.forEach(no => {
+                  showToast(`🔔 NEW ORDER: #${no.orderId} from ${no.farmerName || 'Customer'} (₹${Math.round(no.finalTotal || 0).toLocaleString('en-IN')})!`, 'success');
+                });
+              }
+            }
+
+            allOrders = data;
+            knownOrderIds = new Set(data.map(o => (o.orderId || '').toLowerCase()));
+            initialLoadDone = true;
+
+            localStorage.setItem('nutriagro_orders', JSON.stringify(data));
+            renderDashboard();
+            if (isManual) showToast('Orders list refreshed successfully!', 'success');
+            return;
+          }
+        }
+      } catch (err) {
+        // Fallback to localStorage if offline
+      }
+
+      try {
+        const cached = JSON.parse(localStorage.getItem('nutriagro_orders') || '[]');
+        allOrders = cached;
+        renderDashboard();
+      } catch (e) {}
+    }
+
+    function renderDashboard() {
+      updateKPICounters();
+      renderOrdersCards();
+    }
+
+    function updateKPICounters() {
+      const totalOrders = allOrders.length;
+      const totalRevenue = allOrders.reduce((sum, o) => sum + (o.finalTotal || 0), 0);
+      const totalBags = allOrders.reduce((sum, o) => sum + (o.totalBags || 1), 0);
+
+      const confirmed = allOrders.filter(o => (o.currentStep || 1) === 1).length;
+      const milling = allOrders.filter(o => (o.currentStep || 1) === 2).length;
+      const dispatched = allOrders.filter(o => (o.currentStep || 1) === 3).length;
+      const delivered = allOrders.filter(o => (o.currentStep || 1) === 4).length;
+
+      document.getElementById('kpiTotalOrders').textContent = totalOrders;
+      document.getElementById('kpiTotalRevenue').textContent = '₹' + Math.round(totalRevenue).toLocaleString('en-IN');
+      document.getElementById('kpiTotalBags').textContent = totalBags;
+      document.getElementById('kpiConfirmed').textContent = confirmed;
+      document.getElementById('kpiMilling').textContent = milling;
+      document.getElementById('kpiDispatched').textContent = dispatched;
+      document.getElementById('kpiDelivered').textContent = delivered;
+
+      document.getElementById('countAll').textContent = totalOrders;
+      document.getElementById('countConfirmed').textContent = confirmed;
+      document.getElementById('countMilling').textContent = milling;
+      document.getElementById('countDispatched').textContent = dispatched;
+      document.getElementById('countDelivered').textContent = delivered;
+    }
+
+    function setFilter(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-filter') === filter);
+      });
+      renderOrdersCards();
+    }
+
+    function filterOrders() {
+      const input = document.getElementById('adminSearchInput');
+      searchQuery = input ? input.value.trim().toLowerCase() : '';
+      renderOrdersCards();
+    }
+
+    function renderOrdersCards() {
+      const container = document.getElementById('ordersListWrap');
+      if (!container) return;
+
+      let filtered = allOrders;
+
+      // Filter by stage
+      if (currentFilter !== 'all') {
+        const targetStep = parseInt(currentFilter, 10);
+        filtered = filtered.filter(o => (o.currentStep || 1) === targetStep);
+      }
+
+      // Filter by search query
+      if (searchQuery) {
+        filtered = filtered.filter(o =>
+          (o.orderId && o.orderId.toLowerCase().includes(searchQuery)) ||
+          (o.farmerName && o.farmerName.toLowerCase().includes(searchQuery)) ||
+          (o.phone && o.phone.toLowerCase().includes(searchQuery)) ||
+          (o.address && o.address.toLowerCase().includes(searchQuery))
+        );
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div style="font-size: 2.8rem; margin-bottom: 12px;">📋</div>
+            <h3 style="font-size: 1.2rem; color: var(--text-main); margin-bottom: 6px;">No Orders Matching Criteria</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 440px; margin: 0 auto 18px auto;">
+              No customer orders found under this filter or search query.
+            </p>
+            <button type="button" class="btn btn-primary" onclick="setFilter('all'); document.getElementById('adminSearchInput').value=''; filterOrders();">
+              View All Orders
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(order => {
+        const step = order.currentStep || 1;
+        const statusBadgeClass = `status-badge-${step}`;
+        const statusBadgeLabel = step === 1 
+          ? '🌾 1. Confirmed & Logged'
+          : (step === 2 
+            ? '⚙️ 2. Automated Milling & QA'
+            : (step === 3 
+              ? '🚚 3. Dispatched on Truck' 
+              : '🏡 4. Delivered to Farm'));
+
+        let itemsHtml = '';
+        if (order.items && order.items.length > 0) {
+          itemsHtml = order.items.map(it => `
+            <span class="feed-item-pill">
+              <strong>${it.quantity}×</strong> ${it.name} (${it.bagSize || '50kg'})
+            </span>
+          `).join('');
+        } else {
+          itemsHtml = `<span class="feed-item-pill">${order.totalBags || 1} Bags (${order.totalWeightKg || 50} kg) Feed</span>`;
+        }
+
+        const cleanPhone = order.phone ? order.phone.replace(/\D/g, '') : '919876543210';
+        const siteUrl = window.location.origin;
+
+        const whatsappText = `Hello ${order.farmerName || 'Customer'}, your NutriAgro Feeds order #${order.orderId} status has been updated to: *${order.status || statusBadgeLabel}*. Destination: ${order.address || 'Farm'}. Track live here: ${siteUrl}`;
+
+        return `
+          <div class="order-card" id="card-${order.orderId}">
+            <!-- Header -->
+            <div class="order-card-header">
+              <div class="order-id-group">
+                <span class="order-id-text">#${order.orderId}</span>
+                <span class="order-date-text">· Placed: ${order.date || 'Today'}</span>
+              </div>
+              <div>
+                <span class="status-badge ${statusBadgeClass}">
+                  ${statusBadgeLabel}
+                </span>
+              </div>
+            </div>
+
+            <!-- Body Details Grid -->
+            <div class="order-details-grid">
+              <!-- Customer Column -->
+              <div class="detail-block">
+                <span class="detail-heading">Farmer Contact & Destination</span>
+                <span class="customer-name">${order.farmerName || 'Farm Customer'}</span>
+                <a href="tel:${order.phone || ''}" class="customer-phone">📞 ${order.phone || 'Phone Not Provided'}</a>
+                <div class="customer-addr">
+                  <strong>📍 Delivery Address:</strong> ${order.address || 'Detected Location'}
+                </div>
+                <div style="margin-top: 8px; font-size: 0.78rem; color: #475569;">
+                  <strong>Payment Method:</strong> ${order.paymentMethod || 'Farmgate Delivery (COD)'}
+                </div>
+              </div>
+
+              <!-- Order Payload Column -->
+              <div class="detail-block">
+                <span class="detail-heading">Order Value & Feed Formulations</span>
+                <div class="order-total-num">₹${Math.round(order.finalTotal || 0).toLocaleString('en-IN')}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+                  ${order.totalBags || 1} Bags · ${order.totalWeightKg || 50} kg Total Weight
+                </div>
+                <div class="feed-items-list">
+                  ${itemsHtml}
+                </div>
+                <div style="font-size: 0.76rem; color: #64748b; margin-top: 8px;">
+                  🚚 <strong>Assigned Freight Hauler:</strong> ${order.driverName || 'Ramesh Singh (Truck #HR-05-AB-4821)'}
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer Action Controls -->
+            <div class="order-card-footer">
+              <div class="status-select-wrap">
+                <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">Update Order Stage:</span>
+                <select class="status-dropdown" onchange="updateAdminOrderStatus('${order.orderId}', this.value)">
+                  <option value="1" ${step === 1 ? 'selected' : ''}>🌾 1. Order Confirmed & Logged</option>
+                  <option value="2" ${step === 2 ? 'selected' : ''}>⚙️ 2. Automated Milling & Quality Screened</option>
+                  <option value="3" ${step === 3 ? 'selected' : ''}>🚚 3. Dispatched on Agro Freight Truck</option>
+                  <option value="4" ${step === 4 ? 'selected' : ''}>🏡 4. Delivered to Farm Gate</option>
+                </select>
+              </div>
+
+              <div class="action-btns-group">
+                <a href="https://wa.me/${cleanPhone}?text=${encodeURIComponent(whatsappText)}" target="_blank" class="btn btn-sm btn-whatsapp">
+                  <span>📲</span> WhatsApp Customer Alert
+                </a>
+                <button type="button" class="btn btn-sm btn-light" style="color: #0f172a;" onclick="printOrderInvoice('${order.orderId}')">
+                  <span>🖨️</span> Print Invoice
+                </button>
+                <button type="button" class="btn btn-sm btn-light" style="color: #ef4444; border-color: rgba(239,68,68,0.3);" onclick="deleteAdminOrder('${order.orderId}')" title="Delete this order">
+                  <span>🗑️</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function updateAdminOrderStatus(orderId, newStepVal) {
+      const step = parseInt(newStepVal, 10);
+      const match = allOrders.find(o => o.orderId === orderId);
+      if (!match) return;
+
+      match.currentStep = step;
+      if (step === 1) match.status = 'Order Confirmed & Logged';
+      else if (step === 2) match.status = 'Automated Milling & Quality Screened';
+      else if (step === 3) match.status = 'Dispatched on Agro Freight Truck';
+      else if (step === 4) match.status = 'Delivered to Farm Gate';
+      match.lastUpdated = new Date().toISOString();
+
+      localStorage.setItem('nutriagro_orders', JSON.stringify(allOrders));
+
+      // Push to backend server
+      try {
+        await fetch(getApiEndpoint(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'update_status',
+            orderId: orderId,
+            currentStep: step,
+            status: match.status
+          })
+        });
+      } catch (err) {}
+
+      showToast(`✅ Order #${orderId} status updated to: ${match.status}! Customer notified.`, 'success');
+      renderDashboard();
+    }
+
+    async function deleteAdminOrder(orderId) {
+      if (!confirm(`Are you sure you want to delete order #${orderId}?`)) return;
+      allOrders = allOrders.filter(o => o.orderId !== orderId);
+      localStorage.setItem('nutriagro_orders', JSON.stringify(allOrders));
+      showToast(`Order #${orderId} removed.`, 'info');
+      renderDashboard();
+    }
+
+    function createSampleOrderAdmin() {
+      const randId = 'NUTRI-' + Math.floor(100000 + Math.random() * 900000);
+      const sample = {
+        orderId: randId,
+        date: new Date().toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }),
+        timestamp: Date.now(),
+        farmerName: 'Kaveri Green Pastures Dairy Farm',
+        phone: '+91 98452 77890',
+        address: 'Sy No. 88, Sompura Industrial Agro Hub, Nelamangala, Bengaluru, PIN: 562123',
+        paymentMethod: 'Farmgate Delivery (COD / Cheque on Site)',
+        items: [
+          { name: 'NutriBov LactaMax™ High-Yield Dairy Feed', quantity: 5, price: 1850, bagSize: '50kg' },
+          { name: 'NutriBov HeiferGrow™ 18% Developer Pellets', quantity: 2, price: 1950, bagSize: '50kg' }
+        ],
+        totalBags: 7,
+        totalWeightKg: 350,
+        finalTotal: 13150,
+        status: 'Order Confirmed & Logged',
+        eta: 'Tomorrow by 2:00 PM',
+        driverName: 'Ramesh Singh (Truck #HR-05-AB-4821)',
+        driverPhone: '+91 98123 45678',
+        currentStep: 1,
+        lastUpdated: new Date().toISOString()
+      };
+
+      allOrders.unshift(sample);
+      localStorage.setItem('nutriagro_orders', JSON.stringify(allOrders));
+
+      // Post to server
+      fetch(getApiEndpoint(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(sample)
+      }).catch(() => {});
+
+      playCashChime();
+      showToast(`Sample order #${randId} created successfully!`, 'success');
+      renderDashboard();
+    }
+
+    function exportOrdersToCSV() {
+      if (allOrders.length === 0) {
+        showToast('No orders to export', 'info');
+        return;
+      }
+
+      let csv = 'Order ID,Date,Customer Name,Phone,Address,Payment Method,Total Bags,Weight (kg),Total Amount (INR),Status,Stage\n';
+      allOrders.forEach(o => {
+        csv += `"${o.orderId}","${o.date}","${(o.farmerName||'').replace(/"/g,'""')}","${o.phone}","${(o.address||'').replace(/"/g,'""')}","${o.paymentMethod}",${o.totalBags||1},${o.totalWeightKg||50},${o.finalTotal||0},"${o.status}",${o.currentStep||1}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `NutriAgro_Orders_Export_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('Exported orders CSV successfully!', 'success');
+    }
+
+    function printOrderInvoice(orderId) {
+      const order = allOrders.find(o => o.orderId === orderId);
+      if (!order) return;
+
+      const printWindow = window.open('', '_blank');
+      let itemsRows = '';
+      if (order.items) {
+        itemsRows = order.items.map(it => `
+          <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">${it.name} (${it.bagSize || '50kg'})</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${it.quantity}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">₹${it.price}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">₹${it.price * it.quantity}</td>
+          </tr>
+        `).join('');
+      }
+
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>NutriAgro Farm Invoice - #${order.orderId}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 40px; color: #333; }
+            .invoice-box { max-width: 800px; margin: auto; border: 1px solid #eee; padding: 30px; }
+            .header { display: flex; justify-content: space-between; border-bottom: 3px solid #064e3b; padding-bottom: 14px; margin-bottom: 24px; }
+          </style>
+        </head>
+        <body>
+          <div class="invoice-box">
+            <div class="header">
+              <div>
+                <h1 style="color: #064e3b; margin: 0;">NutriAgro Feeds India</h1>
+                <p style="margin: 4px 0; color: #666;">Commercial Animal Feeds Milling & QA</p>
+                <p style="margin: 0; font-size: 13px;">GSTIN: 29AABCN8291M1Z4 • BIS Livestock Certified</p>
+              </div>
+              <div style="text-align: right;">
+                <h2 style="margin: 0; color: #d97706;">FARMGATE DISPATCH INVOICE</h2>
+                <p style="margin: 4px 0;"><strong>Invoice #:</strong> ${order.orderId}</p>
+                <p style="margin: 0;"><strong>Date:</strong> ${order.date || 'Today'}</p>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; margin-bottom: 24px;">
+              <div>
+                <strong style="color: #064e3b;">DELIVERY DESTINATION:</strong><br>
+                <strong>${order.farmerName || 'Customer'}</strong><br>
+                Phone: ${order.phone || 'N/A'}<br>
+                Address: ${order.address || 'Farm Delivery'}
+              </div>
+              <div style="text-align: right;">
+                <strong style="color: #064e3b;">LOGISTICS DISPATCH:</strong><br>
+                Freight Hauler: ${order.driverName || 'Ramesh Singh'}<br>
+                Driver Phone: ${order.driverPhone || '+91 98123 45678'}<br>
+                Payment: ${order.paymentMethod || 'COD'}
+              </div>
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+              <thead>
+                <tr style="background: #f4f6f8; text-align: left;">
+                  <th style="padding: 8px;">Feed Formulation & Bag Spec</th>
+                  <th style="padding: 8px; text-align: center;">Bags</th>
+                  <th style="padding: 8px; text-align: right;">Rate (₹)</th>
+                  <th style="padding: 8px; text-align: right;">Amount (₹)</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsRows}
+              </tbody>
+            </table>
+
+            <div style="text-align: right; margin-bottom: 30px;">
+              <p style="margin: 4px 0;">Total Bags: <strong>${order.totalBags || 1} Bags (${order.totalWeightKg || 50} kg)</strong></p>
+              <h2 style="margin: 6px 0; color: #064e3b;">Final Total: ₹${Math.round(order.finalTotal || 0).toLocaleString('en-IN')}</h2>
+            </div>
+
+            <div style="border-top: 1px dashed #ccc; padding-top: 14px; font-size: 12px; color: #666; text-align: center;">
+              Thank you for trusting NutriAgro Feeds. All formulas guaranteed laboratory aflatoxin-screened.
+            </div>
+          </div>
+          <script>
+            window.onload = function() { window.print(); };
+          <\/script>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
+
+    // Auto-refresh polling every 3.5 seconds
+    setInterval(() => {
+      loadAdminOrders(false);
+    }, 3500);
+
+    // Initial load
+    document.addEventListener('DOMContentLoaded', () => {
+      loadAdminOrders(false);
+    });
+    loadAdminOrders(false);
+  </script>
+</body>
+</html>
