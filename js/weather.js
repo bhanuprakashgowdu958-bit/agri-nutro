@@ -139,7 +139,7 @@ async function detectLocationViaIP() {
       loadAndRenderGoogleWeather();
       return;
     }
-  } catch (e) {}
+  } catch (e) { }
 
   // Default confirmed location: Sholinganallur, Chennai
   loadAndRenderGoogleWeather();
@@ -258,8 +258,8 @@ function renderSelectedDayWeather(dayIdx) {
   if (humEl) humEl.textContent = `${dayHumidity}%`;
 
   // Wind Speed
-  const windKm = isToday 
-    ? Math.round(current.wind_speed_10m) 
+  const windKm = isToday
+    ? Math.round(current.wind_speed_10m)
     : (daily.wind_speed_10m_max ? Math.round(daily.wind_speed_10m_max[dayIdx]) : 12);
   const windEl = document.getElementById('gwWindVal');
   if (windEl) windEl.textContent = `${windKm} km/h`;
@@ -326,12 +326,12 @@ function renderHourlyGraph(hourly, dayIdx = 0) {
 
   offsets.forEach((offset) => {
     const targetIdx = dayBaseHour + offset;
-    const rawTemp = hourly.temperature_2m[targetIdx] !== undefined 
-      ? hourly.temperature_2m[targetIdx] 
+    const rawTemp = hourly.temperature_2m[targetIdx] !== undefined
+      ? hourly.temperature_2m[targetIdx]
       : 28;
     const precipProb = hourly.precipitation_probability ? (hourly.precipitation_probability[targetIdx] || 0) : 0;
     const windSpeed = hourly.wind_speed_10m ? Math.round(hourly.wind_speed_10m[targetIdx] || 10) : 10;
-    
+
     // 12-hour AM/PM label
     const ampm = offset >= 12 ? 'pm' : 'am';
     const hour12 = offset % 12 === 0 ? 12 : offset % 12;
