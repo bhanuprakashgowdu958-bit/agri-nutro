@@ -71,6 +71,9 @@ exports.handler = async (event, context) => {
           match.lastUpdated = new Date().toISOString();
         }
         return { statusCode: 200, headers, body: JSON.stringify(memoryOrders) };
+      } else if (body.action === 'delete' && body.orderId) {
+        memoryOrders = memoryOrders.filter(o => o.orderId && o.orderId.toLowerCase() !== body.orderId.toLowerCase());
+        return { statusCode: 200, headers, body: JSON.stringify(memoryOrders) };
       } else {
         body.lastUpdated = new Date().toISOString();
         memoryOrders.unshift(body);

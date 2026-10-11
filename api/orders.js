@@ -72,6 +72,9 @@ module.exports = async function handler(req, res) {
           match.lastUpdated = new Date().toISOString();
         }
         return res.status(200).json(memoryOrders);
+      } else if (body.action === 'delete' && body.orderId) {
+        memoryOrders = memoryOrders.filter(o => o.orderId && o.orderId.toLowerCase() !== body.orderId.toLowerCase());
+        return res.status(200).json(memoryOrders);
       } else {
         body.lastUpdated = new Date().toISOString();
         memoryOrders.unshift(body);

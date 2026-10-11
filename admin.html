@@ -433,6 +433,55 @@
       border: 1px solid rgba(16, 185, 129, 0.4);
     }
 
+    /* Order Delete Buttons */
+    .btn-delete-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 13px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #dc2626;
+      background: #fef2f2;
+      border: 1.5px solid #fecaca;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(220, 38, 38, 0.05);
+    }
+    .btn-delete-badge:hover {
+      background: #dc2626;
+      color: #ffffff;
+      border-color: #dc2626;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(220, 38, 38, 0.25);
+    }
+    .btn-delete-badge:active {
+      transform: translateY(0);
+    }
+
+    .btn-danger-delete {
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1.5px solid #fecaca;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.82rem;
+    }
+    .btn-danger-delete:hover {
+      background: #dc2626;
+      color: #ffffff;
+      border-color: #dc2626;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(220, 38, 38, 0.25);
+    }
+
     /* Order Details Grid */
     .order-details-grid {
       display: grid;
@@ -1280,10 +1329,13 @@
                 <span class="order-id-text">#${order.orderId}</span>
                 <span class="order-date-text">· Placed: ${order.date || 'Today'}</span>
               </div>
-              <div>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <span class="status-badge ${statusBadgeClass}">
                   ${statusBadgeLabel}
                 </span>
+                <button type="button" class="btn-delete-badge" onclick="deleteAdminOrder('${order.orderId}')" title="Delete this order permanently">
+                  <span>🗑️</span> Delete
+                </button>
               </div>
             </div>
 
@@ -1337,8 +1389,8 @@
                 <button type="button" class="btn btn-sm btn-light" style="color: #0f172a;" onclick="printOrderInvoice('${order.orderId}')">
                   <span>🖨️</span> Print Invoice
                 </button>
-                <button type="button" class="btn btn-sm btn-light" style="color: #ef4444; border-color: rgba(239,68,68,0.3);" onclick="deleteAdminOrder('${order.orderId}')" title="Delete this order">
-                  <span>🗑️</span>
+                <button type="button" class="btn btn-sm btn-danger-delete" onclick="deleteAdminOrder('${order.orderId}')" title="Delete Order #${order.orderId} permanently">
+                  <span>🗑️</span> Delete Order
                 </button>
               </div>
             </div>
@@ -1380,11 +1432,25 @@
     }
 
     async function deleteAdminOrder(orderId) {
-      if (!confirm(`Are you sure you want to delete order #${orderId}?`)) return;
+      if (!confirm(`Are you sure you want to permanently delete Order #${orderId}?\nThis will remove the customer order from the system.`)) return;
       allOrders = allOrders.filter(o => o.orderId !== orderId);
+      knownOrderIds.delete(orderId.toLowerCase());
       localStorage.setItem('nutriagro_orders', JSON.stringify(allOrders));
-      showToast(`Order #${orderId} removed.`, 'info');
       renderDashboard();
+      showToast(`🗑️ Order #${orderId} deleted permanently.`, 'info');
+
+      try {
+        await fetch(getApiEndpoint(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'delete',
+            orderId: orderId
+          })
+        });
+      } catch (err) {
+        console.warn('Backend delete sync error:', err);
+      }
     }
 
     function createSampleOrderAdmin() {
