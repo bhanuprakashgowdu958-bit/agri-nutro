@@ -685,7 +685,96 @@ function playNotificationChime() {
   } catch (e) {}
 }
 
+function getCustomerNotifications() {
+  try {
+    return JSON.parse(localStorage.getItem('nutri_customer_notifs') || '[]');
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveCustomerNotification(notif) {
+  try {
+    const list = getCustomerNotifications();
+    list.unshift(notif);
+    // Keep last 15 notifications
+    const trimmed = list.slice(0, 15);
+    localStorage.setItem('nutri_customer_notifs', JSON.stringify(trimmed));
+    renderCustomerNotificationsDropdown();
+    updateNotifDot(true);
+  } catch (e) {}
+}
+
+function updateNotifDot(hasUnread) {
+  const dot = document.getElementById('headerNotifGlowDot');
+  if (dot) {
+    dot.style.display = hasUnread ? 'block' : 'none';
+  }
+}
+
+function clearCustomerNotifs() {
+  localStorage.setItem('nutri_customer_notifs', '[]');
+  renderCustomerNotificationsDropdown();
+  updateNotifDot(false);
+}
+
+function toggleCustomerNotifDropdown() {
+  const dd = document.getElementById('customerNotifDropdown');
+  if (!dd) return;
+  const isOpening = !dd.classList.contains('active');
+  dd.classList.toggle('active', isOpening);
+  if (isOpening) {
+    updateNotifDot(false);
+    renderCustomerNotificationsDropdown();
+  }
+}
+
+// Close dropdown on outside click
+document.addEventListener('click', (e) => {
+  const wrapper = document.getElementById('headerNotifWrapper');
+  const dd = document.getElementById('customerNotifDropdown');
+  if (dd && wrapper && !wrapper.contains(e.target)) {
+    dd.classList.remove('active');
+  }
+});
+
+function renderCustomerNotificationsDropdown() {
+  const listEl = document.getElementById('customerNotifList');
+  if (!listEl) return;
+  const notifs = getCustomerNotifications();
+
+  if (notifs.length === 0) {
+    listEl.innerHTML = `
+      <div class="notif-empty-state">
+        <span>🌾</span>
+        <p>No new order updates right now. When the mill updates your stage, you'll be alerted here!</p>
+      </div>
+    `;
+    return;
+  }
+
+  listEl.innerHTML = notifs.map(n => `
+    <div class="notif-item-card" onclick="openOrderTrackerModal('${n.orderId}'); toggleCustomerNotifDropdown();">
+      <div class="notif-item-title">
+        <span>#${n.orderId}</span>
+        <span style="font-size: 0.72rem; color: #78350f;">${n.time || 'Just now'}</span>
+      </div>
+      <div class="notif-item-desc">
+        ${n.message || `Order status updated to: ${n.status}`}
+      </div>
+    </div>
+  `).join('');
+}
+
 function showCustomerStatusNotificationBanner(order) {
+  // Add to notification center history
+  saveCustomerNotification({
+    orderId: order.orderId,
+    status: order.status,
+    message: `Stage updated to: "${order.status}". Freight hauler: ${order.driverName || 'Ramesh Singh'}.`,
+    time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+  });
+
   let banner = document.getElementById('customerStatusNotificationBanner');
   if (!banner) {
     banner = document.createElement('div');
@@ -1300,6 +1389,9 @@ window.trackOrderSubmit = trackOrderSubmit;
 window.manualRefreshOrders = manualRefreshOrders;
 window.dismissCustomerStatusBanner = dismissCustomerStatusBanner;
 window.fetchOrdersFromServer = fetchOrdersFromServer;
+window.toggleCustomerNotifDropdown = toggleCustomerNotifDropdown;
+window.clearCustomerNotifs = clearCustomerNotifs;
+window.renderCustomerNotificationsDropdown = renderCustomerNotificationsDropdown;
 
 // Start order sync & customer watcher immediately
 if (document.readyState === 'loading') {

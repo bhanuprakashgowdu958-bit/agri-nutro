@@ -137,6 +137,18 @@ html, body {
     width: 38px;
   }
 
+  .header-orders-btn {
+    padding: 6px 10px;
+    height: 38px;
+    font-size: 0.8rem;
+    gap: 4px;
+  }
+
+  .header-notif-btn {
+    width: 38px;
+    height: 38px;
+  }
+
   .header-cart-btn {
     padding: 6px 12px;
     height: 38px;
