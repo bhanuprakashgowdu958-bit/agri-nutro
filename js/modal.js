@@ -480,8 +480,37 @@ function updateAllOrderBadges(count) {
   }
 }
 
+const FIREBASE_RTDB_ORDERS_URL = 'https://nutriagro-feeds-default-rtdb.firebaseio.com/orders';
+
 async function fetchOrdersFromServer(callback) {
   const deletedIds = getDeletedOrderIds();
+  // 1. Try Firebase Cloud Database directly (real multi-device cloud store)
+  try {
+    const fbRes = await fetch(`${FIREBASE_RTDB_ORDERS_URL}.json?_t=${Date.now()}`, {
+      method: 'GET',
+      cache: 'no-store'
+    });
+    if (fbRes.ok) {
+      const fbData = await fbRes.json();
+      if (fbData && typeof fbData === 'object') {
+        const list = Array.isArray(fbData) ? fbData : Object.values(fbData);
+        const cleanServer = list.filter(o => 
+          o && o.orderId && 
+          !o.action && 
+          (o.farmerName || o.items || o.finalTotal) && 
+          !deletedIds.has(String(o.orderId).toLowerCase())
+        );
+        cleanServer.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        localStorage.setItem('nutriagro_orders', JSON.stringify(cleanServer));
+        updateAllOrderBadges(cleanServer.length);
+        checkCustomerOrderStatusChanges(cleanServer);
+        if (typeof callback === 'function') callback(cleanServer);
+        return cleanServer;
+      }
+    }
+  } catch (fbErr) {}
+
+  // 2. Fallback to /api/orders endpoint
   try {
     const res = await fetch(getOrdersApiEndpoint() + '?_t=' + Date.now(), {
       method: 'GET',
@@ -526,7 +555,7 @@ async function saveOrder(orderObj) {
 
     updateAllOrderBadges(local.length);
 
-    // Instant cross-tab broadcast to open Admin Hub
+    // Instant cross-tab broadcast to open Admin Hub on same machine
     try {
       if (typeof BroadcastChannel !== 'undefined') {
         const channel = new BroadcastChannel('nutriagro_orders_channel');
@@ -534,7 +563,18 @@ async function saveOrder(orderObj) {
       }
     } catch (e) {}
 
-    // POST to /api/orders endpoint (Vercel & Local Server)
+    // 1. Direct Cloud Sync to Firebase Realtime Database (Multi-Device Worldwide Instant Delivery)
+    try {
+      await fetch(`${FIREBASE_RTDB_ORDERS_URL}/${encodeURIComponent(orderObj.orderId)}.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderObj)
+      });
+    } catch (fbErr) {
+      console.warn('Firebase order push note:', fbErr);
+    }
+
+    // 2. Also POST to /api/orders endpoint (Vercel & Local Server fallback)
     try {
       await fetch(getOrdersApiEndpoint(), {
         method: 'POST',
@@ -569,6 +609,18 @@ async function updateOrderStatus(orderId, newStepVal) {
   match.lastUpdated = new Date().toISOString();
 
   localStorage.setItem('nutriagro_orders', JSON.stringify(orders));
+
+  try {
+    fetch(`${FIREBASE_RTDB_ORDERS_URL}/${encodeURIComponent(orderId)}.json`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        currentStep: step,
+        status: match.status,
+        lastUpdated: match.lastUpdated
+      })
+    }).catch(() => {});
+  } catch (e) {}
 
   try {
     await fetch(getOrdersApiEndpoint(), {

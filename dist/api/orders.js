@@ -5,6 +5,57 @@ const path = require('path');
 // In-memory + persistent fallback orders store
 let memoryOrders = null;
 
+const FIREBASE_RTDB_ORDERS_URL = process.env.FIREBASE_RTDB_ORDERS_URL || 'https://nutriagro-feeds-default-rtdb.firebaseio.com/orders';
+
+// Helper: Get orders directly from Firebase Realtime Database
+async function getFirebaseOrders() {
+  try {
+    const res = await fetch(`${FIREBASE_RTDB_ORDERS_URL}.json`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && typeof data === 'object') {
+        const list = Array.isArray(data) ? data : Object.values(data);
+        return list.filter(o => o && o.orderId && !o.action).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+
+// Helper: Save single order to Firebase Realtime Database
+async function saveFirebaseOrder(order) {
+  if (!order || !order.orderId) return;
+  try {
+    await fetch(`${FIREBASE_RTDB_ORDERS_URL}/${encodeURIComponent(order.orderId)}.json`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(order)
+    });
+  } catch (e) {}
+}
+
+// Helper: Patch order status in Firebase Realtime Database
+async function patchFirebaseOrder(orderId, patch) {
+  if (!orderId) return;
+  try {
+    await fetch(`${FIREBASE_RTDB_ORDERS_URL}/${encodeURIComponent(orderId)}.json`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(patch)
+    });
+  } catch (e) {}
+}
+
+// Helper: Delete order from Firebase Realtime Database
+async function deleteFirebaseOrder(orderId) {
+  if (!orderId) return;
+  try {
+    await fetch(`${FIREBASE_RTDB_ORDERS_URL}/${encodeURIComponent(orderId)}.json`, {
+      method: 'DELETE'
+    });
+  } catch (e) {}
+}
+
 // Helper: Get orders from Vercel KV / Upstash Redis if configured
 async function getKvOrders() {
   const kvUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
@@ -144,9 +195,12 @@ module.exports = async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // Load orders (try KV cloud store first, then local /tmp & bundled)
-  let orders = await getKvOrders();
-  if (!orders) {
+  // Load orders (try Firebase Cloud Store first, then KV, then memory/local)
+  let orders = await getFirebaseOrders();
+  if (!orders || orders.length === 0) {
+    orders = await getKvOrders();
+  }
+  if (!orders || orders.length === 0) {
     if (!memoryOrders) {
       memoryOrders = loadLocalOrders();
     }
@@ -163,19 +217,27 @@ module.exports = async function handler(req, res) {
 
       if (body.action === 'update_status' && body.orderId) {
         const match = orders.find(o => o.orderId && o.orderId.toLowerCase() === body.orderId.toLowerCase());
+        const patch = {
+          currentStep: parseInt(body.currentStep, 10) || (match ? match.currentStep : 1),
+          status: body.status || (match ? match.status : 'Order Confirmed & Logged'),
+          lastUpdated: new Date().toISOString()
+        };
         if (match) {
-          match.currentStep = parseInt(body.currentStep, 10) || match.currentStep || 1;
-          match.status = body.status || match.status;
-          match.lastUpdated = new Date().toISOString();
+          match.currentStep = patch.currentStep;
+          match.status = patch.status;
+          match.lastUpdated = patch.lastUpdated;
         }
+        await patchFirebaseOrder(body.orderId, patch);
       } else if (body.action === 'delete' && body.orderId) {
         orders = orders.filter(o => o && o.orderId && o.orderId.toLowerCase() !== body.orderId.toLowerCase());
+        await deleteFirebaseOrder(body.orderId);
       } else if (body.action) {
         // Handled action, do not insert
       } else {
         if (body.farmerName || body.items || body.finalTotal || body.orderId) {
           body.lastUpdated = new Date().toISOString();
           orders.unshift(body);
+          await saveFirebaseOrder(body);
         }
       }
 
