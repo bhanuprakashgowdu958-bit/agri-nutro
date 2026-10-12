@@ -13,3 +13,5 @@ Server.cs
 server.ps1
 run_server.ps1
 dev.js
+.env
+.env.local
