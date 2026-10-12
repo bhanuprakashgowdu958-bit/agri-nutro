@@ -238,12 +238,26 @@ async function callGeminiWithFailover(payload, apiKey) {
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, x-gemini-key');
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
+  }
+
+  const authHeader = req.headers['authorization'] || '';
+  const bearerKey = authHeader.replace(/^Bearer\s+/i, '').trim();
+  const clientKey = (req.headers['x-gemini-key'] || bearerKey || '').trim();
+  const effectiveKey = (clientKey || process.env.GEMINI_API_KEY || '').trim();
+
+  // GET /api/gemini health & AI readiness check
+  if (req.method === 'GET') {
+    return res.status(200).json({
+      active: Boolean(effectiveKey),
+      model: 'gemini-1.5-flash',
+      mode: effectiveKey ? 'live_ai' : 'built_in_knowledge_base'
+    });
   }
 
   if (req.method !== 'POST') {
@@ -253,14 +267,10 @@ module.exports = async function handler(req, res) {
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
     const userText = body.contents?.[body.contents.length - 1]?.parts?.[0]?.text || '';
-
-    const authHeader = req.headers['authorization'] || '';
-    const bearerKey = authHeader.replace(/^Bearer\s+/i, '').trim();
-    const clientKey = (req.headers['x-gemini-key'] || bearerKey || body.apiKey || '').trim();
-    const effectiveKey = (clientKey || process.env.GEMINI_API_KEY || '').trim();
+    const postKey = (body.apiKey || effectiveKey || '').trim();
 
     // If no API key configured, seamlessly serve built-in agronomy knowledge engine
-    if (!effectiveKey) {
+    if (!postKey) {
       const expertAnswer = generateAgronomistExpertResponse(userText);
       return res.status(200).json({
         candidates: [
@@ -274,19 +284,24 @@ module.exports = async function handler(req, res) {
       });
     }
 
+    const sysText = (body.systemInstruction?.parts?.[0]?.text || body.system_instruction?.parts?.[0]?.text || '').trim();
+
     const geminiPayload = {
-      system_instruction: body.system_instruction || undefined,
+      systemInstruction: sysText ? { parts: [{ text: sysText }] } : undefined,
       contents: body.contents || [],
       generationConfig: body.generationConfig || {
-        temperature: 0.5,
-        topP: 0.9,
+        temperature: 0.6,
+        topP: 0.95,
         maxOutputTokens: 1000
       }
     };
 
     try {
-      const geminiResponse = await callGeminiWithFailover(geminiPayload, effectiveKey);
-      return res.status(200).json(geminiResponse);
+      const geminiResponse = await callGeminiWithFailover(geminiPayload, postKey);
+      return res.status(200).json({
+        ...geminiResponse,
+        isLiveAI: true
+      });
     } catch (apiErr) {
       // Gracefully fall back if key was invalid/forbidden/quota exhausted
       const expertAnswer = generateAgronomistExpertResponse(userText);

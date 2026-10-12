@@ -35,6 +35,22 @@ CRITICAL RULES FOR ALL RESPONSES:
       input.value = this.apiKey;
     }
     this.updateStatusIndicator();
+    this.checkServerAIStatus();
+  }
+
+  async checkServerAIStatus() {
+    try {
+      const headers = {};
+      if (this.apiKey) headers['x-gemini-key'] = this.apiKey;
+      const res = await fetch('/api/gemini', { method: 'GET', headers });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.active) {
+          this.isLiveConnected = true;
+          this.updateStatusIndicator();
+        }
+      }
+    } catch (e) {}
   }
 
   openChat(initialQuery = '') {
@@ -50,6 +66,7 @@ CRITICAL RULES FOR ALL RESPONSES:
       modal.classList.add('active');
       overlay.classList.add('active');
       document.body.classList.add('modal-open');
+      this.checkServerAIStatus();
 
       const chatInput = document.getElementById('geminiChatInput');
       if (initialQuery && initialQuery.trim()) {
@@ -80,24 +97,32 @@ CRITICAL RULES FOR ALL RESPONSES:
     if (!input) return;
     const key = input.value.trim();
     this.apiKey = key;
+    this.isLiveConnected = Boolean(key);
     try {
       localStorage.setItem(this.apiKeyStorageKey, key);
     } catch (e) {}
 
     this.updateStatusIndicator();
     if (window.cart) {
-      window.cart.showToast(key ? 'Gemini AI API Key saved successfully!' : 'Using built-in Agronomist Expert Database', 'success');
+      window.cart.showToast(key ? '✨ Gemini AI Connected! Live generation active.' : 'Using built-in Agronomist Expert Database', 'success');
     }
     this.toggleSettings();
   }
 
   updateStatusIndicator() {
     const sub = document.querySelector('.gemini-header-subtitle');
-    if (sub) {
-      if (this.apiKey && this.apiKey.trim()) {
-        sub.textContent = '✨ Gemini Live AI Connected • 24/7 Advisory';
-      } else {
-        sub.textContent = '🌾 Dr. Thorne Agronomist Engine (Offline Ready)';
+    const dot = document.querySelector('.gemini-status-online');
+    if (this.apiKey || this.isLiveConnected) {
+      if (sub) sub.textContent = '✨ Gemini Live AI Connected • 24/7 Advisory';
+      if (dot) {
+        dot.style.background = '#10b981';
+        dot.title = 'Gemini Live AI Connected';
+      }
+    } else {
+      if (sub) sub.textContent = '🌾 Dr. Thorne Agronomist Engine (Built-In Advisory)';
+      if (dot) {
+        dot.style.background = '#22c55e';
+        dot.title = 'Agronomy Knowledge Base Active';
       }
     }
   }
@@ -175,6 +200,9 @@ CRITICAL RULES FOR ALL RESPONSES:
 
     const payload = {
       apiKey: (this.apiKey && this.apiKey.trim()) || undefined,
+      systemInstruction: {
+        parts: [{ text: this.systemInstruction }]
+      },
       system_instruction: {
         parts: [{ text: this.systemInstruction }]
       },
@@ -204,6 +232,11 @@ CRITICAL RULES FOR ALL RESPONSES:
     }
 
     const data = await response.json();
+
+    if (data.isLiveAI) {
+      this.isLiveConnected = true;
+      this.updateStatusIndicator();
+    }
 
     const candidate = data.candidates && data.candidates[0];
     if (candidate && candidate.content && candidate.content.parts && candidate.content.parts[0]) {
