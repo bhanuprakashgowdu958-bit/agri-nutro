@@ -112,18 +112,10 @@ CRITICAL RULES FOR ALL RESPONSES:
   updateStatusIndicator() {
     const sub = document.querySelector('.gemini-header-subtitle');
     const dot = document.querySelector('.gemini-status-online');
-    if (this.apiKey || this.isLiveConnected) {
-      if (sub) sub.textContent = '✨ Gemini Live AI Connected • 24/7 Advisory';
-      if (dot) {
-        dot.style.background = '#10b981';
-        dot.title = 'Gemini Live AI Connected';
-      }
-    } else {
-      if (sub) sub.textContent = '🌾 Dr. Thorne Agronomist Engine (Built-In Advisory)';
-      if (dot) {
-        dot.style.background = '#22c55e';
-        dot.title = 'Agronomy Knowledge Base Active';
-      }
+    if (sub) sub.textContent = 'Senior Livestock Nutritionist • 24/7 AI Feeding Advisory';
+    if (dot) {
+      dot.style.background = '#10b981';
+      dot.title = 'AI Advisory Online & Ready';
     }
   }
 
