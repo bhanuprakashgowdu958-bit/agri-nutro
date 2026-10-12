@@ -968,9 +968,12 @@
         <button type="button" class="filter-btn" data-filter="4" onclick="setFilter('4')">🏡 Delivered (<span id="countDelivered">0</span>)</button>
       </div>
 
-      <div style="display: flex; gap: 8px;">
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
         <button type="button" class="btn btn-sm btn-primary" onclick="createSampleOrderAdmin()">
           ➕ Add Test Order
+        </button>
+        <button type="button" class="btn btn-sm" style="background:#059669; color:#fff;" onclick="logManualFarmerOrder()">
+          📝 Log Phone/WhatsApp Order
         </button>
         <button type="button" class="btn btn-sm btn-light" style="background:#e2e8f0; color:#334155;" onclick="exportOrdersToCSV()">
           📥 Export CSV
@@ -1032,8 +1035,8 @@
     }
 
     function getApiEndpoint() {
-      if (window.location.hostname.includes('netlify.app')) {
-        return '/.netlify/functions/orders';
+      if (window.location.protocol === 'file:') {
+        return 'http://localhost:8080/api/orders';
       }
       return '/api/orders';
     }
@@ -1550,6 +1553,56 @@
       renderDashboard();
     }
 
+    function logManualFarmerOrder() {
+      const name = prompt('Farmer / Contact Person Name:', 'Ramesh Dairy Farm');
+      if (!name) return;
+      const phone = prompt('Phone Number:', '+91 98765 43210') || 'N/A';
+      const address = prompt('Delivery Address / Location:', 'Hosur Highway, Bengaluru') || 'Local Farmgate';
+      const itemsStr = prompt('Feed Product & Bags (e.g. 4x NutriBov LactaMax 50kg):', '4x NutriBov LactaMax 50kg') || 'NutriAgro Feed';
+      const totalAmount = parseInt(prompt('Total Amount (₹):', '7400') || '7400', 10) || 7400;
+
+      const randId = 'NUTRI-' + Math.floor(100000 + Math.random() * 900000);
+      const newOrder = {
+        orderId: randId,
+        date: new Date().toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }),
+        timestamp: Date.now(),
+        farmerName: name,
+        phone: phone,
+        address: address,
+        paymentMethod: 'Phone / Farmgate Delivery (COD)',
+        items: [{ name: itemsStr, quantity: 1, price: totalAmount, bagSize: '50kg' }],
+        totalBags: 1,
+        totalWeightKg: 50,
+        finalTotal: totalAmount,
+        status: 'Order Confirmed & Logged',
+        eta: 'Tomorrow by 4:00 PM',
+        driverName: 'Ramesh Singh (Truck #HR-05-AB-4821)',
+        driverPhone: '+91 98123 45678',
+        currentStep: 1,
+        lastUpdated: new Date().toISOString()
+      };
+
+      allOrders.unshift(newOrder);
+      localStorage.setItem('nutriagro_orders', JSON.stringify(allOrders));
+      localStorage.setItem('nutriagro_last_order_timestamp', String(Date.now()));
+
+      fetch(getApiEndpoint(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newOrder)
+      }).catch(() => {});
+
+      try {
+        if (typeof BroadcastChannel !== 'undefined') {
+          new BroadcastChannel('nutriagro_orders_channel').postMessage({ type: 'NEW_ORDER', order: newOrder });
+        }
+      } catch (e) {}
+
+      playCashChime();
+      showToast(`✅ Order #${randId} logged successfully!`, 'success');
+      renderDashboard();
+    }
+
     function exportOrdersToCSV() {
       if (allOrders.length === 0) {
         showToast('No orders to export', 'info');
@@ -1668,6 +1721,30 @@
         loadAdminOrders(false);
       }
     }, 3500);
+
+    // Cross-tab immediate synchronization (0ms latency when order placed in another tab/window)
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'nutriagro_orders' || e.key === 'nutriagro_last_order_timestamp') {
+        if (isAuthorized()) {
+          loadAdminOrders(false);
+        }
+      }
+    });
+
+    // BroadcastChannel synchronization across windows/tabs
+    try {
+      if (typeof BroadcastChannel !== 'undefined') {
+        const adminChannel = new BroadcastChannel('nutriagro_orders_channel');
+        adminChannel.onmessage = (ev) => {
+          if (ev.data && ev.data.type === 'NEW_ORDER') {
+            playCashChime();
+            if (isAuthorized()) {
+              loadAdminOrders(false);
+            }
+          }
+        };
+      }
+    } catch (e) {}
 
     // Initial load
     document.addEventListener('DOMContentLoaded', () => {

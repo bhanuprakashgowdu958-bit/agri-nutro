@@ -401,6 +401,28 @@ function handleCheckoutSubmit(e) {
     document.getElementById('confirmPaymentType').textContent = paymentMethod;
     document.getElementById('confirmAmountPaid').textContent = formatCurrency(window.cart.getFinalTotal());
 
+    // Update WhatsApp direct dispatch link for guaranteed instant owner notification
+    try {
+      const waText = encodeURIComponent(
+        `🌾 *NUTRIAGRO FEEDS - NEW ORDER CONFIRMATION* 🌾\n\n` +
+        `📋 *Order ID:* #${orderObj.orderId}\n` +
+        `📅 *Date:* ${orderObj.date}\n` +
+        `👤 *Contact Person:* ${orderObj.farmerName}\n` +
+        `📞 *Phone:* ${orderObj.phone}\n` +
+        `📍 *Delivery Address:* ${orderObj.address}\n\n` +
+        `📦 *Order Items:*\n` +
+        orderObj.items.map(it => `  • ${it.quantity}x ${it.name} (${it.bagSize}) - ₹${(it.price * it.quantity).toLocaleString('en-IN')}`).join('\n') + `\n\n` +
+        `📊 *Total Packaging:* ${orderObj.totalBags} Bags (${orderObj.totalWeightKg} kg)\n` +
+        `💰 *Total Amount:* ₹${Math.round(orderObj.finalTotal).toLocaleString('en-IN')}\n` +
+        `💳 *Payment Mode:* ${orderObj.paymentMethod}\n\n` +
+        `🚜 *Please confirm receipt and dispatch this commercial farm order!*`
+      );
+      const waBtn = document.getElementById('confirmWhatsappOrderBtn');
+      if (waBtn) {
+        waBtn.href = `https://wa.me/919845012345?text=${waText}`;
+      }
+    } catch (e) {}
+
     // Clear cart
     window.cart.clearCart();
     window.cart.showToast(`Order #${orderId} Confirmed! We are prepping your batch.`, 'success');
@@ -411,8 +433,8 @@ function handleCheckoutSubmit(e) {
 // 14. LIVE ORDER TRACKER & SERVER SYNC ENGINE
 // ==========================================
 function getOrdersApiEndpoint() {
-  if (window.location.hostname.includes('netlify.app')) {
-    return '/.netlify/functions/orders';
+  if (window.location.protocol === 'file:') {
+    return 'http://localhost:8080/api/orders';
   }
   return '/api/orders';
 }
@@ -494,6 +516,7 @@ async function saveOrder(orderObj) {
     const local = getStoredOrders();
     local.unshift(orderObj);
     localStorage.setItem('nutriagro_orders', JSON.stringify(local));
+    localStorage.setItem('nutriagro_last_order_timestamp', String(Date.now()));
 
     localStorage.setItem('nutriagro_my_latest_order_id', orderObj.orderId);
     localStorage.setItem('nutriagro_tracked_status_' + orderObj.orderId, JSON.stringify({
@@ -503,13 +526,41 @@ async function saveOrder(orderObj) {
 
     updateAllOrderBadges(local.length);
 
-    await fetch(getOrdersApiEndpoint(), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(orderObj)
-    });
+    // Instant cross-tab broadcast to open Admin Hub
+    try {
+      if (typeof BroadcastChannel !== 'undefined') {
+        const channel = new BroadcastChannel('nutriagro_orders_channel');
+        channel.postMessage({ type: 'NEW_ORDER', order: orderObj });
+      }
+    } catch (e) {}
+
+    // POST to orders endpoint
+    try {
+      const res = await fetch(getOrdersApiEndpoint(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderObj)
+      });
+      if (!res.ok && window.location.hostname.includes('netlify.app')) {
+        await fetch('/.netlify/functions/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderObj)
+        });
+      }
+    } catch (netErr) {
+      if (window.location.hostname.includes('netlify.app')) {
+        try {
+          await fetch('/.netlify/functions/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderObj)
+          });
+        } catch (e) {}
+      }
+    }
   } catch (err) {
-    console.warn('Save order network notice:', err);
+    console.warn('Save order notice:', err);
   }
   fetchOrdersFromServer();
 }

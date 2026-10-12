@@ -17,6 +17,7 @@ if (Test-Path (Join-Path $root "admin.html")) { Copy-Item -Path (Join-Path $root
 if (Test-Path (Join-Path $root "orders.json")) { Copy-Item -Path (Join-Path $root "orders.json") -Destination $dist }
 if (Test-Path (Join-Path $root "api")) { Copy-Item -Path (Join-Path $root "api") -Destination $dist -Recurse }
 if (Test-Path (Join-Path $root "netlify")) { Copy-Item -Path (Join-Path $root "netlify") -Destination $dist -Recurse }
+if (Test-Path (Join-Path $root "netlify.toml")) { Copy-Item -Path (Join-Path $root "netlify.toml") -Destination $dist }
 
 # Read CSS files
 $cssMain = [System.IO.File]::ReadAllText((Join-Path $root "css\main.css"))
