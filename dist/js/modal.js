@@ -767,13 +767,36 @@ function checkCustomerOrderStatusChanges(allOrders) {
 }
 
 let statusWatcherTimer = null;
+let firebaseEventSource = null;
+
 function startOrderStatusWatcher() {
   if (statusWatcherTimer) clearInterval(statusWatcherTimer);
   fetchOrdersFromServer();
 
+  // Fast poll fallback (every 2.5s) to guarantee zero missed updates across tabs & mobile
   statusWatcherTimer = setInterval(() => {
     fetchOrdersFromServer();
-  }, 4000);
+  }, 2500);
+
+  // Real-time Firebase Server-Sent Events (SSE) Stream for 0ms Instant Push
+  try {
+    if (typeof EventSource !== 'undefined' && !firebaseEventSource) {
+      firebaseEventSource = new EventSource(`${FIREBASE_RTDB_ORDERS_URL}.json`);
+      firebaseEventSource.addEventListener('put', (event) => {
+        try {
+          fetchOrdersFromServer();
+        } catch (e) {}
+      });
+      firebaseEventSource.addEventListener('patch', (event) => {
+        try {
+          fetchOrdersFromServer();
+        } catch (e) {}
+      });
+      firebaseEventSource.onerror = () => {
+        // Fallback continues running via statusWatcherTimer
+      };
+    }
+  } catch (sseErr) {}
 }
 
 function requestNotificationPermission() {
