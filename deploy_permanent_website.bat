@@ -1,28 +1,38 @@
 @echo off
-title NutriAgro Feeds - Update Permanent Website
+title NutriAgro Feeds - Vercel Deployment & Sync
 color 0A
 cls
 echo ======================================================================
-echo    NUTRIAGRO FEEDS - INSTANT PERMANENT WEBSITE UPDATE
+echo    🌾 NUTRIAGRO FEEDS - VERCEL CLOUD DEPLOYMENT & SYNC
 echo ======================================================================
 echo.
-echo  The build with 100% inlined CSS and clean web paths is ready!
-echo.
-echo  Opening:
-echo    1. Your Netlify Deploys page: 
-echo       https://app.netlify.com/projects/astonishing-donut-8422b5/deploys
-echo    2. File Explorer showing the "dist" folder and "NutriAgro-Feeds-Website.zip"
+echo  Your project is configured for Vercel with:
+echo    - /api/orders Serverless Endpoint
+echo    - /api/gemini AI Agronomist Proxy
+echo    - Full vercel.json API & CORS routing
 echo.
 echo  ----------------------------------------------------------------------
 echo  ACTION:
-echo  Drag the "dist" folder OR "NutriAgro-Feeds-Website.zip" into the box:
-echo  "Need to update your site? Drag and drop your site folder here"
+echo  1. Running git push to trigger instant Vercel cloud deployment...
 echo  ----------------------------------------------------------------------
 echo.
-timeout /t 2 >nul
 
-start https://app.netlify.com/projects/astonishing-donut-8422b5/deploys
-explorer.exe /select,"%~dp0dist"
+git push origin main
+if %ERRORLEVEL% EQU 0 (
+    echo.
+    echo  ======================================================================
+    echo   [SUCCESS] Code pushed directly to GitHub 'main' branch!
+    echo   Vercel will now automatically build and publish your latest website.
+    echo  ======================================================================
+) else (
+    echo.
+    echo  [NOTICE] To push manually, run: push_to_github.bat
+)
 
-echo [DONE] Drag the highlighted dist folder to update your site!
+echo.
+echo  Opening Vercel Dashboard in your default browser...
+start https://vercel.com/dashboard
+
+echo.
+echo  [DONE] Your live Vercel website will be updated automatically!
 pause

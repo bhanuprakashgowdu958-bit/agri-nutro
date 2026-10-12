@@ -534,30 +534,15 @@ async function saveOrder(orderObj) {
       }
     } catch (e) {}
 
-    // POST to orders endpoint
+    // POST to /api/orders endpoint (Vercel & Local Server)
     try {
-      const res = await fetch(getOrdersApiEndpoint(), {
+      await fetch(getOrdersApiEndpoint(), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderObj)
       });
-      if (!res.ok && window.location.hostname.includes('netlify.app')) {
-        await fetch('/.netlify/functions/orders', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(orderObj)
-        });
-      }
     } catch (netErr) {
-      if (window.location.hostname.includes('netlify.app')) {
-        try {
-          await fetch('/.netlify/functions/orders', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(orderObj)
-          });
-        } catch (e) {}
-      }
+      console.warn('API sync notice:', netErr);
     }
   } catch (err) {
     console.warn('Save order notice:', err);
