@@ -1829,7 +1829,7 @@
     }
 
     // Form Submit Handler (Login)
-    function handleFarmerLogin(e) {
+    async function handleFarmerLogin(e) {
       e.preventDefault();
       const identifier = document.getElementById('loginPhone').value.trim();
       
@@ -1846,6 +1846,23 @@
           return;
         }
 
+        // Check backend /api/users for cross-device / clean storage sessions
+        try {
+          const res = await fetch('/api/users?_t=' + Date.now());
+          if (res.ok) {
+            const serverUsers = await res.json();
+            if (Array.isArray(serverUsers)) {
+              matched = serverUsers.find(u => (u.phone && u.phone === identifier) || (u.email && u.email.toLowerCase() === identifier.toLowerCase()));
+              if (matched) {
+                usersList.unshift(matched);
+                localStorage.setItem('nutriagro_users_list', JSON.stringify(usersList));
+              }
+            }
+          }
+        } catch (err) {}
+      }
+
+      if (!matched) {
         alert(`No account found for "${identifier}". Please create a farm account or sign in with Google.`);
         return;
       }

@@ -1300,6 +1300,7 @@
     let knownOrderIds = new Set();
     let initialLoadDone = false;
     let deletedOrderIds = new Set();
+    let deletedFarmerKeys = new Set();
 
     let allFarmers = [];
     let currentFarmerFilter = 'all';
@@ -2225,6 +2226,12 @@
       [...incoming, ...localList, ...defaultSeed].forEach(item => {
         if (!item) return;
         const key = (item.phone || item.email || item.userId || '').toString().toLowerCase();
+        const uid = (item.userId || '').toString().toLowerCase();
+        const ph = (item.phone || '').toString().toLowerCase();
+        const em = (item.email || '').toString().toLowerCase();
+        if (deletedFarmerKeys.has(key) || (uid && deletedFarmerKeys.has(uid)) || (ph && deletedFarmerKeys.has(ph)) || (em && deletedFarmerKeys.has(em))) {
+          return;
+        }
         if (key && !mergedMap.has(key)) {
           mergedMap.set(key, item);
         }
@@ -2472,10 +2479,29 @@
 
     function deleteFarmer(userIdOrPhone) {
       if (!confirm('Are you sure you want to remove this farmer from the directory?')) return;
-      allFarmers = allFarmers.filter(f => (f.userId !== userIdOrPhone && f.phone !== userIdOrPhone));
+      const targetKey = (userIdOrPhone || '').toString().toLowerCase();
+      deletedFarmerKeys.add(targetKey);
+
+      allFarmers = allFarmers.filter(f => {
+        const uid = (f.userId || '').toString().toLowerCase();
+        const ph = (f.phone || '').toString().toLowerCase();
+        const em = (f.email || '').toString().toLowerCase();
+        return uid !== targetKey && ph !== targetKey && em !== targetKey;
+      });
+
       try {
         localStorage.setItem('nutriagro_users_list', JSON.stringify(allFarmers));
       } catch (e) {}
+
+      // Inform backend of deletion
+      try {
+        fetch(getUsersApiEndpoint(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'delete', userId: userIdOrPhone })
+        }).catch(() => {});
+      } catch (err) {}
+
       showToast('Farmer profile removed.', 'info');
       updateFarmerCounters();
       renderFarmersCards();

@@ -52,8 +52,25 @@ module.exports = async (req, res) => {
         return res.status(400).json({ error: 'Missing request body' });
       }
 
-      // Check if user with phone already exists
-      const existingIdx = users.findIndex(u => u.phone === body.phone);
+      if (body.action === 'delete') {
+        const targetKey = (body.userId || body.phone || body.email || '').toString().toLowerCase();
+        users = users.filter(u => {
+          const uid = (u.userId || '').toLowerCase();
+          const ph = (u.phone || '').toLowerCase();
+          const em = (u.email || '').toLowerCase();
+          return uid !== targetKey && ph !== targetKey && em !== targetKey;
+        });
+        memoryUsers = users;
+        saveLocalUsers(users);
+        return res.status(200).json({ success: true, users });
+      }
+
+      // Check if user with phone, userId, or email already exists
+      const existingIdx = users.findIndex(u => 
+        (body.phone && u.phone && u.phone === body.phone) ||
+        (body.userId && u.userId && u.userId.toLowerCase() === body.userId.toLowerCase()) ||
+        (body.email && u.email && u.email.toLowerCase() === body.email.toLowerCase())
+      );
       if (existingIdx >= 0) {
         users[existingIdx] = { ...users[existingIdx], ...body, lastUpdated: new Date().toISOString() };
       } else {
@@ -68,7 +85,7 @@ module.exports = async (req, res) => {
       memoryUsers = users;
       saveLocalUsers(users);
 
-      return res.status(200).json({ success: true, user: users[0] });
+      return res.status(200).json({ success: true, user: users[0], users });
     } catch (err) {
       return res.status(500).json({ error: err.message || 'Internal error' });
     }

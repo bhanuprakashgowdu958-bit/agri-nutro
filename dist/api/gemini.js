@@ -1,13 +1,17 @@
 // Vercel Serverless Function: Gemini AI Proxy for NutriAgro Feeds
 const https = require('https');
 
-// Official Google Gemini model candidates
+// Official Google Gemini model candidates (active official models with graceful cascade)
 const MODEL_CANDIDATES = [
-  'gemini-3.6-flash',
-  'gemini-3.5-flash',
-  'gemini-3.5-flash-lite',
+  'gemini-2.0-flash',
+  'gemini-2.5-flash',
+  'gemini-1.5-flash',
   'gemini-flash-lite-latest',
-  'gemini-3.8-flash'
+  'gemini-2.0-flash-lite',
+  'gemini-1.5-pro',
+  'gemini-3.8-flash',
+  'gemini-3.6-flash',
+  'gemini-3.5-flash'
 ];
 
 // Dr. Thorne Built-in Livestock Nutrition Knowledge Base
@@ -256,7 +260,7 @@ module.exports = async function handler(req, res) {
   if (req.method === 'GET') {
     return res.status(200).json({
       active: Boolean(effectiveKey),
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.0-flash',
       mode: effectiveKey ? 'live_ai' : 'built_in_knowledge_base'
     });
   }

@@ -252,7 +252,7 @@ CRITICAL RULES FOR ALL RESPONSES:
       throw new Error('No Google Gemini API key configured.');
     }
 
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(this.apiKey.trim())}`;
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(this.apiKey.trim())}`;
 
     // Cleanly build contents ensuring strict alternating user/model turns starting with 'user'
     const contents = [];
