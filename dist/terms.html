@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms & Conditions | NutriAgro Feeds™</title>
+  <meta name="description" content="NutriAgro Feeds Terms & Conditions, Farmgate Delivery Guidelines, Aflatoxin Quality Guarantee, and Animal Nutrition Advisory Policies." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>" />
+
+  <style>
+    :root {
+      --color-primary: #124d32;
+      --color-primary-dark: #0a311f;
+      --color-primary-light: #1b6a46;
+      --color-primary-soft: #e8f5ee;
+      --color-accent-gold: #e2920d;
+      --color-accent-gold-light: #fbeccf;
+      --color-accent-gold-dark: #b57105;
+      --color-dark: #121c17;
+      --color-dark-muted: #3a4b44;
+      --color-gray-50: #f7faf8;
+      --color-gray-100: #eef3f0;
+      --color-gray-200: #dce5e0;
+      --color-gray-300: #c2d1c9;
+      --color-white: #ffffff;
+      --font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+      --shadow-md: 0 8px 24px rgba(18, 28, 23, 0.08);
+      --transition: all 0.25s ease;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: #f2f7f4;
+      color: var(--color-dark);
+      line-height: 1.65;
+    }
+
+    /* Header Bar */
+    .top-header {
+      background: var(--color-primary-dark);
+      border-bottom: 3px solid var(--color-accent-gold);
+      color: #fff;
+      padding: 18px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+    .header-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+    }
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background: var(--color-primary);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent-gold);
+    }
+    .brand-title {
+      font-family: var(--font-heading);
+      font-size: 1.3rem;
+      font-weight: 800;
+    }
+    .brand-title span {
+      color: var(--color-accent-gold);
+    }
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: var(--radius-full);
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.22);
+    }
+
+    /* Container */
+    .terms-container {
+      max-width: 1080px;
+      margin: 36px auto 60px;
+      padding: 0 20px;
+    }
+
+    /* Hero Banner */
+    .terms-hero {
+      background: linear-gradient(135deg, #124d32 0%, #1b6a46 100%);
+      color: #fff;
+      border-radius: var(--radius-lg);
+      padding: 40px 36px;
+      margin-bottom: 32px;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+    .terms-hero::after {
+      content: '📜';
+      position: absolute;
+      right: 24px;
+      bottom: -10px;
+      font-size: 7rem;
+      opacity: 0.12;
+      pointer-events: none;
+    }
+    .terms-tag {
+      display: inline-block;
+      background: rgba(226, 146, 13, 0.2);
+      border: 1px solid rgba(226, 146, 13, 0.4);
+      color: var(--color-accent-gold-light);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+    .terms-hero h1 {
+      font-family: var(--font-heading);
+      font-size: 2.2rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+    .terms-hero p {
+      color: #e2f7f3;
+      max-width: 760px;
+      font-size: 1rem;
+    }
+
+    /* Content Cards */
+    .terms-content {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .term-section {
+      background: #ffffff;
+      border-radius: var(--radius-md);
+      padding: 32px 30px;
+      box-shadow: 0 4px 14px rgba(18, 28, 23, 0.05);
+      border: 1px solid var(--color-gray-200);
+      transition: var(--transition);
+    }
+    .term-section:hover {
+      box-shadow: 0 8px 24px rgba(18, 28, 23, 0.08);
+      border-color: var(--color-primary-light);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1.5px solid var(--color-gray-100);
+    }
+    .section-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      background: var(--color-primary-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+    .section-header h2 {
+      font-family: var(--font-heading);
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--color-dark);
+    }
+
+    .term-section p {
+      color: var(--color-dark-muted);
+      margin-bottom: 14px;
+      font-size: 0.95rem;
+    }
+
+    .term-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .term-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.92rem;
+      color: var(--color-dark-muted);
+    }
+    .term-list li::before {
+      content: '✓';
+      color: var(--color-primary);
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .highlight-box {
+      background: var(--color-primary-soft);
+      border-left: 4px solid var(--color-primary);
+      padding: 14px 18px;
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      font-size: 0.9rem;
+      color: var(--color-primary-dark);
+      margin-top: 16px;
+    }
+
+    /* Footer CTAs */
+    .terms-footer {
+      margin-top: 36px;
+      background: #ffffff;
+      border-radius: var(--radius-md);
+      padding: 28px 30px;
+      border: 1px solid var(--color-gray-200);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: var(--color-primary);
+      color: #fff;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+    .cta-btn:hover {
+      background: var(--color-primary-dark);
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+      .terms-hero {
+        padding: 28px 20px;
+      }
+      .terms-hero h1 {
+        font-size: 1.7rem;
+      }
+      .term-section {
+        padding: 22px 18px;
+      }
+      .terms-footer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="top-header">
+    <div class="header-inner">
+      <a href="index.html" class="brand-group">
+        <div class="brand-icon">🌾</div>
+        <div class="brand-title">Nutri<span>Agro</span> Feeds™</div>
+      </a>
+      <div style="display: flex; gap: 10px;">
+        <a href="signup.html" class="nav-btn">← Back to Farm Sign Up</a>
+        <a href="index.html" class="nav-btn">Home</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="terms-container">
+    <!-- Hero -->
+    <div class="terms-hero">
+      <span class="terms-tag">Official Agricultural Agreement</span>
+      <h1>Terms & Conditions & Quality Guarantee</h1>
+      <p>
+        These terms govern commercial feed purchases, farmgate haulage delivery, batch quality guarantees, and animal ration advisory services provided by NutriAgro Feeds™.
+      </p>
+    </div>
+
+    <!-- Terms Sections -->
+    <main class="terms-content">
+
+      <!-- Section 1 -->
+      <section class="term-section" id="quality">
+        <div class="section-header">
+          <div class="section-icon">🧪</div>
+          <h2>1. Feed Quality, Formulations & Aflatoxin Guarantee</h2>
+        </div>
+        <p>
+          NutriAgro Feeds™ manufactures commercial livestock rations adhering to strict ISO 9001:2015 milling standards and Bureau of Indian Standards (BIS) specifications.
+        </p>
+        <ul class="term-list">
+          <li><strong>100% Aflatoxin Clearance:</strong> Every milling run undergoes strict ELISA laboratory screening to ensure total aflatoxin levels remain well below 20 ppb (parts per billion), protecting herd health and milk safety.</li>
+          <li><strong>Certified Guaranteed Analysis:</strong> Each 50kg bag is certified for minimum Crude Protein (CP), Crude Fat, Crude Fiber, Calcium, Phosphorus, and trace mineral chelation as stated on the tag.</li>
+          <li><strong>Tamper-Evident Packaging:</strong> Bags are dispatched in heavy-duty HDPE woven sacks with moisture-barrier inner liners and machine-stitched tamper tags.</li>
+        </ul>
+        <div class="highlight-box">
+          🛡️ <strong>Quality Guarantee:</strong> In the unlikely event a bag arrives with broken stitching or water moisture damage incurred during transport, NutriAgro will replace the affected bags free of charge within 48 hours.
+        </div>
+      </section>
+
+      <!-- Section 2 -->
+      <section class="term-section" id="delivery">
+        <div class="section-header">
+          <div class="section-icon">🚚</div>
+          <h2>2. Farmgate Freight Delivery & Hauler Access</h2>
+        </div>
+        <p>
+          We operate dedicated agro-hauler trucks (3 MT to 14 MT capacity) to deliver directly to rural farm gates across India.
+        </p>
+        <ul class="term-list">
+          <li><strong>Free Freight Threshold:</strong> Orders of <strong>15 bags (750 kg) or more</strong> qualify for 100% Free Farmgate Freight Delivery. Orders under 15 bags incur standard distance-based local delivery charges.</li>
+          <li><strong>Truck Access Road:</strong> The customer must ensure that the farm approach road allows safe passage for commercial delivery haulers (minimum 10-foot road width and overhead wire clearance).</li>
+          <li><strong>Farmgate Unloading:</strong> Hauler drivers will park at the nearest safe vehicular gate. Farm staff/labor must assist with unloading bags into dry farm storage.</li>
+          <li><strong>Delivery Timelines:</strong> Standard farmgate arrival is within 24 to 48 hours from order confirmation. Hauler driver contact and live ETA are shared via SMS and WhatsApp.</li>
+        </ul>
+      </section>
+
+      <!-- Section 3 -->
+      <section class="term-section" id="nutrition">
+        <div class="section-header">
+          <div class="section-icon">🐄</div>
+          <h2>3. Animal Nutrition Advisory & Feed Transition Protocol</h2>
+        </div>
+        <p>
+          Livestock rumen biology requires gradual adaptation to new feed formulations to prevent digestive upsets (acidosis or diarrhea).
+        </p>
+        <ul class="term-list">
+          <li><strong>7-Day Transition Protocol:</strong> When switching cattle, poultry, or swine to NutriAgro feeds, mix 25% NutriAgro with 75% previous ration on Days 1-2; 50/50 on Days 3-4; 75/25 on Days 5-6; and 100% from Day 7 onwards.</li>
+          <li><strong>Clean Water Requirement:</strong> High-density pelleted feeds require continuous access to fresh, clean drinking water for optimal feed conversion ratio (FCR) and milk synthesis.</li>
+          <li><strong>Advisory Disclaimer:</strong> NutriAgro nutritional guidance and the Gemini AI Agronomist provide general herd optimization science. Specific clinical diagnoses remain under the authority of your licensed local veterinary practitioner.</li>
+        </ul>
+      </section>
+
+      <!-- Section 4 -->
+      <section class="term-section" id="payment">
+        <div class="section-header">
+          <div class="section-icon">💰</div>
+          <h2>4. Payment Methods, Credit & GST Invoicing</h2>
+        </div>
+        <p>
+          We provide transparent pricing and multiple payment methods tailored to Indian agricultural operations.
+        </p>
+        <ul class="term-list">
+          <li><strong>Payment on Farmgate Delivery:</strong> Cash on Delivery (COD), UPI (Google Pay, PhonePe, Paytm), site cheque, or direct NEFT/RTGS bank transfer upon physical bag inspection.</li>
+          <li><strong>Official GST Tax Invoices:</strong> All orders are invoiced with applicable GST rates (Animal Feeds are classified under HSN 2309 with Nil/Zero GST exemption for pure compound animal feed in India). Official commercial invoices are generated for all business entities.</li>
+          <li><strong>Commercial Credit Lines:</strong> Progressive dairy farms and poultry hatcheries ordering 10+ metric tons monthly may apply for 15-day revolving credit terms subject to verification.</li>
+        </ul>
+      </section>
+
+      <!-- Section 5 -->
+      <section class="term-section" id="privacy">
+        <div class="section-header">
+          <div class="section-icon">📱</div>
+          <h2>5. WhatsApp & Communication Consent</h2>
+        </div>
+        <p>
+          By creating an account on NutriAgro Feeds, you authorize us to communicate order status and delivery alerts via SMS and WhatsApp:
+        </p>
+        <ul class="term-list">
+          <li>Order logging, dispatch verification, and hauler truck driver details.</li>
+          <li>Seasonal harvest updates, extreme weather ration adjustment alerts, and volume discount vouchers.</li>
+          <li>Your contact details and farm data will never be sold, rented, or shared with third-party marketing companies.</li>
+        </ul>
+      </section>
+
+    </main>
+
+    <!-- Footer Action Box -->
+    <div class="terms-footer">
+      <div>
+        <h3 style="font-family: var(--font-heading); margin-bottom: 4px;">Ready to Register Your Farm?</h3>
+        <p style="color: var(--color-dark-muted); font-size: 0.92rem;">Enjoy direct millgate prices and free farmgate delivery on 15+ bags.</p>
+      </div>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <a href="signup.html" class="cta-btn">
+          🚜 Return to Farm Registration
+        </a>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

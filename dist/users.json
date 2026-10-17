@@ -1,0 +1,38 @@
+[
+  {
+    "userId": "FARM-108219",
+    "fullName": "Sardar Gurpreet Singh",
+    "phone": "9876543210",
+    "email": "gurpreet.dairy@gmail.com",
+    "farmName": "Golden Harvest Dairy Farm",
+    "farmType": "Dairy Cattle & Buffalo",
+    "herdSize": "45 Cattle (Milking & Dry)",
+    "primaryFeed": "NutriBov LactaMax™ High-Yield Dairy Feed",
+    "pincode": "141001",
+    "state": "Punjab",
+    "district": "Ludhiana",
+    "address": "GT Road, Near Canal Bridge, Ludhiana, Punjab",
+    "gstin": "03AAAAA0000A1Z5",
+    "whatsappAlerts": true,
+    "registeredAt": "2026-10-11T10:00:00.000Z",
+    "tier": "Progressive Farmer Tier"
+  },
+  {
+    "userId": "FARM-205934",
+    "fullName": "M. Thangaraj",
+    "phone": "9443218765",
+    "email": "thangaraj.poultry@gmail.com",
+    "farmName": "Sri Murugan Broiler Farms",
+    "farmType": "Poultry (Broiler & Layer)",
+    "herdSize": "12,000 Birds per Batch",
+    "primaryFeed": "NutriAvi BroilerMax™ Starter & Finisher",
+    "pincode": "637211",
+    "state": "Tamil Nadu",
+    "district": "Namakkal",
+    "address": "Trichy Main Road, Namakkal District, Tamil Nadu",
+    "gstin": "33BBBBB0000B2Z8",
+    "whatsappAlerts": true,
+    "registeredAt": "2026-10-12T14:30:00.000Z",
+    "tier": "Commercial Poultry Tier"
+  }
+]

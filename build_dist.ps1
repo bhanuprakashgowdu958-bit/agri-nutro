@@ -9,12 +9,15 @@ if (Test-Path $dist) {
 }
 New-Item -ItemType Directory -Path $dist | Out-Null
 
-# Copy assets, css, js, orders.json, api, vercel.json
+# Copy assets, css, js, orders.json, users.json, api, vercel.json
 Copy-Item -Path (Join-Path $root "assets") -Destination $dist -Recurse
 Copy-Item -Path (Join-Path $root "css") -Destination $dist -Recurse
 Copy-Item -Path (Join-Path $root "js") -Destination $dist -Recurse
 if (Test-Path (Join-Path $root "admin.html")) { Copy-Item -Path (Join-Path $root "admin.html") -Destination $dist }
+if (Test-Path (Join-Path $root "signup.html")) { Copy-Item -Path (Join-Path $root "signup.html") -Destination $dist }
+if (Test-Path (Join-Path $root "terms.html")) { Copy-Item -Path (Join-Path $root "terms.html") -Destination $dist }
 if (Test-Path (Join-Path $root "orders.json")) { Copy-Item -Path (Join-Path $root "orders.json") -Destination $dist }
+if (Test-Path (Join-Path $root "users.json")) { Copy-Item -Path (Join-Path $root "users.json") -Destination $dist }
 if (Test-Path (Join-Path $root "api")) { Copy-Item -Path (Join-Path $root "api") -Destination $dist -Recurse }
 if (Test-Path (Join-Path $root "vercel.json")) { Copy-Item -Path (Join-Path $root "vercel.json") -Destination $dist }
 

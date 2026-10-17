@@ -4622,6 +4622,399 @@ button, input, select, textarea {
   }
 }
 
+/* ==========================================================================
+   GOOGLE SIGN-IN ENTRY GATEWAY & USER PROFILE DROPDOWN
+   ========================================================================== */
+
+.google-auth-gateway {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.google-auth-gateway.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.gateway-backdrop {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(10, 49, 31, 0.95) 0%, rgba(18, 77, 50, 0.92) 50%, rgba(14, 58, 38, 0.96) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.gateway-card {
+  position: relative;
+  z-index: 1;
+  background: #ffffff;
+  width: 100%;
+  max-width: 480px;
+  border-radius: var(--radius-xl);
+  padding: 38px 34px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transform: scale(1);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: gatewayPop 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes gatewayPop {
+  0% { transform: scale(0.92); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.gateway-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  border: 1px solid rgba(18, 77, 50, 0.2);
+  border-radius: var(--radius-full);
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  letter-spacing: 0.02em;
+  margin-bottom: 16px;
+}
+
+.gateway-logo-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.gateway-logo-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #1b6a46 0%, #0a311f 100%);
+  color: var(--color-accent-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(18, 77, 50, 0.25);
+}
+
+.gateway-brand-name {
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--color-dark);
+  line-height: 1.2;
+}
+
+.gateway-brand-name span {
+  color: var(--color-accent-gold);
+}
+
+.gateway-brand-tag {
+  font-size: 0.74rem;
+  color: var(--color-dark-muted);
+  display: block;
+}
+
+.gateway-title {
+  font-family: var(--font-heading);
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: var(--color-dark);
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.gateway-desc {
+  font-size: 0.88rem;
+  color: var(--color-dark-muted);
+  line-height: 1.5;
+  margin-bottom: 22px;
+}
+
+.gateway-perks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--color-gray-50);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.gateway-perk-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.82rem;
+  color: var(--color-dark-muted);
+}
+
+.gateway-perk-item span {
+  font-size: 1.1rem;
+}
+
+.google-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: #ffffff;
+  color: #3c4043;
+  border: 1.5px solid #dadce0;
+  border-radius: var(--radius-md);
+  padding: 13px 20px;
+  font-family: 'Google Sans', Roboto, var(--font-body);
+  font-size: 0.98rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: all var(--transition-fast);
+}
+
+.google-btn:hover {
+  background: #f8fafd;
+  border-color: #d2e3fc;
+  box-shadow: 0 4px 14px rgba(66, 133, 244, 0.18);
+  transform: translateY(-1px);
+}
+
+.google-btn:active {
+  background: #eeeeee;
+  transform: translateY(0);
+}
+
+.google-accounts-picker {
+  margin-top: 16px;
+  background: #f8faf9;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.picker-heading {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--color-dark-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 2px 6px;
+}
+
+.google-account-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  border: 1px solid var(--color-gray-200);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.google-account-option:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  transform: translateX(2px);
+}
+
+.account-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-primary-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.account-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.account-name {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--color-dark);
+}
+
+.account-email {
+  font-size: 0.73rem;
+  color: var(--color-gray-500);
+}
+
+.gateway-terms {
+  margin-top: 20px;
+  font-size: 0.78rem;
+  color: var(--color-dark-muted);
+  line-height: 1.45;
+}
+
+.gateway-terms a {
+  color: var(--color-primary);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.gateway-footer-links {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-gray-200);
+}
+
+.guest-bypass-btn {
+  background: none;
+  border: none;
+  color: var(--color-dark-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  padding: 4px 8px;
+}
+
+.guest-bypass-btn:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+/* User Account Dropdown in Header */
+.user-dropdown-wrapper {
+  position: relative;
+}
+
+.header-user-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(18, 77, 50, 0.08);
+  border: 1px solid rgba(18, 77, 50, 0.2);
+  border-radius: var(--radius-full);
+  color: var(--color-dark);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.header-user-btn:hover {
+  background: rgba(18, 77, 50, 0.14);
+  border-color: var(--color-primary);
+}
+
+.user-avatar-badge {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.user-menu-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 250px;
+  background: #ffffff;
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--color-gray-200);
+  padding: 8px;
+  z-index: 1000;
+  display: none;
+  flex-direction: column;
+  animation: dropIn 0.2s ease;
+}
+
+.user-menu-dropdown.show {
+  display: flex;
+}
+
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.user-menu-header {
+  padding: 10px;
+  border-bottom: 1px solid var(--color-gray-100);
+  margin-bottom: 4px;
+}
+
+.user-menu-name {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--color-dark);
+}
+
+.user-menu-email {
+  font-size: 0.75rem;
+  color: var(--color-gray-500);
+  word-break: break-all;
+}
+
+.user-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--color-dark);
+  font-size: 0.83rem;
+  font-weight: 600;
+  text-decoration: none;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.user-menu-item:hover {
+  background: var(--color-gray-100);
+  color: var(--color-primary);
+}
+
+.user-menu-item.logout {
+  color: var(--color-danger);
+  border-top: 1px solid var(--color-gray-100);
+  margin-top: 4px;
+}
+.user-menu-item.logout:hover {
+  background: #fff5f5;
+  color: var(--color-danger);
+}
+
+
 
 /* Inlined Responsive CSS */
 /* ==========================================================================
@@ -5227,8 +5620,121 @@ html, body {
 }
 
 </style>
+
+  <!-- Official Google Identity Services SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
+
+  <!-- ==========================================
+       0. GOOGLE SIGN-IN ENTRY GATEWAY
+       ========================================== -->
+  <div class="google-auth-gateway" id="googleAuthGateway" aria-modal="true" role="dialog" style="display: none;">
+    <div class="gateway-backdrop"></div>
+    <div class="gateway-card">
+      <div class="gateway-brand-badge">
+        <span>🌾 Official Commercial Livestock Feeds</span>
+      </div>
+
+      <div class="gateway-logo-wrap">
+        <div class="gateway-logo-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+            <path d="M12 2a10 10 0 0 1 10 10c0 5.5-4.5 10-10 10S2 17.5 2 12A10 10 0 0 1 12 2z"/>
+            <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+            <path d="M12 6v6"/>
+            <path d="M9 9l3-3 3 3"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="gateway-brand-name">Nutri<span>Agro</span> Feeds™</h2>
+          <span class="gateway-brand-tag">Precision Livestock Nutrition • Pan-India</span>
+        </div>
+      </div>
+
+      <h1 class="gateway-title">Sign In to Continue</h1>
+      <p class="gateway-desc">
+        Access certified millgate pricing, free farmgate delivery on 15+ bags, and 24/7 AI herd nutrition formulation.
+      </p>
+
+      <!-- Value Pillars -->
+      <div class="gateway-perks">
+        <div class="gateway-perk-item">
+          <span>🚚</span>
+          <div><strong>Free Farmgate Freight Delivery</strong> on 15+ bags</div>
+        </div>
+        <div class="gateway-perk-item">
+          <span>🧪</span>
+          <div><strong>100% Aflatoxin Screened</strong> certified lab rations</div>
+        </div>
+        <div class="gateway-perk-item">
+          <span>💰</span>
+          <div><strong>10% First Order Rebate</strong> (Voucher: FARM10)</div>
+        </div>
+      </div>
+
+      <!-- Main Google Sign-In Button (1-Click Instant Login) -->
+      <button type="button" class="google-btn" id="googleGatewayBtn" onclick="handleGoogleSignIn()" title="Sign In Instantly with Google">
+        <svg class="google-svg" viewBox="0 0 24 24" width="22" height="22">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+        </svg>
+        <span class="google-btn-text">Sign In with Google</span>
+      </button>
+
+      <!-- Account Chooser / Demo Switcher -->
+      <div class="google-accounts-picker" id="googleAccountsPicker">
+        <div class="picker-heading">Choose Account or Quick-Sign In:</div>
+        <div class="google-account-option" onclick="chooseGoogleAccount('Sardar Gurpreet Singh', 'gurpreet.dairy@gmail.com')" title="Click to Sign In as Sardar Gurpreet Singh">
+          <div class="account-avatar">🚜</div>
+          <div class="account-details">
+            <span class="account-name">Sardar Gurpreet Singh</span>
+            <span class="account-email">gurpreet.dairy@gmail.com</span>
+          </div>
+          <span style="margin-left: auto; font-size: 0.72rem; color: #059669; font-weight: 700; background: #e8f5ee; padding: 2px 8px; border-radius: 10px;">1-Click</span>
+        </div>
+        <div class="google-account-option" onclick="chooseGoogleAccount('Ramesh Patel', 'ramesh.patel.dairy@gmail.com')" title="Click to Sign In as Ramesh Patel">
+          <div class="account-avatar">🌾</div>
+          <div class="account-details">
+            <span class="account-name">Ramesh Patel</span>
+            <span class="account-email">ramesh.patel.dairy@gmail.com</span>
+          </div>
+          <span style="margin-left: auto; font-size: 0.72rem; color: #059669; font-weight: 700; background: #e8f5ee; padding: 2px 8px; border-radius: 10px;">1-Click</span>
+        </div>
+        <div class="google-account-option" onclick="toggleCustomGoogleInput()" title="Type your own Name and Gmail ID">
+          <div class="account-avatar">👤</div>
+          <div class="account-details">
+            <span class="account-name">Use another Google account...</span>
+            <span class="account-email">Enter your name and Gmail address</span>
+          </div>
+          <span style="margin-left: auto; font-size: 0.76rem; color: var(--color-primary); font-weight: 600;">Edit ▾</span>
+        </div>
+
+        <!-- Inline Custom Google Account Input -->
+        <div id="customGoogleInputBox" style="display: none; padding: 12px; background: #fff; border: 1.5px solid #1a73e8; border-radius: 8px; margin-top: 6px; text-align: left;">
+          <label style="display: block; font-size: 0.76rem; font-weight: 700; color: #5f6368; margin-bottom: 4px;">Your Full Name:</label>
+          <input type="text" id="customGoogleName" placeholder="e.g. Bhanu Prakash" style="width: 100%; box-sizing: border-box; padding: 8px 10px; margin-bottom: 8px; border: 1px solid #dadce0; border-radius: 4px; font-size: 0.88rem; outline: none;" />
+          <label style="display: block; font-size: 0.76rem; font-weight: 700; color: #5f6368; margin-bottom: 4px;">Your Gmail Address:</label>
+          <input type="email" id="customGoogleEmail" placeholder="e.g. bhanu@gmail.com" style="width: 100%; box-sizing: border-box; padding: 8px 10px; margin-bottom: 10px; border: 1px solid #dadce0; border-radius: 4px; font-size: 0.88rem; outline: none;" />
+          <button type="button" onclick="submitInlineGoogleAccount()" style="width: 100%; background: #1a73e8; color: #fff; border: none; padding: 10px; border-radius: 4px; font-weight: 600; font-size: 0.88rem; cursor: pointer;">
+            Continue with this Google Account →
+          </button>
+        </div>
+      </div>
+
+      <!-- Agreement & Guest Link -->
+      <p class="gateway-terms">
+        By continuing, you agree to NutriAgro Feeds <a href="terms.html" target="_blank">Terms & Conditions</a> and <a href="terms.html#quality" target="_blank">Agricultural Quality Guarantee</a>.
+      </p>
+
+      <div class="gateway-footer-links">
+        <button type="button" class="guest-bypass-btn" onclick="bypassAsGuest()">
+          Explore Store as Guest (Browse Only) →
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- 1. Top Announcement Bar -->
   <aside class="top-announcement-bar" aria-label="Special Offers">
@@ -5268,6 +5774,39 @@ html, body {
         <span class="currency-badge-india" title="All feed prices shown in Indian Rupees (₹ INR)">
           🇮🇳 ₹ INR (Incl. GST)
         </span>
+
+        <!-- Farmer Account / Google User Button with Dropdown -->
+        <div class="user-dropdown-wrapper" id="userDropdownWrapper">
+          <button type="button" class="header-orders-btn header-account-btn" id="headerAccountBtn" onclick="handleHeaderAccountClick(event)" title="Farmer Sign In / Account" aria-label="Farmer Account">
+            <svg id="headerAccountDefaultIcon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span class="user-avatar-badge" id="headerUserAvatarBadge" style="display: none;">G</span>
+            <span class="header-orders-label" id="headerAccountLabel">Sign In</span>
+          </button>
+
+          <!-- User Profile Dropdown -->
+          <div class="user-menu-dropdown" id="userMenuDropdown">
+            <div class="user-menu-header">
+              <div class="user-menu-name" id="userDropdownName">Google User</div>
+              <div class="user-menu-email" id="userDropdownEmail">user@gmail.com</div>
+              <span style="display: inline-block; font-size: 0.72rem; font-weight: 700; color: #059669; background: rgba(5,150,105,0.1); padding: 2px 6px; border-radius: 4px; margin-top: 4px;">✓ Verified Member (10% Rebate)</span>
+            </div>
+            <button type="button" class="user-menu-item" onclick="openOrderTrackerModal(); closeUserMenu();">
+              <span>📦</span> My Placed Orders
+            </button>
+            <a href="signup.html" class="user-menu-item" onclick="closeUserMenu()">
+              <span>🚜</span> Farm Profile & Preferences
+            </a>
+            <a href="terms.html" class="user-menu-item" target="_blank" onclick="closeUserMenu()">
+              <span>📜</span> Terms & Quality Guarantee
+            </a>
+            <button type="button" class="user-menu-item logout" onclick="signOutUser(); closeUserMenu();">
+              <span>🚪</span> Sign Out / Switch Account
+            </button>
+          </div>
+        </div>
 
         <!-- Customer Orders Tracking Button -->
         <button type="button" class="header-orders-btn" id="headerOrdersBtn" onclick="openOrderTrackerModal()" title="View and Track Placed Feed Orders" aria-label="View Placed Orders">
@@ -5931,7 +6470,7 @@ html, body {
             <li><a href="#qualitySection">Guaranteed Lab Analysis</a></li>
             <li><a href="#testimonialsSection">Farm Case Studies</a></li>
             <li><a href="#faqSection">Feed Transition Guide</a></li>
-            <li><a href="#faqSection">Bulk Tonnage Rates</a></li>
+            <li><a href="terms.html">Terms & Conditions (Quality Agreement)</a></li>
           </ul>
         </div>
 
@@ -5950,9 +6489,9 @@ html, body {
       <div class="footer-bottom">
         <div>© 2026 NutriAgro Feeds India Pvt. Ltd. All rights reserved. Registered with FSSAI & BIS Livestock Feed Standards (India).</div>
         <div style="display: flex; gap: 20px;">
-          <a href="#" style="color: #7d968b;">Privacy Policy</a>
-          <a href="#" style="color: #7d968b;">Commercial Terms</a>
-          <a href="#" style="color: #7d968b;">MSDS & Feed Safety</a>
+          <a href="terms.html#privacy" style="color: #7d968b;">Privacy & Alerts</a>
+          <a href="terms.html" style="color: #7d968b;">Terms & Conditions</a>
+          <a href="terms.html#quality" style="color: #7d968b;">Aflatoxin & Quality Guarantee</a>
         </div>
       </div>
     </div>

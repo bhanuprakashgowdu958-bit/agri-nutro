@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Farmer Sign Up & Registration | NutriAgro Feeds™</title>
+  <meta name="description" content="Register your dairy, poultry, or aquaculture farm with NutriAgro Feeds. Direct millgate pricing, free farmgate delivery, and AI ration formulation." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>" />
+
+  <style>
+    :root {
+      --color-primary: #124d32;
+      --color-primary-dark: #0a311f;
+      --color-primary-light: #1b6a46;
+      --color-primary-soft: #e8f5ee;
+      --color-accent-gold: #e2920d;
+      --color-accent-gold-light: #fbeccf;
+      --color-accent-gold-dark: #b57105;
+      --color-dark: #121c17;
+      --color-dark-muted: #4a5d54;
+      --color-gray-50: #f7faf8;
+      --color-gray-100: #eef3f0;
+      --color-gray-200: #dce5e0;
+      --color-gray-300: #c2d1c9;
+      --color-gray-400: #93a89e;
+      --color-white: #ffffff;
+      --color-success: #198754;
+      --color-warning: #d97706;
+      --color-danger: #dc3545;
+      --font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+      --shadow-sm: 0 2px 8px rgba(18, 28, 23, 0.06);
+      --shadow-md: 0 8px 24px rgba(18, 28, 23, 0.08);
+      --shadow-lg: 0 16px 40px rgba(18, 28, 23, 0.12);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+      --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: linear-gradient(135deg, #0d3824 0%, #124d32 50%, #185a3b 100%);
+      color: var(--color-dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Background Glow */
+    body::before {
+      content: '';
+      position: absolute;
+      top: -200px;
+      right: -100px;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(226, 146, 13, 0.18) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: absolute;
+      bottom: -150px;
+      left: -100px;
+      width: 550px;
+      height: 550px;
+      background: radial-gradient(circle, rgba(2, 142, 117, 0.2) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Top Quick Announcement */
+    .top-strip {
+      background: rgba(10, 49, 31, 0.75);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 0.82rem;
+      padding: 8px 16px;
+      text-align: center;
+      position: relative;
+      z-index: 10;
+    }
+    .top-strip a {
+      color: var(--color-accent-gold);
+      text-decoration: underline;
+      font-weight: 600;
+    }
+
+    /* Main Container */
+    .signup-wrapper {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 1240px;
+      margin: 24px auto 40px;
+      padding: 0 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header Nav */
+    .signup-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .brand-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+    }
+    .brand-logo-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #1b6a46 0%, #0a311f 100%);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      color: var(--color-accent-gold);
+    }
+    .brand-title {
+      font-family: var(--font-heading);
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .brand-title span {
+      color: var(--color-accent-gold);
+    }
+    .brand-sub {
+      font-size: 0.76rem;
+      opacity: 0.85;
+      display: block;
+      color: #e2f7f3;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .back-home-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: var(--transition);
+      backdrop-filter: blur(6px);
+    }
+    .back-home-btn:hover {
+      background: rgba(255, 255, 255, 0.22);
+      transform: translateX(-2px);
+    }
+
+    /* Layout Split */
+    .signup-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.22fr;
+      gap: 32px;
+      align-items: start;
+    }
+
+    /* Left Showcase Pillar */
+    .showcase-card {
+      background: rgba(255, 255, 255, 0.07);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-lg);
+      padding: 36px 32px;
+      color: #fff;
+      box-shadow: var(--shadow-lg);
+      position: sticky;
+      top: 24px;
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(226, 146, 13, 0.2);
+      border: 1px solid rgba(226, 146, 13, 0.4);
+      color: var(--color-accent-gold-light);
+      padding: 5px 14px;
+      border-radius: var(--radius-full);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .showcase-title {
+      font-family: var(--font-heading);
+      font-size: 2.1rem;
+      font-weight: 800;
+      line-height: 1.22;
+      margin-bottom: 14px;
+      color: #ffffff;
+    }
+    .showcase-title span {
+      background: linear-gradient(90deg, #fbeccf 0%, #e2920d 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .showcase-desc {
+      color: #d2e4db;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    /* Benefits List */
+    .benefit-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .benefit-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      transition: var(--transition);
+    }
+    .benefit-item:hover {
+      background: rgba(255, 255, 255, 0.09);
+      border-color: rgba(226, 146, 13, 0.35);
+      transform: translateX(4px);
+    }
+    .benefit-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      background: rgba(226, 146, 13, 0.18);
+      color: var(--color-accent-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      flex-shrink: 0;
+    }
+    .benefit-text h4 {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 3px;
+    }
+    .benefit-text p {
+      font-size: 0.81rem;
+      color: #b7cebf;
+      line-height: 1.45;
+    }
+
+    /* Farmer Testimonial Card */
+    .testimonial-badge {
+      background: rgba(10, 49, 31, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      margin-top: 10px;
+    }
+    .testimonial-stars {
+      color: #f59e0b;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+    .testimonial-quote {
+      font-style: italic;
+      font-size: 0.85rem;
+      color: #e2f7f3;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+    .farmer-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .farmer-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #1b6a46;
+      border: 2px solid var(--color-accent-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+    .farmer-info h5 {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+    .farmer-info span {
+      font-size: 0.74rem;
+      color: #a4c4b2;
+    }
+
+    /* Right Form Card */
+    .form-card {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      padding: 40px 38px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
+      position: relative;
+    }
+
+    /* Tabs Header */
+    .form-tabs {
+      display: flex;
+      background: var(--color-gray-100);
+      border-radius: var(--radius-full);
+      padding: 4px;
+      margin-bottom: 28px;
+    }
+    .form-tab-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 10px 18px;
+      border-radius: var(--radius-full);
+      font-family: var(--font-heading);
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--color-dark-muted);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .form-tab-btn.active {
+      background: #ffffff;
+      color: var(--color-primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Card Titles */
+    .card-heading {
+      margin-bottom: 22px;
+    }
+    .card-heading h2 {
+      font-size: 1.55rem;
+      color: var(--color-dark);
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+    .card-heading p {
+      font-size: 0.88rem;
+      color: var(--color-dark-muted);
+      margin-top: 4px;
+    }
+
+    /* Form Sections */
+    .form-fieldset {
+      border: none;
+      margin-bottom: 24px;
+    }
+    .fieldset-legend {
+      font-family: var(--font-heading);
+      font-size: 0.82rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-primary);
+      background: var(--color-primary-soft);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 14px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .form-row .form-group {
+      margin-bottom: 0;
+    }
+
+    .form-label {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--color-dark);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .form-label .optional-tag {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--color-gray-500);
+    }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      color: var(--color-gray-400);
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .input-field {
+      width: 100%;
+      padding: 12px 14px 12px 42px;
+      border: 1.5px solid var(--color-gray-200);
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 0.92rem;
+      color: var(--color-dark);
+      background: var(--color-gray-50);
+      transition: var(--transition);
+      outline: none;
+    }
+    .input-field:focus {
+      background: #ffffff;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 4px rgba(18, 77, 50, 0.12);
+    }
+    .input-field.input-error {
+      border-color: var(--color-danger);
+      background: #fff8f8;
+    }
+
+    .toggle-pwd-btn {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-gray-500);
+      padding: 4px;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Password Strength Indicator */
+    .pwd-strength-container {
+      margin-top: 6px;
+    }
+    .strength-bar-track {
+      height: 4px;
+      background: var(--color-gray-200);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      display: flex;
+      gap: 3px;
+    }
+    .strength-segment {
+      flex: 1;
+      height: 100%;
+      background: transparent;
+      transition: background 0.25s ease;
+    }
+    .strength-text {
+      font-size: 0.72rem;
+      font-weight: 600;
+      margin-top: 4px;
+      color: var(--color-gray-500);
+    }
+
+    /* Farm Category Grid Picker */
+    .farm-type-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .farm-type-card {
+      border: 1.5px solid var(--color-gray-200);
+      border-radius: var(--radius-md);
+      padding: 10px 8px;
+      text-align: center;
+      cursor: pointer;
+      background: var(--color-gray-50);
+      transition: var(--transition);
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .farm-type-card:hover {
+      border-color: var(--color-primary-light);
+      background: #ffffff;
+      transform: translateY(-2px);
+    }
+    .farm-type-card.selected {
+      border-color: var(--color-primary);
+      background: var(--color-primary-soft);
+      box-shadow: 0 0 0 2px var(--color-primary);
+    }
+    .farm-type-card .card-emoji {
+      font-size: 1.5rem;
+    }
+    .farm-type-card .card-name {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--color-dark);
+      line-height: 1.25;
+    }
+
+    /* Scale / Herd Dropdown & Pincode Auto-Fill */
+    .custom-select {
+      width: 100%;
+      padding: 12px 14px 12px 40px;
+      border: 1.5px solid var(--color-gray-200);
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      background: var(--color-gray-50) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23657c72' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 14px center;
+      appearance: none;
+      outline: none;
+      color: var(--color-dark);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .custom-select:focus {
+      border-color: var(--color-primary);
+      background-color: #ffffff;
+      box-shadow: 0 0 0 4px rgba(18, 77, 50, 0.12);
+    }
+
+    .pincode-status {
+      font-size: 0.76rem;
+      font-weight: 600;
+      margin-top: 4px;
+      color: var(--color-primary);
+      display: none;
+    }
+
+    /* Checkbox & WhatsApp Opt-in */
+    .checkbox-wrap {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin: 16px 0;
+      cursor: pointer;
+    }
+    .checkbox-wrap input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--color-primary);
+      margin-top: 2px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .checkbox-label {
+      font-size: 0.83rem;
+      color: var(--color-dark-muted);
+      line-height: 1.45;
+    }
+    .checkbox-label strong {
+      color: var(--color-dark);
+    }
+
+    /* Submit CTA Button */
+    .submit-cta-btn {
+      width: 100%;
+      padding: 15px 24px;
+      border: none;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #124d32 0%, #1b6a46 100%);
+      color: #ffffff;
+      font-family: var(--font-heading);
+      font-size: 1.02rem;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(18, 77, 50, 0.35);
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .submit-cta-btn:hover {
+      background: linear-gradient(135deg, #0a311f 0%, #124d32 100%);
+      box-shadow: 0 12px 28px rgba(18, 77, 50, 0.45);
+      transform: translateY(-2px);
+    }
+    .submit-cta-btn:active {
+      transform: translateY(0);
+    }
+
+    .demo-autofill-btn {
+      margin-top: 14px;
+      width: 100%;
+      padding: 10px 16px;
+      background: rgba(226, 146, 13, 0.1);
+      border: 1px dashed var(--color-accent-gold);
+      border-radius: var(--radius-md);
+      color: var(--color-accent-gold-dark);
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+    .demo-autofill-btn:hover {
+      background: rgba(226, 146, 13, 0.2);
+    }
+
+    /* Modal / Alert Toast */
+    .success-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(18, 28, 23, 0.85);
+      backdrop-filter: blur(10px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .success-modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .success-modal-card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 520px;
+      border-radius: var(--radius-lg);
+      padding: 36px 32px;
+      text-align: center;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+      transform: scale(0.92);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .success-modal-overlay.open .success-modal-card {
+      transform: scale(1);
+    }
+
+    .modal-icon-circle {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 18px;
+      border-radius: 50%;
+      background: var(--color-primary-soft);
+      border: 3px solid var(--color-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+    }
+
+    .modal-title {
+      font-family: var(--font-heading);
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--color-dark);
+      margin-bottom: 8px;
+    }
+
+    .modal-sub {
+      color: var(--color-dark-muted);
+      font-size: 0.94rem;
+      line-height: 1.5;
+      margin-bottom: 22px;
+    }
+
+    .coupon-box {
+      background: #fff8eb;
+      border: 1.5px dashed var(--color-accent-gold);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .coupon-code {
+      font-family: monospace;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--color-accent-gold-dark);
+      letter-spacing: 0.05em;
+    }
+    .coupon-tag {
+      font-size: 0.76rem;
+      font-weight: 700;
+      background: var(--color-accent-gold);
+      color: #fff;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+    }
+
+    .modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .modal-btn-primary {
+      width: 100%;
+      padding: 13px 20px;
+      border: none;
+      border-radius: var(--radius-md);
+      background: var(--color-primary);
+      color: #fff;
+      font-size: 0.96rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: var(--transition);
+    }
+    .modal-btn-primary:hover {
+      background: var(--color-primary-dark);
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .signup-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+      .showcase-card {
+        position: static;
+        padding: 28px 22px;
+      }
+      .form-card {
+        padding: 28px 22px;
+      }
+      .showcase-title {
+        font-size: 1.7rem;
+      }
+      .farm-type-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      .signup-wrapper {
+        margin: 12px auto 28px;
+        padding: 0 14px;
+      }
+      .form-card {
+        padding: 24px 18px;
+      }
+      .showcase-card {
+        padding: 22px 18px;
+      }
+      .farm-type-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <div class="top-strip">
+    🌾 <strong>Pan-India Commercial Livestock Feeds:</strong> Register now for Direct Farmgate Freight Discounts & AI Ration Formulation. Need help? Call Toll-Free: <a href="tel:18008904567">1800-890-4567</a>
+  </div>
+
+  <div class="signup-wrapper">
+    <!-- Navigation Header -->
+    <header class="signup-nav">
+      <a href="index.html" class="brand-link" title="Return to NutriAgro Feeds Homepage">
+        <div class="brand-logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a10 10 0 0 1 10 10c0 5.5-4.5 10-10 10S2 17.5 2 12A10 10 0 0 1 12 2z"/>
+            <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+            <path d="M12 6v6"/>
+            <path d="M9 9l3-3 3 3"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">Nutri<span>Agro</span> Feeds™</div>
+          <span class="brand-sub">Commercial Livestock Nutrition</span>
+        </div>
+      </a>
+
+      <div class="nav-actions">
+        <a href="index.html" class="back-home-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+          Back to Store
+        </a>
+      </div>
+    </header>
+
+    <!-- Split Grid Layout -->
+    <main class="signup-grid">
+
+      <!-- LEFT: Trust, Value Stack & Farmer Social Proof -->
+      <section class="showcase-card">
+        <div class="badge-pill">
+          <span>⭐️ ISO 9001:2015 Certified Milling</span>
+        </div>
+
+        <h1 class="showcase-title">
+          Join <span>12,500+ Farmers</span> & Dairies Across India
+        </h1>
+
+        <p class="showcase-desc">
+          Get direct access to wholesale millgate rations, guaranteed aflatoxin screening, and automated doorstep freight delivery straight to your farmgate.
+        </p>
+
+        <div class="benefit-stack">
+          <div class="benefit-item">
+            <div class="benefit-icon">🌾</div>
+            <div class="benefit-text">
+              <h4>Direct Millgate Pricing</h4>
+              <p>Save 18% to 22% per 50kg bag by cutting out local intermediaries and middle dealers.</p>
+            </div>
+          </div>
+
+          <div class="benefit-item">
+            <div class="benefit-icon">🚚</div>
+            <div class="benefit-text">
+              <h4>Free Farmgate Delivery</h4>
+              <p>Zero freight charges on bulk orders of 15+ bags. Dedicated rural hauler trucks with live SMS alerts.</p>
+            </div>
+          </div>
+
+          <div class="benefit-item">
+            <div class="benefit-icon">🧪</div>
+            <div class="benefit-text">
+              <h4>100% Lab Tested & Certified</h4>
+              <p>Every single batch passes moisture, crude protein, and ultra-strict aflatoxin lab clearance.</p>
+            </div>
+          </div>
+
+          <div class="benefit-item">
+            <div class="benefit-icon">🤖</div>
+            <div class="benefit-text">
+              <h4>Free Gemini AI Ration Formulation</h4>
+              <p>Custom daily nutrition balancing based on your herd breed, milk yield, and local weather.</p>
+            </div>
+          </div>
+
+          <div class="benefit-item">
+            <div class="benefit-icon">📱</div>
+            <div class="benefit-text">
+              <h4>WhatsApp Live Dispatch Updates</h4>
+              <p>Track your hauler driver, arrival ETA, and download official GST tax invoices with 1 tap.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Real Farmer Social Proof -->
+        <div class="testimonial-badge">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-quote">
+            "Switched our 45-cow dairy herd in Ludhiana to NutriBov LactaMax. Milk yield went up by 2.2L per cow per day within 3 weeks, and deliveries always arrive right on time."
+          </p>
+          <div class="farmer-profile">
+            <div class="farmer-avatar">🚜</div>
+            <div class="farmer-info">
+              <h5>Sardar Gurpreet Singh</h5>
+              <span>Golden Harvest Dairy Farm • Ludhiana, Punjab</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: Interactive Signup & Signin Form Card -->
+      <section class="form-card">
+        <!-- Tab Selector: Register vs Sign In -->
+        <div class="form-tabs" role="tablist">
+          <button type="button" class="form-tab-btn active" id="tabRegisterBtn" onclick="switchFormMode('register')">
+            <span>✨ Create Farm Account</span>
+          </button>
+          <button type="button" class="form-tab-btn" id="tabLoginBtn" onclick="switchFormMode('login')">
+            <span>🔑 Farmer Sign In</span>
+          </button>
+        </div>
+
+        <!-- Mode 1: Register Form -->
+        <form id="signupForm" onsubmit="handleFarmerSubmit(event)">
+          <div class="card-heading">
+            <h2 id="formTitle">Register Your Farm</h2>
+            <p id="formSubtitle">Set up your profile in 1 click with Google or enter custom farm details below.</p>
+          </div>
+
+          <!-- Fast 1-Click Google Sign In -->
+          <div style="margin-bottom: 22px;">
+            <button type="button" class="google-btn" onclick="signUpWithGoogleFast()" style="width: 100%; border: 1.5px solid #dadce0; box-shadow: 0 2px 6px rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; border-radius: var(--radius-md); background: #fff; cursor: pointer; font-size: 0.95rem; font-weight: 600; color: #3c4043;">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+              <span>Instant 1-Click Sign Up with Google</span>
+            </button>
+            <div style="display: flex; align-items: center; margin: 18px 0 10px; color: var(--color-gray-400); font-size: 0.76rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.04em;">
+              <span style="flex: 1; height: 1px; background: var(--color-gray-200);"></span>
+              <span style="padding: 0 12px; color: var(--color-dark-muted);">or register farm manually</span>
+              <span style="flex: 1; height: 1px; background: var(--color-gray-200);"></span>
+            </div>
+          </div>
+
+          <!-- Section 1: Farmer Personal & Contact -->
+          <fieldset class="form-fieldset">
+            <legend class="fieldset-legend">👤 1. Contact & Credentials</legend>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="farmerName">Full Name / Farm In-Charge *</label>
+                <div class="input-wrap">
+                  <span class="input-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  </span>
+                  <input type="text" id="farmerName" class="input-field" placeholder="e.g. Ramesh Patel" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="farmerPhone">Mobile Number (WhatsApp) *</label>
+                <div class="input-wrap">
+                  <span class="input-icon" style="font-weight: 700; font-size: 0.85rem; color: var(--color-primary);">+91</span>
+                  <input type="tel" id="farmerPhone" class="input-field" placeholder="9876543210" pattern="[0-9]{10}" maxlength="10" required />
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="farmerEmail">Email Address <span class="optional-tag">(Optional)</span></label>
+                <div class="input-wrap">
+                  <span class="input-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                  </span>
+                  <input type="email" id="farmerEmail" class="input-field" placeholder="name@farm.com" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="farmerPassword">Create Password *</label>
+                <div class="input-wrap">
+                  <span class="input-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  </span>
+                  <input type="password" id="farmerPassword" class="input-field" placeholder="At least 6 characters" minlength="6" oninput="checkPwdStrength(this.value)" required />
+                  <button type="button" class="toggle-pwd-btn" onclick="togglePasswordVisibility('farmerPassword', this)" title="Show/Hide Password">
+                    👁️
+                  </button>
+                </div>
+                <!-- Dynamic Strength Bar -->
+                <div class="pwd-strength-container" id="strengthContainer">
+                  <div class="strength-bar-track">
+                    <div class="strength-segment" id="seg1"></div>
+                    <div class="strength-segment" id="seg2"></div>
+                    <div class="strength-segment" id="seg3"></div>
+                  </div>
+                  <div class="strength-text" id="strengthText">Password Strength: Minimum 6 chars</div>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Section 2: Farm & Livestock Profile (Agritech Customization) -->
+          <fieldset class="form-fieldset" id="farmProfileFieldset">
+            <legend class="fieldset-legend">🐄 2. Farm & Livestock Category</legend>
+            
+            <div class="form-group">
+              <label class="form-label">Select Your Primary Livestock Type *</label>
+              <div class="farm-type-grid" id="farmTypeGrid">
+                <div class="farm-type-card selected" onclick="selectFarmType('Dairy Cattle & Buffalo', this)">
+                  <span class="card-emoji">🐄</span>
+                  <span class="card-name">Dairy Cattle & Buffalo</span>
+                </div>
+                <div class="farm-type-card" onclick="selectFarmType('Poultry (Broiler & Layer)', this)">
+                  <span class="card-emoji">🐔</span>
+                  <span class="card-name">Poultry Broiler / Layer</span>
+                </div>
+                <div class="farm-type-card" onclick="selectFarmType('Aquaculture & Fish', this)">
+                  <span class="card-emoji">🐟</span>
+                  <span class="card-name">Aquaculture / Fish</span>
+                </div>
+                <div class="farm-type-card" onclick="selectFarmType('Sheep & Goat Breeding', this)">
+                  <span class="card-emoji">🐐</span>
+                  <span class="card-name">Sheep & Goat Breeding</span>
+                </div>
+                <div class="farm-type-card" onclick="selectFarmType('Commercial Swine', this)">
+                  <span class="card-emoji">🐖</span>
+                  <span class="card-name">Commercial Swine</span>
+                </div>
+                <div class="farm-type-card" onclick="selectFarmType('Feed Retailer / Dealer', this)">
+                  <span class="card-emoji">🏪</span>
+                  <span class="card-name">Retailer / Feed Dealer</span>
+                </div>
+              </div>
+              <input type="hidden" id="selectedFarmType" value="Dairy Cattle & Buffalo" />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="farmName">Farm / Dairy Trade Name *</label>
+                <div class="input-wrap">
+                  <span class="input-icon">🏡</span>
+                  <input type="text" id="farmName" class="input-field" placeholder="e.g. Krishna Dairy Farm" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="herdSize">Operational Scale / Herd Size *</label>
+                <select id="herdSize" class="custom-select" required>
+                  <option value="Micro / Backyard (1-10 Animals / <500 Birds)">Micro / Backyard (1-10 Animals / &lt;500 Birds)</option>
+                  <option value="Progressive Farm (10-40 Animals / 500-5,000 Birds)" selected>Progressive Farm (10-40 Animals / 500-5,000 Birds)</option>
+                  <option value="Commercial Dairy / Unit (40-150 Animals / 5,000-20,000 Birds)">Commercial Unit (40-150 Animals / 5,000-20,000 Birds)</option>
+                  <option value="Large Industrial Enterprise (150+ Animals / 20,000+ Birds)">Large Industrial Enterprise (150+ Animals / 20,000+ Birds)</option>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Section 3: Farmgate Delivery Address & Pincode -->
+          <fieldset class="form-fieldset" id="addressFieldset">
+            <legend class="fieldset-legend">📍 3. Farmgate Delivery Location</legend>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="pincode">6-Digit Pincode *</label>
+                <div class="input-wrap">
+                  <span class="input-icon">📮</span>
+                  <input type="text" id="pincode" class="input-field" placeholder="e.g. 560100" maxlength="6" pattern="[0-9]{6}" oninput="lookupPincode(this.value)" required />
+                </div>
+                <div class="pincode-status" id="pincodeStatus"></div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="stateSelect">State & Territory *</label>
+                <select id="stateSelect" class="custom-select" required>
+                  <option value="Karnataka" selected>Karnataka</option>
+                  <option value="Tamil Nadu">Tamil Nadu</option>
+                  <option value="Andhra Pradesh">Andhra Pradesh</option>
+                  <option value="Telangana">Telangana</option>
+                  <option value="Maharashtra">Maharashtra</option>
+                  <option value="Punjab">Punjab</option>
+                  <option value="Haryana">Haryana</option>
+                  <option value="Gujarat">Gujarat</option>
+                  <option value="Uttar Pradesh">Uttar Pradesh</option>
+                  <option value="Rajasthan">Rajasthan</option>
+                  <option value="Kerala">Kerala</option>
+                  <option value="Madhya Pradesh">Madhya Pradesh</option>
+                  <option value="West Bengal">West Bengal</option>
+                  <option value="Bihar">Bihar</option>
+                  <option value="Odisha">Odisha</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="farmAddress">Village / Farmgate Address & Landmark *</label>
+              <div class="input-wrap">
+                <span class="input-icon">🚚</span>
+                <input type="text" id="farmAddress" class="input-field" placeholder="Survey No., Canal road, Nearest landmark for hauler truck" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="gstin">GSTIN Number <span class="optional-tag">(Optional - For Input Tax Credit)</span></label>
+              <div class="input-wrap">
+                <span class="input-icon">🏛️</span>
+                <input type="text" id="gstin" class="input-field" placeholder="29AAAAA0000A1Z5" maxlength="15" />
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Checkboxes -->
+          <div class="checkbox-wrap">
+            <input type="checkbox" id="whatsappAlerts" checked />
+            <label class="checkbox-label" for="whatsappAlerts">
+              Receive <strong>WhatsApp order dispatch & driver location alerts</strong> for all feed shipments.
+            </label>
+          </div>
+
+          <div class="checkbox-wrap" id="termsWrap">
+            <input type="checkbox" id="termsAgree" required />
+            <label class="checkbox-label" for="termsAgree">
+              I agree to the <a href="javascript:void(0)" onclick="openTermsModal()" style="color: var(--color-primary); font-weight: 700; text-decoration: underline;">NutriAgro Feeds Terms & Conditions</a> and <a href="javascript:void(0)" onclick="openTermsModal()" style="color: var(--color-primary); font-weight: 700; text-decoration: underline;">Agricultural Quality Guarantee</a>. <button type="button" onclick="openTermsModal()" style="margin-left: 6px; background: rgba(18, 77, 50, 0.1); border: 1px solid rgba(18, 77, 50, 0.25); color: var(--color-primary); font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 9999px; cursor: pointer;">📜 Read Terms</button>
+            </label>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="submit-cta-btn" id="submitBtn">
+            <span>🚜 Create Farmer Account & Unlock Discounts</span>
+          </button>
+
+          <!-- Demo Quick Fill Button -->
+          <button type="button" class="demo-autofill-btn" onclick="fillDemoFarmer()">
+            <span>⚡ 1-Click Fill Demo Progressive Farmer Details</span>
+          </button>
+        </form>
+
+        <!-- Mode 2: Login Form (Hidden by default) -->
+        <form id="loginForm" style="display: none;" onsubmit="handleFarmerLogin(event)">
+          <div class="card-heading">
+            <h2>Farmer Sign In</h2>
+            <p>Access your past feed orders, repeat deliveries, and farm credit status.</p>
+          </div>
+
+          <!-- 1-Click Fast Google Sign In for Returning Farmers -->
+          <div style="margin-bottom: 20px;">
+            <button type="button" class="google-btn" onclick="signUpWithGoogleFast()" style="width: 100%; border: 1.5px solid #dadce0; box-shadow: 0 2px 6px rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; border-radius: var(--radius-md); background: #fff; cursor: pointer; font-size: 0.95rem; font-weight: 600; color: #3c4043; transition: all 0.2s;">
+              <svg viewBox="0 0 24 24" width="20" height="20">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+              <span>Instant 1-Click Sign In with Google</span>
+            </button>
+            <div style="display: flex; align-items: center; margin: 18px 0 10px; color: var(--color-gray-400); font-size: 0.76rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.04em;">
+              <span style="flex: 1; height: 1px; background: var(--color-gray-200);"></span>
+              <span style="padding: 0 12px; color: var(--color-dark-muted);">or sign in with password</span>
+              <span style="flex: 1; height: 1px; background: var(--color-gray-200);"></span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="loginPhone">Registered Mobile Number or Email *</label>
+            <div class="input-wrap">
+              <span class="input-icon">📱</span>
+              <input type="text" id="loginPhone" class="input-field" placeholder="9876543210 or email" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="loginPassword">Password *</label>
+            <div class="input-wrap">
+              <span class="input-icon">🔒</span>
+              <input type="password" id="loginPassword" class="input-field" placeholder="Enter your password" required />
+              <button type="button" class="toggle-pwd-btn" onclick="togglePasswordVisibility('loginPassword', this)">
+                👁️
+              </button>
+            </div>
+          </div>
+
+          <div class="checkbox-wrap">
+            <input type="checkbox" id="rememberMe" checked />
+            <label class="checkbox-label" for="rememberMe">
+              Remember my farm account on this device
+            </label>
+          </div>
+
+          <button type="submit" class="submit-cta-btn">
+            <span>🌾 Sign In to Farm Dashboard</span>
+          </button>
+
+          <button type="button" class="demo-autofill-btn" onclick="fillDemoLogin()">
+            <span>⚡ 1-Click Sign In as Demo Farmer (Gurpreet Singh)</span>
+          </button>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <!-- Success Celebratory Modal -->
+  <div class="success-modal-overlay" id="successModal" role="dialog" aria-modal="true">
+    <div class="success-modal-card">
+      <div class="modal-icon-circle">🎉</div>
+      <h3 class="modal-title" id="modalWelcomeTitle">Welcome to NutriAgro!</h3>
+      <p class="modal-sub" id="modalWelcomeSub">
+        Your farm profile has been officially registered with the NutriAgro Central Milling Hub.
+      </p>
+
+      <div class="coupon-box">
+        <div>
+          <div style="font-size: 0.76rem; color: var(--color-gray-500); text-align: left;">YOUR EXCLUSIVE FIRST ORDER VOUCHER:</div>
+          <div class="coupon-code">FARM10</div>
+        </div>
+        <span class="coupon-tag">10% OFF</span>
+      </div>
+
+      <div class="modal-actions">
+        <a href="index.html" class="modal-btn-primary" onclick="proceedToStore()">
+          🌾 Explore Commercial Feed Catalog
+        </a>
+        <button type="button" class="back-home-btn" style="color: var(--color-primary); background: var(--color-gray-100); justify-content: center; width: 100%; border: none; padding: 12px;" onclick="closeModalAndGo()">
+          View Placed Orders & Live Status
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Terms & Conditions Interactive Modal -->
+  <div class="success-modal-overlay" id="termsModal" role="dialog" aria-modal="true" style="z-index: 10000;">
+    <div class="success-modal-card" style="max-width: 680px; text-align: left; max-height: 85vh; display: flex; flex-direction: column; padding: 0; overflow: hidden;">
+      <div style="padding: 20px 24px; border-bottom: 1.5px solid var(--color-gray-200); display: flex; align-items: center; justify-content: space-between; background: var(--color-gray-50);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.4rem;">📜</span>
+          <div>
+            <h3 style="font-family: var(--font-heading); font-size: 1.15rem; font-weight: 800; color: var(--color-dark); margin: 0;">NutriAgro Feeds™ Terms & Conditions</h3>
+            <span style="font-size: 0.74rem; color: var(--color-dark-muted);">Official Agricultural Quality & Farmgate Delivery Agreement</span>
+          </div>
+        </div>
+        <button type="button" onclick="closeTermsModal()" style="background: none; border: none; font-size: 1.5rem; line-height: 1; cursor: pointer; color: var(--color-gray-500); padding: 4px 8px;">&times;</button>
+      </div>
+
+      <div class="terms-scroll-body" style="padding: 24px; overflow-y: auto; flex: 1; font-size: 0.88rem; color: var(--color-dark-muted); line-height: 1.6;">
+        <div style="margin-bottom: 20px; padding: 12px 16px; background: var(--color-primary-soft); border-left: 4px solid var(--color-primary); border-radius: 4px; color: var(--color-primary-dark); font-size: 0.84rem;">
+          🌾 <strong>Summary for Farmers:</strong> All feed batches are 100% aflatoxin-screened. Orders of 15+ bags qualify for free farmgate freight. Damaged bags are replaced within 48 hours.
+        </div>
+
+        <h4 style="color: var(--color-dark); font-size: 0.95rem; font-weight: 800; margin-bottom: 6px;">1. 100% Aflatoxin Clearance & Lab Quality</h4>
+        <p style="margin-bottom: 14px;">Every batch undergoes ELISA screening to ensure total aflatoxin levels remain strictly under 20 ppb. Moisture is maintained below 12% to prevent mold growth during farm storage. Tamper-evident bags are heat-sealed at the central mill.</p>
+
+        <h4 style="color: var(--color-dark); font-size: 0.95rem; font-weight: 800; margin-bottom: 6px;">2. Free Farmgate Freight & Delivery Guidelines</h4>
+        <p style="margin-bottom: 14px;">Orders of 15 bags (750 kg) or more receive 100% Free Farmgate Freight Delivery. Customer must ensure an accessible road for delivery trucks (minimum 10-foot width) and arrange farm labor to assist unloading into dry storage.</p>
+
+        <h4 style="color: var(--color-dark); font-size: 0.95rem; font-weight: 800; margin-bottom: 6px;">3. 7-Day Gradual Herd Transition Protocol</h4>
+        <p style="margin-bottom: 14px;">To protect rumen digestion, transition livestock gradually over 7 days (25% new feed on Days 1-2, 50% on Days 3-4, 75% on Days 5-6, 100% on Day 7). Provide continuous fresh drinking water.</p>
+
+        <h4 style="color: var(--color-dark); font-size: 0.95rem; font-weight: 800; margin-bottom: 6px;">4. Bag Damage & 48-Hour Replacement Guarantee</h4>
+        <p style="margin-bottom: 14px;">If any bag arrives torn or wet due to transit weather, report it with a photo to our toll-free hotline (1800-890-4567) within 48 hours for immediate replacement.</p>
+
+        <h4 style="color: var(--color-dark); font-size: 0.95rem; font-weight: 800; margin-bottom: 6px;">5. Payment on Delivery & GST Invoices</h4>
+        <p style="margin-bottom: 14px;">Payment accepted via Cash on Delivery (COD), UPI (PhonePe / GPay), or site cheque upon physical bag arrival. Commercial entities receive official tax invoices.</p>
+
+        <div style="margin-top: 10px; font-size: 0.82rem; text-align: center;">
+          <a href="terms.html" target="_blank" style="color: var(--color-primary); font-weight: 700; text-decoration: underline;">Open Full Detailed Terms Page in New Tab ↗</a>
+        </div>
+      </div>
+
+      <div style="padding: 16px 24px; border-top: 1.5px solid var(--color-gray-200); display: flex; align-items: center; justify-content: space-between; background: var(--color-gray-50);">
+        <button type="button" onclick="closeTermsModal()" style="padding: 10px 18px; border: 1.5px solid var(--color-gray-300); background: #fff; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; color: var(--color-dark);">Close</button>
+        <button type="button" onclick="acceptTermsAndClose()" style="padding: 10px 22px; border: none; background: var(--color-primary); color: #fff; border-radius: var(--radius-md); font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(18,77,50,0.25);">✓ I Have Read & Accept Terms</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Logic -->
+  <script>
+    function openTermsModal() {
+      document.getElementById('termsModal').classList.add('open');
+    }
+    function closeTermsModal() {
+      document.getElementById('termsModal').classList.remove('open');
+    }
+    function acceptTermsAndClose() {
+      document.getElementById('termsAgree').checked = true;
+      closeTermsModal();
+    }
+
+    function signUpWithGoogleFast() {
+      const name = 'Sardar Gurpreet Singh';
+      const email = 'gurpreet.dairy@gmail.com';
+      const googleUser = {
+        userId: 'GOOGLE-' + Math.floor(100000 + Math.random() * 900000),
+        fullName: name,
+        email: email,
+        phone: '9876543210',
+        authProvider: 'google',
+        farmName: `${name.split(' ')[0]}'s Commercial Farm`,
+        farmType: 'Dairy Cattle & Buffalo',
+        tier: 'Verified Google Member (10% Rebate)',
+        signedInAt: new Date().toISOString()
+      };
+      localStorage.setItem('nutriagro_user', JSON.stringify(googleUser));
+      document.getElementById('modalWelcomeTitle').textContent = `Welcome, ${name.split(' ')[0]}!`;
+      document.getElementById('modalWelcomeSub').textContent = `Your Google account (${email}) is connected. 10% wholesale discount (FARM10) unlocked.`;
+      document.getElementById('successModal').classList.add('open');
+    }
+
+    // Tab Switching
+    function switchFormMode(mode) {
+      const regForm = document.getElementById('signupForm');
+      const logForm = document.getElementById('loginForm');
+      const tabReg = document.getElementById('tabRegisterBtn');
+      const tabLog = document.getElementById('tabLoginBtn');
+
+      if (mode === 'login') {
+        regForm.style.display = 'none';
+        logForm.style.display = 'block';
+        tabReg.classList.remove('active');
+        tabLog.classList.add('active');
+      } else {
+        regForm.style.display = 'block';
+        logForm.style.display = 'none';
+        tabReg.classList.add('active');
+        tabLog.classList.remove('active');
+      }
+    }
+
+    // Livestock Type Selector
+    function selectFarmType(type, element) {
+      document.getElementById('selectedFarmType').value = type;
+      document.querySelectorAll('.farm-type-card').forEach(card => card.classList.remove('selected'));
+      element.classList.add('selected');
+    }
+
+    // Password Visibility Toggle
+    function togglePasswordVisibility(fieldId, btn) {
+      const input = document.getElementById(fieldId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '🔒';
+      } else {
+        input.type = 'password';
+        btn.textContent = '👁️';
+      }
+    }
+
+    // Password Strength Meter
+    function checkPwdStrength(val) {
+      const seg1 = document.getElementById('seg1');
+      const seg2 = document.getElementById('seg2');
+      const seg3 = document.getElementById('seg3');
+      const txt = document.getElementById('strengthText');
+
+      if (!val || val.length === 0) {
+        seg1.style.background = 'transparent';
+        seg2.style.background = 'transparent';
+        seg3.style.background = 'transparent';
+        txt.textContent = 'Password Strength: Minimum 6 chars';
+        txt.style.color = 'var(--color-gray-500)';
+        return;
+      }
+
+      let score = 0;
+      if (val.length >= 6) score++;
+      if (val.length >= 8 && /[0-9]/.test(val)) score++;
+      if (/[A-Z]/.test(val) && /[^A-Za-z0-9]/.test(val)) score++;
+
+      if (score === 1) {
+        seg1.style.background = '#dc3545';
+        seg2.style.background = 'transparent';
+        seg3.style.background = 'transparent';
+        txt.textContent = 'Password: Weak (Add numbers & uppercase)';
+        txt.style.color = '#dc3545';
+      } else if (score === 2) {
+        seg1.style.background = '#e2920d';
+        seg2.style.background = '#e2920d';
+        seg3.style.background = 'transparent';
+        txt.textContent = 'Password: Good (Strong security)';
+        txt.style.color = '#b57105';
+      } else {
+        seg1.style.background = '#198754';
+        seg2.style.background = '#198754';
+        seg3.style.background = '#198754';
+        txt.textContent = 'Password: Very Strong & Secure! 🛡️';
+        txt.style.color = '#198754';
+      }
+    }
+
+    // Pincode Auto Lookup
+    const PIN_DIRECTORY = {
+      '560': { state: 'Karnataka', area: 'Bengaluru / Urban' },
+      '570': { state: 'Karnataka', area: 'Mysuru District' },
+      '580': { state: 'Karnataka', area: 'Hubballi / Dharwad' },
+      '600': { state: 'Tamil Nadu', area: 'Chennai Region' },
+      '641': { state: 'Tamil Nadu', area: 'Coimbatore Cattle Belt' },
+      '637': { state: 'Tamil Nadu', area: 'Namakkal Poultry Hub' },
+      '500': { state: 'Telangana', area: 'Hyderabad / Ranga Reddy' },
+      '520': { state: 'Andhra Pradesh', area: 'Vijayawada Aqua Belt' },
+      '530': { state: 'Andhra Pradesh', area: 'Visakhapatnam District' },
+      '400': { state: 'Maharashtra', area: 'Mumbai / Thane' },
+      '411': { state: 'Maharashtra', area: 'Pune Dairy Belt' },
+      '141': { state: 'Punjab', area: 'Ludhiana Dairy District' },
+      '143': { state: 'Punjab', area: 'Amritsar District' },
+      '124': { state: 'Haryana', area: 'Rohtak Murrah Buffalo Belt' },
+      '380': { state: 'Gujarat', area: 'Ahmedabad / Anand Dairy Zone' }
+    };
+
+    function lookupPincode(pin) {
+      const status = document.getElementById('pincodeStatus');
+      const stateSelect = document.getElementById('stateSelect');
+      if (pin && pin.length >= 3) {
+        const prefix = pin.substring(0, 3);
+        if (PIN_DIRECTORY[prefix]) {
+          const match = PIN_DIRECTORY[prefix];
+          status.style.display = 'block';
+          status.textContent = `✓ Auto-detected Hub: ${match.area} (${match.state})`;
+          stateSelect.value = match.state;
+          return;
+        }
+      }
+      status.style.display = 'none';
+    }
+
+    // 1-Click Demo Farmer Fill
+    function fillDemoFarmer() {
+      document.getElementById('farmerName').value = 'Ramesh Patel';
+      document.getElementById('farmerPhone').value = '9876543210';
+      document.getElementById('farmerEmail').value = 'ramesh.patel.dairy@gmail.com';
+      document.getElementById('farmerPassword').value = 'NutriAgro2026!';
+      checkPwdStrength('NutriAgro2026!');
+      selectFarmType('Dairy Cattle & Buffalo', document.querySelectorAll('.farm-type-card')[0]);
+      document.getElementById('farmName').value = 'Patel High-Yield Dairy & Milk Chilling Center';
+      document.getElementById('herdSize').value = 'Commercial Dairy / Unit (40-150 Animals / 5,000-20,000 Birds)';
+      document.getElementById('pincode').value = '560100';
+      lookupPincode('560100');
+      document.getElementById('farmAddress').value = 'Survey No. 42, Hosur Road, Near Milk Chilling Hub';
+      document.getElementById('gstin').value = '29AABCP1234D1Z8';
+      document.getElementById('whatsappAlerts').checked = true;
+      document.getElementById('termsAgree').checked = true;
+    }
+
+    // 1-Click Demo Login
+    function fillDemoLogin() {
+      document.getElementById('loginPhone').value = '9876543210';
+      document.getElementById('loginPassword').value = 'NutriAgro2026!';
+    }
+
+    // Form Submit Handler (Register)
+    async function handleFarmerSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span>🚜 Registering Farm with Central Mill...</span>';
+
+      const user = {
+        userId: 'FARM-' + Math.floor(100000 + Math.random() * 900000),
+        fullName: document.getElementById('farmerName').value.trim(),
+        phone: document.getElementById('farmerPhone').value.trim(),
+        email: document.getElementById('farmerEmail').value.trim(),
+        farmType: document.getElementById('selectedFarmType').value,
+        farmName: document.getElementById('farmName').value.trim(),
+        herdSize: document.getElementById('herdSize').value,
+        pincode: document.getElementById('pincode').value.trim(),
+        state: document.getElementById('stateSelect').value,
+        address: document.getElementById('farmAddress').value.trim(),
+        gstin: document.getElementById('gstin').value.trim(),
+        whatsappAlerts: document.getElementById('whatsappAlerts').checked,
+        registeredAt: new Date().toISOString(),
+        tier: 'Progressive Farmer (10% First-Order Rebate)'
+      };
+
+      // Save to localStorage
+      try {
+        localStorage.setItem('nutriagro_user', JSON.stringify(user));
+        let usersList = JSON.parse(localStorage.getItem('nutriagro_users_list') || '[]');
+        usersList.unshift(user);
+        localStorage.setItem('nutriagro_users_list', JSON.stringify(usersList));
+      } catch (err) {}
+
+      // Try API persistence
+      try {
+        await fetch('/api/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(user)
+        });
+      } catch (err) {}
+
+      // Show celebratory modal
+      document.getElementById('modalWelcomeTitle').textContent = `Welcome, ${user.fullName.split(' ')[0]}!`;
+      document.getElementById('modalWelcomeSub').textContent = `Your farm "${user.farmName}" is successfully registered for direct farmgate dispatch in ${user.state}.`;
+      document.getElementById('successModal').classList.add('open');
+
+      btn.disabled = false;
+      btn.innerHTML = '<span>🚜 Create Farmer Account & Unlock Discounts</span>';
+    }
+
+    // Form Submit Handler (Login)
+    function handleFarmerLogin(e) {
+      e.preventDefault();
+      const identifier = document.getElementById('loginPhone').value.trim();
+      
+      // Look for user in localStorage
+      let usersList = JSON.parse(localStorage.getItem('nutriagro_users_list') || '[]');
+      let matched = usersList.find(u => u.phone === identifier || u.email === identifier);
+
+      if (!matched) {
+        matched = {
+          userId: 'FARM-991204',
+          fullName: 'Sardar Gurpreet Singh',
+          phone: identifier.match(/^[0-9]+$/) ? identifier : '9876543210',
+          email: identifier.includes('@') ? identifier : 'gurpreet.dairy@gmail.com',
+          farmType: 'Dairy Cattle & Buffalo',
+          farmName: 'Golden Harvest Dairy Farm',
+          state: 'Punjab',
+          tier: 'Progressive Farmer Tier'
+        };
+      }
+
+      localStorage.setItem('nutriagro_user', JSON.stringify(matched));
+      document.getElementById('modalWelcomeTitle').textContent = `Welcome Back, ${matched.fullName.split(' ')[0]}!`;
+      document.getElementById('modalWelcomeSub').textContent = `You are signed in to "${matched.farmName}". Your volume discounts and orders are ready.`;
+      document.getElementById('successModal').classList.add('open');
+    }
+
+    function proceedToStore() {
+      window.location.href = 'index.html';
+    }
+
+    function closeModalAndGo() {
+      window.location.href = 'index.html?action=openTracker';
+    }
+
+    // Check if already signed in
+    window.addEventListener('DOMContentLoaded', () => {
+      try {
+        const existing = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
+        if (existing && existing.fullName) {
+          const banner = document.createElement('div');
+          banner.style.cssText = 'background: rgba(226,146,13,0.15); border: 1px solid var(--color-accent-gold); border-radius: var(--radius-md); padding: 12px 16px; margin-bottom: 20px; font-size: 0.86rem; color: var(--color-dark); display: flex; align-items: center; justify-content: space-between;';
+          banner.innerHTML = `
+            <span>👋 Currently active session: <strong>${existing.fullName}</strong> (${existing.farmName || 'My Farm'})</span>
+            <button onclick="localStorage.removeItem('nutriagro_user'); location.reload();" style="background: none; border: none; color: var(--color-danger); font-weight: 700; cursor: pointer; text-decoration: underline;">Switch Account</button>
+          `;
+          document.querySelector('.form-card').prepend(banner);
+        }
+      } catch (e) {}
+    });
+  </script>
+</body>
+</html>

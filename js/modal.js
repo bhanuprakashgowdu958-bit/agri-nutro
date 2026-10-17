@@ -208,7 +208,31 @@ function openCheckoutModal() {
   overlay.classList.add('active');
   document.body.classList.add('modal-open');
 
-  // Automatically detect customer delivery address upon opening
+  // Auto-fill details if registered farmer is logged in
+  try {
+    const loggedUser = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
+    if (loggedUser) {
+      const nameInput = document.getElementById('checkoutFarmerName');
+      const phoneInput = document.getElementById('checkoutPhone');
+      const addrInput = document.getElementById('checkoutAddress');
+      if (nameInput && !nameInput.value.trim() && loggedUser.fullName) {
+        nameInput.value = loggedUser.fullName;
+      }
+      if (phoneInput && !phoneInput.value.trim() && loggedUser.phone) {
+        phoneInput.value = loggedUser.phone;
+      }
+      if (addrInput && !addrInput.value.trim() && loggedUser.address) {
+        addrInput.value = `${loggedUser.address}, ${loggedUser.state || ''} ${loggedUser.pincode ? '(PIN: ' + loggedUser.pincode + ')' : ''}`.trim();
+        const badge = document.getElementById('autoDetectBadge');
+        if (badge) {
+          badge.textContent = '✓ Saved Farm Profile';
+          badge.style.color = '#10b981';
+        }
+      }
+    }
+  } catch (e) {}
+
+  // Automatically detect customer delivery address upon opening if still empty
   const addressInput = document.getElementById('checkoutAddress');
   if (addressInput && !addressInput.value.trim()) {
     autoDetectDeliveryAddress();
