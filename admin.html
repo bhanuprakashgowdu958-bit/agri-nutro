@@ -809,6 +809,123 @@
       color: #64748b;
       margin-top: 18px;
     }
+
+    /* Top-level View Switcher Tabs (Orders vs Farmers) */
+    .view-switcher-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 22px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .view-tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border-radius: 10px;
+      font-size: 0.92rem;
+      font-weight: 800;
+      border: 1.5px solid var(--border-dark);
+      background: #ffffff;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .view-tab-btn:hover {
+      background: #f1f5f9;
+      color: var(--text-main);
+    }
+
+    .view-tab-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+      box-shadow: 0 4px 14px rgba(6, 78, 59, 0.22);
+    }
+
+    .view-tab-badge {
+      background: rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .view-tab-btn:not(.active) .view-tab-badge {
+      background: #e2e8f0;
+      color: var(--text-main);
+    }
+
+    /* Farmer Directory Cards */
+    .farmer-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 22px 24px;
+      box-shadow: var(--shadow);
+      transition: all 0.2s ease;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .farmer-card:hover {
+      border-color: rgba(6, 78, 59, 0.4);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .farmer-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .farmer-badge-tier {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent-dark);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .farmer-badge-verified {
+      background: rgba(16, 185, 129, 0.15);
+      color: #047857;
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-whatsapp {
+      background: #25D366;
+      color: #ffffff;
+      border: none;
+    }
+
+    .btn-whatsapp:hover {
+      background: #1ebd5a;
+      color: #ffffff;
+    }
+
+    .farmer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 18px;
+    }
   </style>
 </head>
 <body>
@@ -894,109 +1011,280 @@
   <!-- Main Container -->
   <main class="admin-container">
 
-    <!-- KPI Metric Cards Grid -->
-    <section class="kpi-grid">
-      <div class="kpi-card">
-        <div class="kpi-icon-box" style="background: rgba(6, 78, 59, 0.1); color: var(--primary);">📦</div>
-        <div>
-          <div class="kpi-val" id="kpiTotalOrders">0</div>
-          <div class="kpi-label">Total Placed Orders</div>
+    <!-- Top View Switcher Tabs -->
+    <div class="view-switcher-bar">
+      <button type="button" class="view-tab-btn active" id="tabOrdersBtn" onclick="switchAdminView('orders')">
+        <span>📦</span> Orders & Dispatch Operations (<span id="tabOrdersCount" class="view-tab-badge">0</span>)
+      </button>
+      <button type="button" class="view-tab-btn" id="tabFarmersBtn" onclick="switchAdminView('farmers')">
+        <span>🌾</span> Registered Farmers Directory (<span id="tabFarmersCount" class="view-tab-badge">0</span>)
+      </button>
+    </div>
+
+    <!-- VIEW 1: ORDERS & DISPATCH -->
+    <div id="ordersSectionView">
+      <!-- KPI Metric Cards Grid -->
+      <section class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon-box" style="background: rgba(6, 78, 59, 0.1); color: var(--primary);">📦</div>
+          <div>
+            <div class="kpi-val" id="kpiTotalOrders">0</div>
+            <div class="kpi-label">Total Placed Orders</div>
+          </div>
         </div>
-      </div>
 
-      <div class="kpi-card">
-        <div class="kpi-icon-box" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-dark);">💰</div>
-        <div>
-          <div class="kpi-val" id="kpiTotalRevenue">₹0</div>
-          <div class="kpi-label">Total Revenue Value</div>
+        <div class="kpi-card">
+          <div class="kpi-icon-box" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-dark);">💰</div>
+          <div>
+            <div class="kpi-val" id="kpiTotalRevenue">₹0</div>
+            <div class="kpi-label">Total Revenue Value</div>
+          </div>
         </div>
-      </div>
 
-      <div class="kpi-card">
-        <div class="kpi-icon-box" style="background: rgba(16, 185, 129, 0.12); color: var(--success);">🌾</div>
-        <div>
-          <div class="kpi-val" id="kpiTotalBags">0</div>
-          <div class="kpi-label">Total 50kg Bags</div>
+        <div class="kpi-card">
+          <div class="kpi-icon-box" style="background: rgba(16, 185, 129, 0.12); color: var(--success);">🌾</div>
+          <div>
+            <div class="kpi-val" id="kpiTotalBags">0</div>
+            <div class="kpi-label">Total 50kg Bags</div>
+          </div>
         </div>
-      </div>
 
-      <div class="kpi-card">
-        <div class="kpi-icon-box" style="background: rgba(59, 130, 246, 0.12); color: #2563eb;">🌾</div>
-        <div>
-          <div class="kpi-val" id="kpiConfirmed">0</div>
-          <div class="kpi-label">1. Confirmed Queue</div>
+        <div class="kpi-card">
+          <div class="kpi-icon-box" style="background: rgba(59, 130, 246, 0.12); color: #2563eb;">🌾</div>
+          <div>
+            <div class="kpi-val" id="kpiConfirmed">0</div>
+            <div class="kpi-label">1. Confirmed Queue</div>
+          </div>
         </div>
-      </div>
 
-      <div class="kpi-card">
-        <div class="kpi-icon-box" style="background: rgba(245, 158, 11, 0.12); color: #d97706;">⚙️</div>
-        <div>
-          <div class="kpi-val" id="kpiMilling">0</div>
-          <div class="kpi-label">2. In Milling & QA</div>
+        <div class="kpi-card">
+          <div class="kpi-icon-box" style="background: rgba(245, 158, 11, 0.12); color: #d97706;">⚙️</div>
+          <div>
+            <div class="kpi-val" id="kpiMilling">0</div>
+            <div class="kpi-label">2. In Milling & QA</div>
+          </div>
         </div>
-      </div>
 
-      <div class="kpi-card">
-        <div class="kpi-icon-box" style="background: rgba(139, 92, 246, 0.12); color: #7c3aed;">🚚</div>
-        <div>
-          <div class="kpi-val" id="kpiDispatched">0</div>
-          <div class="kpi-label">3. Truck Dispatched</div>
+        <div class="kpi-card">
+          <div class="kpi-icon-box" style="background: rgba(139, 92, 246, 0.12); color: #7c3aed;">🚚</div>
+          <div>
+            <div class="kpi-val" id="kpiDispatched">0</div>
+            <div class="kpi-label">3. Truck Dispatched</div>
+          </div>
         </div>
-      </div>
 
-      <div class="kpi-card">
-        <div class="kpi-icon-box" style="background: rgba(16, 185, 129, 0.15); color: #047857;">🏡</div>
-        <div>
-          <div class="kpi-val" id="kpiDelivered">0</div>
-          <div class="kpi-label">4. Farmgate Delivered</div>
+        <div class="kpi-card">
+          <div class="kpi-icon-box" style="background: rgba(16, 185, 129, 0.15); color: #047857;">🏡</div>
+          <div>
+            <div class="kpi-val" id="kpiDelivered">0</div>
+            <div class="kpi-label">4. Farmgate Delivered</div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Controls Strip: Search & Stage Filtering -->
-    <section class="controls-strip">
-      <div class="search-input-wrap">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="adminSearchInput" class="search-input" placeholder="Search by Order ID (#NUTRI-...), Customer Name, Phone, or City..." oninput="filterOrders()" />
-      </div>
-
-      <div class="filter-tabs">
-        <button type="button" class="filter-btn active" data-filter="all" onclick="setFilter('all')">All (<span id="countAll">0</span>)</button>
-        <button type="button" class="filter-btn" data-filter="1" onclick="setFilter('1')">🌾 Confirmed (<span id="countConfirmed">0</span>)</button>
-        <button type="button" class="filter-btn" data-filter="2" onclick="setFilter('2')">⚙️ Milling (<span id="countMilling">0</span>)</button>
-        <button type="button" class="filter-btn" data-filter="3" onclick="setFilter('3')">🚚 Dispatched (<span id="countDispatched">0</span>)</button>
-        <button type="button" class="filter-btn" data-filter="4" onclick="setFilter('4')">🏡 Delivered (<span id="countDelivered">0</span>)</button>
-      </div>
-
-      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <button type="button" class="btn btn-sm btn-primary" onclick="createSampleOrderAdmin()">
-          ➕ Add Test Order
-        </button>
-        <button type="button" class="btn btn-sm" style="background:#059669; color:#fff;" onclick="logManualFarmerOrder()">
-          📝 Log Phone/WhatsApp Order
-        </button>
-        <button type="button" class="btn btn-sm btn-light" style="background:#e2e8f0; color:#334155;" onclick="exportOrdersToCSV()">
-          📥 Export CSV
-        </button>
-      </div>
-    </section>
-
-    <!-- Orders Section -->
-    <section>
-      <div class="section-title-wrap">
-        <div class="section-title">
-          <span>📋</span> Received Customer Orders List
+      <!-- Controls Strip: Search & Stage Filtering -->
+      <section class="controls-strip">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="adminSearchInput" class="search-input" placeholder="Search by Order ID (#NUTRI-...), Customer Name, Phone, or City..." oninput="filterOrders()" />
         </div>
-        <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">
-          Auto-syncing every 4 seconds • Updating status automatically alerts customers
-        </span>
-      </div>
 
-      <!-- Container where cards are injected -->
-      <div id="ordersListWrap" class="orders-container">
-        <!-- Injected via JavaScript -->
+        <div class="filter-tabs">
+          <button type="button" class="filter-btn active" data-filter="all" onclick="setFilter('all')">All (<span id="countAll">0</span>)</button>
+          <button type="button" class="filter-btn" data-filter="1" onclick="setFilter('1')">🌾 Confirmed (<span id="countConfirmed">0</span>)</button>
+          <button type="button" class="filter-btn" data-filter="2" onclick="setFilter('2')">⚙️ Milling (<span id="countMilling">0</span>)</button>
+          <button type="button" class="filter-btn" data-filter="3" onclick="setFilter('3')">🚚 Dispatched (<span id="countDispatched">0</span>)</button>
+          <button type="button" class="filter-btn" data-filter="4" onclick="setFilter('4')">🏡 Delivered (<span id="countDelivered">0</span>)</button>
+        </div>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-sm btn-primary" onclick="createSampleOrderAdmin()">
+            ➕ Add Test Order
+          </button>
+          <button type="button" class="btn btn-sm" style="background:#059669; color:#fff;" onclick="logManualFarmerOrder()">
+            📝 Log Phone/WhatsApp Order
+          </button>
+          <button type="button" class="btn btn-sm btn-light" style="background:#e2e8f0; color:#334155;" onclick="exportOrdersToCSV()">
+            📥 Export CSV
+          </button>
+        </div>
+      </section>
+
+      <!-- Orders Section -->
+      <section>
+        <div class="section-title-wrap">
+          <div class="section-title">
+            <span>📋</span> Received Customer Orders List
+          </div>
+          <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">
+            Auto-syncing every 4 seconds • Updating status automatically alerts customers
+          </span>
+        </div>
+
+        <!-- Container where cards are injected -->
+        <div id="ordersListWrap" class="orders-container">
+          <!-- Injected via JavaScript -->
+        </div>
+      </section>
+    </div>
+
+    <!-- VIEW 2: REGISTERED FARMERS & ENTERPRISE DIRECTORY -->
+    <div id="farmersSectionView" style="display: none;">
+      <!-- Farmers KPI Metric Cards Grid -->
+      <section class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon-box" style="background: rgba(6, 78, 59, 0.1); color: var(--primary);">👨‍🌾</div>
+          <div>
+            <div class="kpi-val" id="kpiTotalFarmers">0</div>
+            <div class="kpi-label">Registered Farmers</div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon-box" style="background: rgba(59, 130, 246, 0.12); color: #2563eb;">🐄</div>
+          <div>
+            <div class="kpi-val" id="kpiDairyFarmers">0</div>
+            <div class="kpi-label">Dairy Cattle Herds</div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon-box" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-dark);">🐔</div>
+          <div>
+            <div class="kpi-val" id="kpiPoultryFarmers">0</div>
+            <div class="kpi-label">Commercial Poultry Flocks</div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon-box" style="background: rgba(16, 185, 129, 0.12); color: var(--success);">🏛️</div>
+          <div>
+            <div class="kpi-val" id="kpiGstFarmers">0</div>
+            <div class="kpi-label">GST Registered Accounts</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Farmers Controls Strip -->
+      <section class="controls-strip">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="farmerSearchInput" class="search-input" placeholder="Search farmer by Name, Farm Name, Phone, District, State, or Pincode..." oninput="filterFarmers()" />
+        </div>
+
+        <div class="filter-tabs">
+          <button type="button" class="filter-btn active farmer-filter-btn" data-farmer-filter="all" onclick="setFarmerFilter('all')">All Farms (<span id="countFarmersAll">0</span>)</button>
+          <button type="button" class="filter-btn farmer-filter-btn" data-farmer-filter="dairy" onclick="setFarmerFilter('dairy')">🐄 Dairy (<span id="countFarmersDairy">0</span>)</button>
+          <button type="button" class="filter-btn farmer-filter-btn" data-farmer-filter="poultry" onclick="setFarmerFilter('poultry')">🐔 Poultry (<span id="countFarmersPoultry">0</span>)</button>
+          <button type="button" class="filter-btn farmer-filter-btn" data-farmer-filter="goat" onclick="setFarmerFilter('goat')">🐐 Goat/Sheep (<span id="countFarmersGoat">0</span>)</button>
+          <button type="button" class="filter-btn farmer-filter-btn" data-farmer-filter="other" onclick="setFarmerFilter('other')">🐟 Aqua/Swine (<span id="countFarmersOther">0</span>)</button>
+        </div>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-sm btn-primary" onclick="openRegisterFarmerModal()">
+            ➕ Register Farmer
+          </button>
+          <button type="button" class="btn btn-sm btn-accent" onclick="loadAdminFarmers(true)">
+            🔄 Refresh Farmers
+          </button>
+          <button type="button" class="btn btn-sm btn-light" style="background:#e2e8f0; color:#334155;" onclick="exportFarmersToCSV()">
+            📥 Export Farmers CSV
+          </button>
+        </div>
+      </section>
+
+      <!-- Farmers Grid Section -->
+      <section>
+        <div class="section-title-wrap">
+          <div class="section-title">
+            <span>🌾</span> Verified Registered Farmers & Commercial Farm Accounts
+          </div>
+          <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">
+            Source: users.json & Online Farm Registration Portal • Real-time Account Directory
+          </span>
+        </div>
+
+        <!-- Farmers Cards Grid -->
+        <div id="farmersListWrap" class="farmer-grid">
+          <!-- Injected via JavaScript -->
+        </div>
+      </section>
+    </div>
+
+    <!-- Modal: Register New Farmer Profile Manually -->
+    <div id="farmerModalOverlay" class="auth-gate-overlay" style="display: none; z-index: 100000;">
+      <div class="auth-card" style="max-width: 520px; text-align: left;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h3 style="font-size: 1.25rem; color: var(--primary); font-weight: 800; margin: 0;">➕ Register New Farmer Profile</h3>
+          <button type="button" onclick="closeRegisterFarmerModal()" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-muted);">✕</button>
+        </div>
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 18px;">
+          Add a verified livestock farm account to the central directory (saved to users.json and available across millgate operations).
+        </p>
+
+        <form id="manualFarmerForm" onsubmit="submitNewFarmerForm(event)">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Farmer Full Name *</label>
+              <input type="text" id="mFarmerName" required class="search-input" style="padding: 8px 12px;" placeholder="e.g. Ramesh Patel" />
+            </div>
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Mobile / WhatsApp *</label>
+              <input type="tel" id="mFarmerPhone" required class="search-input" style="padding: 8px 12px;" placeholder="e.g. 9876543210" />
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Farm / Enterprise Name</label>
+              <input type="text" id="mFarmName" class="search-input" style="padding: 8px 12px;" placeholder="e.g. Patel Dairy Farm" />
+            </div>
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Farm Enterprise Type</label>
+              <select id="mFarmType" class="search-input" style="padding: 8px 12px;">
+                <option value="Dairy Cattle & Buffalo">Dairy Cattle & Buffalo</option>
+                <option value="Poultry (Broiler & Layer)">Poultry (Broiler & Layer)</option>
+                <option value="Goat & Sheep Farming">Goat & Sheep Farming</option>
+                <option value="Aquaculture (Fish & Shrimp)">Aquaculture (Fish & Shrimp)</option>
+                <option value="Commercial Swine / Piggery">Commercial Swine / Piggery</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Herd / Flock Capacity</label>
+              <input type="text" id="mHerdSize" class="search-input" style="padding: 8px 12px;" placeholder="e.g. 35 Milking Cows" />
+            </div>
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Primary Feed Formula</label>
+              <input type="text" id="mPrimaryFeed" class="search-input" style="padding: 8px 12px;" placeholder="e.g. NutriBov LactaMax™" />
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">District & State *</label>
+              <input type="text" id="mStateDistrict" required class="search-input" style="padding: 8px 12px;" placeholder="e.g. Anand, Gujarat" />
+            </div>
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Pincode</label>
+              <input type="text" id="mPincode" maxlength="6" class="search-input" style="padding: 8px 12px;" placeholder="e.g. 388001" />
+            </div>
+          </div>
+
+          <div style="margin-bottom: 14px;">
+            <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Delivery Address / Landmark</label>
+            <input type="text" id="mAddress" class="search-input" style="padding: 8px 12px;" placeholder="e.g. Near Milk Chilling Center, Anand Bypass" />
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 10px;">
+            <button type="button" class="btn btn-light" style="color: #333;" onclick="closeRegisterFarmerModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Farmer Profile</button>
+          </div>
+        </form>
       </div>
-    </section>
+    </div>
 
   </main>
 
@@ -1004,6 +1292,7 @@
 
   <!-- Client JavaScript for Admin Operations -->
   <script>
+    let currentAdminView = 'orders';
     let allOrders = [];
     let currentFilter = 'all';
     let searchQuery = '';
@@ -1011,6 +1300,39 @@
     let knownOrderIds = new Set();
     let initialLoadDone = false;
     let deletedOrderIds = new Set();
+
+    let allFarmers = [];
+    let currentFarmerFilter = 'all';
+    let farmerSearchQuery = '';
+
+    function getUsersApiEndpoint() {
+      if (window.location.protocol === 'file:') {
+        return 'http://localhost:8080/api/users';
+      }
+      return '/api/users';
+    }
+
+    function switchAdminView(view) {
+      currentAdminView = view;
+      const ordersBtn = document.getElementById('tabOrdersBtn');
+      const farmersBtn = document.getElementById('tabFarmersBtn');
+      const ordersSec = document.getElementById('ordersSectionView');
+      const farmersSec = document.getElementById('farmersSectionView');
+
+      if (view === 'orders') {
+        if (ordersBtn) ordersBtn.classList.add('active');
+        if (farmersBtn) farmersBtn.classList.remove('active');
+        if (ordersSec) ordersSec.style.display = 'block';
+        if (farmersSec) farmersSec.style.display = 'none';
+        renderDashboard();
+      } else {
+        if (ordersBtn) ordersBtn.classList.remove('active');
+        if (farmersBtn) farmersBtn.classList.add('active');
+        if (ordersSec) ordersSec.style.display = 'none';
+        if (farmersSec) farmersSec.style.display = 'block';
+        loadAdminFarmers(false);
+      }
+    }
 
     function getDeletedOrderIds() {
       try {
@@ -1316,6 +1638,9 @@
       document.getElementById('countMilling').textContent = milling;
       document.getElementById('countDispatched').textContent = dispatched;
       document.getElementById('countDelivered').textContent = delivered;
+
+      const tabOrdersBadge = document.getElementById('tabOrdersCount');
+      if (tabOrdersBadge) tabOrdersBadge.textContent = totalOrders;
     }
 
     function setFilter(filter) {
@@ -1631,13 +1956,19 @@
       renderDashboard();
     }
 
-    function logManualFarmerOrder() {
-      const name = prompt('Farmer / Contact Person Name:', 'Ramesh Dairy Farm');
+    function logManualFarmerOrder(prefill = null) {
+      const defName = prefill ? (prefill.fullName + (prefill.farmName ? ' - ' + prefill.farmName : '')) : 'Ramesh Dairy Farm';
+      const defPhone = prefill ? (prefill.phone || '+91 98765 43210') : '+91 98765 43210';
+      const defAddress = prefill ? (prefill.address || ((prefill.district || '') + ', ' + (prefill.state || ''))) : 'Hosur Highway, Bengaluru';
+      const defFeed = prefill && prefill.primaryFeed ? `5x ${prefill.primaryFeed} (50kg)` : '4x NutriBov LactaMax 50kg';
+      const defPrice = prefill && prefill.primaryFeed ? '9250' : '7400';
+
+      const name = prompt('Farmer / Contact Person Name:', defName);
       if (!name) return;
-      const phone = prompt('Phone Number:', '+91 98765 43210') || 'N/A';
-      const address = prompt('Delivery Address / Location:', 'Hosur Highway, Bengaluru') || 'Local Farmgate';
-      const itemsStr = prompt('Feed Product & Bags (e.g. 4x NutriBov LactaMax 50kg):', '4x NutriBov LactaMax 50kg') || 'NutriAgro Feed';
-      const totalAmount = parseInt(prompt('Total Amount (₹):', '7400') || '7400', 10) || 7400;
+      const phone = prompt('Phone Number:', defPhone) || 'N/A';
+      const address = prompt('Delivery Address / Location:', defAddress) || 'Local Farmgate';
+      const itemsStr = prompt('Feed Product & Bags (e.g. 4x NutriBov LactaMax 50kg):', defFeed) || 'NutriAgro Feed';
+      const totalAmount = parseInt(prompt('Total Amount (₹):', defPrice) || defPrice, 10) || 7400;
 
       const randId = 'NUTRI-' + Math.floor(100000 + Math.random() * 900000);
       const newOrder = {
@@ -1802,6 +2133,374 @@
       printWindow.document.close();
     }
 
+    // ══════════════════════════════════════════════════════════════
+    // REGISTERED FARMERS DIRECTORY OPERATIONS
+    // ══════════════════════════════════════════════════════════════
+
+    async function loadAdminFarmers(isManual = false) {
+      if (!isAuthorized()) return;
+
+      // 1. Try /api/users endpoint
+      try {
+        const res = await fetch(getUsersApiEndpoint() + '?_t=' + Date.now(), {
+          method: 'GET',
+          cache: 'no-store'
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            mergeFarmersList(data);
+            if (isManual) showToast('Farmer accounts refreshed from server!', 'success');
+            return;
+          }
+        }
+      } catch (err) {}
+
+      // 2. Try users.json static file
+      try {
+        const res = await fetch('users.json?_t=' + Date.now());
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            mergeFarmersList(data);
+            if (isManual) showToast('Farmer accounts loaded from users.json!', 'success');
+            return;
+          }
+        }
+      } catch (err) {}
+
+      // 3. Fallback to localStorage
+      try {
+        const local = JSON.parse(localStorage.getItem('nutriagro_users_list') || '[]');
+        mergeFarmersList(local);
+      } catch (e) {}
+    }
+
+    function mergeFarmersList(incoming) {
+      let localList = [];
+      try {
+        localList = JSON.parse(localStorage.getItem('nutriagro_users_list') || '[]');
+      } catch (e) {}
+
+      const defaultSeed = [
+        {
+          userId: "FARM-108219",
+          fullName: "Sardar Gurpreet Singh",
+          phone: "9876543210",
+          email: "gurpreet.dairy@gmail.com",
+          farmName: "Golden Harvest Dairy Farm",
+          farmType: "Dairy Cattle & Buffalo",
+          herdSize: "45 Cattle (Milking & Dry)",
+          primaryFeed: "NutriBov LactaMax™ High-Yield Dairy Feed",
+          pincode: "141001",
+          state: "Punjab",
+          district: "Ludhiana",
+          address: "GT Road, Near Canal Bridge, Ludhiana, Punjab",
+          gstin: "03AAAAA0000A1Z5",
+          whatsappAlerts: true,
+          registeredAt: "2026-10-11T10:00:00.000Z",
+          tier: "Progressive Farmer Tier"
+        },
+        {
+          userId: "FARM-205934",
+          fullName: "M. Thangaraj",
+          phone: "9443218765",
+          email: "thangaraj.poultry@gmail.com",
+          farmName: "Sri Murugan Broiler Farms",
+          farmType: "Poultry (Broiler & Layer)",
+          herdSize: "12,000 Birds per Batch",
+          primaryFeed: "NutriAvi BroilerMax™ Starter & Finisher",
+          pincode: "637211",
+          state: "Tamil Nadu",
+          district: "Namakkal",
+          address: "Trichy Main Road, Namakkal District, Tamil Nadu",
+          gstin: "33BBBBB0000B2Z8",
+          whatsappAlerts: true,
+          registeredAt: "2026-10-12T14:30:00.000Z",
+          tier: "Commercial Poultry Tier"
+        }
+      ];
+
+      const mergedMap = new Map();
+      [...incoming, ...localList, ...defaultSeed].forEach(item => {
+        if (!item) return;
+        const key = (item.phone || item.email || item.userId || '').toString().toLowerCase();
+        if (key && !mergedMap.has(key)) {
+          mergedMap.set(key, item);
+        }
+      });
+
+      allFarmers = Array.from(mergedMap.values());
+      try {
+        localStorage.setItem('nutriagro_users_list', JSON.stringify(allFarmers));
+      } catch (e) {}
+
+      updateFarmerCounters();
+      renderFarmersCards();
+    }
+
+    function updateFarmerCounters() {
+      const total = allFarmers.length;
+      const dairy = allFarmers.filter(f => /dairy|cattle|cow|buffalo/i.test((f.farmType || '') + ' ' + (f.primaryFeed || ''))).length;
+      const poultry = allFarmers.filter(f => /poultry|broiler|layer|bird/i.test((f.farmType || '') + ' ' + (f.primaryFeed || ''))).length;
+      const goat = allFarmers.filter(f => /goat|sheep/i.test((f.farmType || '') + ' ' + (f.primaryFeed || ''))).length;
+      const other = Math.max(0, total - dairy - poultry - goat);
+      const gst = allFarmers.filter(f => f.gstin && f.gstin.trim().length >= 8).length;
+
+      const badge = document.getElementById('tabFarmersCount');
+      if (badge) badge.textContent = total;
+
+      const kTotal = document.getElementById('kpiTotalFarmers');
+      if (kTotal) kTotal.textContent = total;
+      const kDairy = document.getElementById('kpiDairyFarmers');
+      if (kDairy) kDairy.textContent = dairy;
+      const kPoultry = document.getElementById('kpiPoultryFarmers');
+      if (kPoultry) kPoultry.textContent = poultry;
+      const kGst = document.getElementById('kpiGstFarmers');
+      if (kGst) kGst.textContent = gst;
+
+      const cAll = document.getElementById('countFarmersAll');
+      if (cAll) cAll.textContent = total;
+      const cDairy = document.getElementById('countFarmersDairy');
+      if (cDairy) cDairy.textContent = dairy;
+      const cPoultry = document.getElementById('countFarmersPoultry');
+      if (cPoultry) cPoultry.textContent = poultry;
+      const cGoat = document.getElementById('countFarmersGoat');
+      if (cGoat) cGoat.textContent = goat;
+      const cOther = document.getElementById('countFarmersOther');
+      if (cOther) cOther.textContent = other;
+    }
+
+    function setFarmerFilter(filter) {
+      currentFarmerFilter = filter;
+      document.querySelectorAll('.farmer-filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-farmer-filter') === filter);
+      });
+      renderFarmersCards();
+    }
+
+    function filterFarmers() {
+      const input = document.getElementById('farmerSearchInput');
+      farmerSearchQuery = input ? input.value.trim().toLowerCase() : '';
+      renderFarmersCards();
+    }
+
+    function renderFarmersCards() {
+      const container = document.getElementById('farmersListWrap');
+      if (!container) return;
+
+      let filtered = allFarmers.slice();
+
+      if (currentFarmerFilter === 'dairy') {
+        filtered = filtered.filter(f => /dairy|cattle|cow|buffalo/i.test((f.farmType || '') + ' ' + (f.primaryFeed || '')));
+      } else if (currentFarmerFilter === 'poultry') {
+        filtered = filtered.filter(f => /poultry|broiler|layer|bird/i.test((f.farmType || '') + ' ' + (f.primaryFeed || '')));
+      } else if (currentFarmerFilter === 'goat') {
+        filtered = filtered.filter(f => /goat|sheep/i.test((f.farmType || '') + ' ' + (f.primaryFeed || '')));
+      } else if (currentFarmerFilter === 'other') {
+        filtered = filtered.filter(f => !/dairy|cattle|cow|buffalo|poultry|broiler|layer|bird|goat|sheep/i.test((f.farmType || '') + ' ' + (f.primaryFeed || '')));
+      }
+
+      if (farmerSearchQuery) {
+        filtered = filtered.filter(f =>
+          (f.fullName && f.fullName.toLowerCase().includes(farmerSearchQuery)) ||
+          (f.farmName && f.farmName.toLowerCase().includes(farmerSearchQuery)) ||
+          (f.phone && f.phone.toLowerCase().includes(farmerSearchQuery)) ||
+          (f.email && f.email.toLowerCase().includes(farmerSearchQuery)) ||
+          (f.state && f.state.toLowerCase().includes(farmerSearchQuery)) ||
+          (f.district && f.district.toLowerCase().includes(farmerSearchQuery)) ||
+          (f.pincode && f.pincode.toLowerCase().includes(farmerSearchQuery)) ||
+          (f.primaryFeed && f.primaryFeed.toLowerCase().includes(farmerSearchQuery)) ||
+          (f.gstin && f.gstin.toLowerCase().includes(farmerSearchQuery))
+        );
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <div style="font-size: 2.8rem; margin-bottom: 12px;">🌾</div>
+            <h3 style="font-size: 1.2rem; color: var(--text-main); margin-bottom: 6px;">No Farmers Found</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 440px; margin: 0 auto 18px auto;">
+              No registered farmers match your active search or enterprise filter.
+            </p>
+            <button type="button" class="btn btn-primary" onclick="setFarmerFilter('all'); document.getElementById('farmerSearchInput').value=''; filterFarmers();">
+              View All Registered Farmers
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(f => {
+        const cleanPhone = (f.phone || '').replace(/\D/g, '');
+        const waMsg = encodeURIComponent(`Namaste ${f.fullName || 'Farmer'} ji, greetings from NutriAgro Feeds India. Regarding your livestock feed requirements at ${f.farmName || 'your farm'}...`);
+        const regDate = f.registeredAt ? new Date(f.registeredAt).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Verified Account';
+        const encodedFarmer = encodeURIComponent(JSON.stringify(f));
+
+        return `
+          <div class="farmer-card">
+            <div>
+              <div class="farmer-card-header">
+                <div>
+                  <span style="font-size: 0.72rem; font-weight: 800; color: var(--primary); background: rgba(6,78,59,0.1); padding: 2px 8px; border-radius: 6px; letter-spacing: 0.04em;">
+                    ${f.userId || 'FARM-VERIFIED'}
+                  </span>
+                  <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin-top: 6px; line-height: 1.3;">
+                    ${f.farmName || 'Commercial Farm'}
+                  </h3>
+                  <div style="font-size: 0.86rem; font-weight: 600; color: #334155;">
+                    👨‍🌾 ${f.fullName || 'Farmer Partner'}
+                  </div>
+                </div>
+                <div>
+                  <span class="farmer-badge-tier ${f.gstin ? 'farmer-badge-verified' : ''}">
+                    ${f.gstin ? '🏛️ GST Verified' : '🌱 ' + (f.tier || 'Progressive Tier')}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Contact & Location Grid -->
+              <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.83rem; margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #f8fafc; padding: 8px 12px; border-radius: 8px;">
+                  <span><strong>📞 Phone:</strong> <a href="tel:${f.phone || ''}" style="color: var(--primary); font-weight: 700; text-decoration: none;">${f.phone || 'N/A'}</a></span>
+                  <a href="https://wa.me/91${cleanPhone}?text=${waMsg}" target="_blank" class="btn btn-sm btn-whatsapp" style="padding: 4px 10px; font-size: 0.74rem;">
+                    💬 WhatsApp
+                  </a>
+                </div>
+
+                ${f.email ? `<div><strong>✉️ Email:</strong> <a href="mailto:${f.email}" style="color: #475569;">${f.email}</a></div>` : ''}
+
+                <div><strong>📍 Location:</strong> ${f.address || (f.district ? f.district + ', ' : '') + (f.state || '') + (f.pincode ? ' - ' + f.pincode : '')}</div>
+                <div><strong>🐄 Farm Type:</strong> ${f.farmType || 'Livestock Farm'}</div>
+                <div><strong>📊 Capacity / Herd:</strong> <span style="color: var(--primary); font-weight: 700;">${f.herdSize || 'Commercial Scale'}</span></div>
+                <div><strong>🌾 Primary Feed:</strong> ${f.primaryFeed || 'NutriAgro Balanced Ration'}</div>
+                ${f.gstin ? `<div><strong>🏛️ GSTIN:</strong> <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.76rem;">${f.gstin}</code></div>` : ''}
+                <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 4px;">Registered: ${regDate}</div>
+              </div>
+            </div>
+
+            <!-- Footer Actions -->
+            <div style="display: flex; gap: 8px; padding-top: 14px; border-top: 1px solid var(--border); flex-wrap: wrap;">
+              <button type="button" class="btn btn-sm btn-primary" onclick="triggerFarmerOrder('${encodedFarmer}')" style="flex: 1; justify-content: center;">
+                📝 Log Order
+              </button>
+              <a href="https://wa.me/91${cleanPhone}?text=${waMsg}" target="_blank" class="btn btn-sm btn-whatsapp" style="padding: 6px 12px;">
+                📲 Chat
+              </a>
+              <button type="button" class="btn-delete-badge" onclick="deleteFarmer('${f.userId || f.phone}')" title="Remove farmer from list">
+                🗑️
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function triggerFarmerOrder(encoded) {
+      try {
+        const farmer = JSON.parse(decodeURIComponent(encoded));
+        switchAdminView('orders');
+        logManualFarmerOrder(farmer);
+      } catch (e) {
+        logManualFarmerOrder();
+      }
+    }
+
+    function openRegisterFarmerModal() {
+      const modal = document.getElementById('farmerModalOverlay');
+      if (modal) modal.style.display = 'flex';
+      const nameInput = document.getElementById('mFarmerName');
+      if (nameInput) setTimeout(() => nameInput.focus(), 100);
+    }
+
+    function closeRegisterFarmerModal() {
+      const modal = document.getElementById('farmerModalOverlay');
+      if (modal) modal.style.display = 'none';
+      const form = document.getElementById('manualFarmerForm');
+      if (form) form.reset();
+    }
+
+    async function submitNewFarmerForm(e) {
+      e.preventDefault();
+      const name = document.getElementById('mFarmerName').value.trim();
+      const phone = document.getElementById('mFarmerPhone').value.trim();
+      const farmName = document.getElementById('mFarmName').value.trim() || `${name}'s Farm`;
+      const farmType = document.getElementById('mFarmType').value;
+      const herdSize = document.getElementById('mHerdSize').value.trim() || 'Commercial Scale';
+      const primaryFeed = document.getElementById('mPrimaryFeed').value.trim() || 'NutriBov LactaMax™ High-Yield Dairy Feed';
+      const stateDist = document.getElementById('mStateDistrict').value.trim();
+      const pincode = document.getElementById('mPincode').value.trim() || '560001';
+      const address = document.getElementById('mAddress').value.trim() || stateDist;
+
+      const newFarmer = {
+        userId: 'FARM-' + Math.floor(100000 + Math.random() * 900000),
+        fullName: name,
+        phone: phone,
+        email: '',
+        farmName: farmName,
+        farmType: farmType,
+        herdSize: herdSize,
+        primaryFeed: primaryFeed,
+        state: stateDist.includes(',') ? stateDist.split(',')[1].trim() : stateDist,
+        district: stateDist.includes(',') ? stateDist.split(',')[0].trim() : stateDist,
+        pincode: pincode,
+        address: address,
+        whatsappAlerts: true,
+        registeredAt: new Date().toISOString(),
+        tier: 'Progressive Farmer Tier'
+      };
+
+      allFarmers.unshift(newFarmer);
+      try {
+        localStorage.setItem('nutriagro_users_list', JSON.stringify(allFarmers));
+      } catch (err) {}
+
+      // POST to /api/users
+      try {
+        fetch(getUsersApiEndpoint(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newFarmer)
+        }).catch(() => {});
+      } catch (err) {}
+
+      closeRegisterFarmerModal();
+      showToast(`🎉 Farmer "${name}" (${farmName}) registered successfully!`, 'success');
+      updateFarmerCounters();
+      renderFarmersCards();
+    }
+
+    function deleteFarmer(userIdOrPhone) {
+      if (!confirm('Are you sure you want to remove this farmer from the directory?')) return;
+      allFarmers = allFarmers.filter(f => (f.userId !== userIdOrPhone && f.phone !== userIdOrPhone));
+      try {
+        localStorage.setItem('nutriagro_users_list', JSON.stringify(allFarmers));
+      } catch (e) {}
+      showToast('Farmer profile removed.', 'info');
+      updateFarmerCounters();
+      renderFarmersCards();
+    }
+
+    function exportFarmersToCSV() {
+      if (allFarmers.length === 0) {
+        showToast('No registered farmers to export.', 'info');
+        return;
+      }
+      let csv = 'User ID,Farmer Name,Mobile,Email,Farm Name,Farm Type,Herd Size,Primary Feed,District,State,Pincode,Address,GSTIN,Registered Date\n';
+      allFarmers.forEach(f => {
+        csv += `"${f.userId||''}","${(f.fullName||'').replace(/"/g,'""')}","${f.phone||''}","${f.email||''}","${(f.farmName||'').replace(/"/g,'""')}","${f.farmType||''}","${(f.herdSize||'').replace(/"/g,'""')}","${(f.primaryFeed||'').replace(/"/g,'""')}","${f.district||''}","${f.state||''}","${f.pincode||''}","${(f.address||'').replace(/"/g,'""')}","${f.gstin||''}","${f.registeredAt||''}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `NutriAgro_Farmers_Directory_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('Exported Farmers Directory CSV successfully!', 'success');
+    }
+
     // Auto-refresh polling every 3.5 seconds
     setInterval(() => {
       if (isAuthorized()) {
@@ -1814,6 +2513,11 @@
       if (e.key === 'nutriagro_orders' || e.key === 'nutriagro_last_order_timestamp') {
         if (isAuthorized()) {
           loadAdminOrders(false);
+        }
+      }
+      if (e.key === 'nutriagro_users_list') {
+        if (isAuthorized()) {
+          loadAdminFarmers(false);
         }
       }
     });
@@ -1838,11 +2542,13 @@
       checkAdminAuth();
       if (isAuthorized()) {
         loadAdminOrders(false);
+        loadAdminFarmers(false);
       }
     });
     checkAdminAuth();
     if (isAuthorized()) {
       loadAdminOrders(false);
+      loadAdminFarmers(false);
     }
   </script>
 </body>
