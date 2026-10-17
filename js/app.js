@@ -49,8 +49,108 @@ function initGoogleAuthGateway() {
   }
 }
 
-// Google Client ID configuration for live Google Cloud OAuth 2.0 (optional)
-const GOOGLE_CLIENT_ID = window.NUTRIAGRO_GOOGLE_CLIENT_ID || '';
+// Google Client ID resolution
+function getGoogleClientId() {
+  return (
+    window.NUTRIAGRO_GOOGLE_CLIENT_ID ||
+    localStorage.getItem('nutriagro_google_client_id') ||
+    ''
+  ).trim();
+}
+
+function setGoogleClientId(id) {
+  if (id) {
+    const cleanId = id.trim();
+    localStorage.setItem('nutriagro_google_client_id', cleanId);
+    window.NUTRIAGRO_GOOGLE_CLIENT_ID = cleanId;
+    initGoogleIdentityServices();
+  }
+}
+
+// Automatically fetch backend configuration if available (.env)
+async function loadServerConfig() {
+  try {
+    const res = await fetch('/api/config');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.googleClientId && !localStorage.getItem('nutriagro_google_client_id')) {
+        setGoogleClientId(data.googleClientId);
+      }
+    }
+  } catch (e) {}
+}
+
+// Decode Google JWT Credential Token
+function parseJwt(token) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+}
+
+function handleGoogleCredentialResponse(response) {
+  if (response && response.credential) {
+    const payload = parseJwt(response.credential);
+    if (payload && payload.email) {
+      chooseGoogleAccount(payload.name || payload.given_name || payload.email, payload.email, payload.picture);
+    }
+  }
+}
+
+// Initialize Official Google Identity Services SDK
+function initGoogleIdentityServices() {
+  const clientId = getGoogleClientId();
+  if (!clientId || typeof google === 'undefined' || !google.accounts) return;
+
+  try {
+    if (google.accounts.id) {
+      google.accounts.id.initialize({
+        client_id: clientId,
+        callback: handleGoogleCredentialResponse,
+        auto_select: false,
+        cancel_on_tap_outside: true
+      });
+
+      // Render Google official button if container exists
+      const officialContainer = document.getElementById('officialGoogleBtnContainer');
+      if (officialContainer) {
+        google.accounts.id.renderButton(officialContainer, {
+          type: 'standard',
+          shape: 'rectangular',
+          theme: 'outline',
+          text: 'signin_with',
+          size: 'large',
+          logo_alignment: 'left',
+          width: 320
+        });
+      }
+
+      // Trigger Google One-Tap prompt on supported devices
+      try {
+        google.accounts.id.prompt();
+      } catch (e) {}
+    }
+  } catch (err) {
+    console.warn('GSI init notice:', err);
+  }
+}
+
+// Automatically initialize on page load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    loadServerConfig();
+    setTimeout(initGoogleIdentityServices, 350);
+  });
+} else {
+  loadServerConfig();
+  setTimeout(initGoogleIdentityServices, 350);
+}
 
 // Device-saved Google accounts storage
 function getSavedGoogleAccounts() {
@@ -97,7 +197,6 @@ function renderGoogleAccountsPicker() {
   const container = document.getElementById('googleSavedAccountsList');
   const picker = document.getElementById('googleAccountsPicker');
   const heading = document.getElementById('googlePickerHeading');
-  const inputBox = document.getElementById('customGoogleInputBox');
   if (!container || !picker) return;
 
   const accounts = getSavedGoogleAccounts();
@@ -105,18 +204,14 @@ function renderGoogleAccountsPicker() {
   const currentEmail = (currentUser && currentUser.email) ? currentUser.email.toLowerCase() : '';
 
   if (accounts.length === 0) {
-    // No saved accounts on this device yet: show input form
-    container.innerHTML = '';
-    if (heading) heading.textContent = 'Enter your Google Account:';
-    if (inputBox) inputBox.style.display = 'block';
-    const useAnotherBtn = document.getElementById('useAnotherAccountBtn');
-    if (useAnotherBtn) useAnotherBtn.style.display = 'none';
+    container.innerHTML = `
+      <div style="padding: 12px; font-size: 0.82rem; color: var(--color-dark-muted); text-align: center; background: #f8f9fa; border-radius: var(--radius-md);">
+        No saved Google accounts on this device yet.<br>Click below to sign in with Google.
+      </div>
+    `;
+    if (heading) heading.textContent = 'Google Account:';
   } else {
     if (heading) heading.textContent = 'Choose an account:';
-    if (inputBox) inputBox.style.display = 'none';
-    const useAnotherBtn = document.getElementById('useAnotherAccountBtn');
-    if (useAnotherBtn) useAnotherBtn.style.display = 'flex';
-
     container.innerHTML = accounts.map(acc => {
       const isActive = acc.email.toLowerCase() === currentEmail;
       const initial = (acc.fullName ? acc.fullName.charAt(0) : acc.email.charAt(0)).toUpperCase();
@@ -146,13 +241,15 @@ window.addEventListener('message', (event) => {
 });
 
 function handleGoogleSignIn() {
-  // 1. If official Google Client ID is configured, launch live Google Identity Services
-  if (GOOGLE_CLIENT_ID && typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+  const clientId = getGoogleClientId();
+
+  // 1. If official Google Client ID is configured, launch live Google Identity Services popup
+  if (clientId && typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
     try {
       const client = google.accounts.oauth2.initTokenClient({
-        client_id: GOOGLE_CLIENT_ID,
+        client_id: clientId,
         scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
-        prompt: 'select_account',
+        prompt: 'select_account', // <-- FORCES GOOGLE TO SHOW ALL ACCOUNTS FOR THE USER TO CHOOSE
         callback: async (tokenResponse) => {
           if (tokenResponse && tokenResponse.access_token) {
             try {
@@ -162,24 +259,66 @@ function handleGoogleSignIn() {
               const profile = await res.json();
               chooseGoogleAccount(profile.name || profile.email, profile.email, profile.picture);
               return;
-            } catch (err) {}
+            } catch (err) {
+              console.error('Error fetching Google UserInfo:', err);
+            }
           }
         }
       });
-      client.requestAccessToken();
+      client.requestAccessToken({ prompt: 'select_account' });
       return;
     } catch (e) {
       console.warn('Google GSI token request note:', e);
     }
   }
 
-  // 2. Open Google Account Chooser & Multi-Account Selector (never automatically log in with a fake account!)
-  const picker = document.getElementById('googleAccountsPicker');
-  if (picker) {
-    picker.style.display = 'flex';
-    renderGoogleAccountsPicker();
-    picker.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  // 2. If no Client ID is connected yet, open the Setup Modal so the user can easily paste their Client ID and launch real Google Auth!
+  openGoogleSetupModal();
+}
+
+function openGoogleSetupModal() {
+  const modal = document.getElementById('googleSetupModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.classList.add('open');
+    const input = document.getElementById('googleClientIdField');
+    if (input) {
+      input.value = getGoogleClientId();
+      setTimeout(() => input.focus(), 100);
+    }
   }
+}
+
+function closeGoogleSetupModal() {
+  const modal = document.getElementById('googleSetupModal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.remove('open');
+  }
+}
+
+function saveAndLaunchGoogleAuth(e) {
+  if (e) e.preventDefault();
+  const input = document.getElementById('googleClientIdField');
+  const val = input ? input.value.trim() : '';
+
+  if (!val || !val.includes('.apps.googleusercontent.com')) {
+    alert('Please paste a valid Google OAuth Client ID ending in ".apps.googleusercontent.com".\n\nYou can create one in 2 minutes for free at:\nhttps://console.cloud.google.com/apis/credentials');
+    if (input) input.focus();
+    return;
+  }
+
+  setGoogleClientId(val);
+  closeGoogleSetupModal();
+
+  if (window.cart && typeof window.cart.showToast === 'function') {
+    window.cart.showToast('Google Client ID connected! Launching Google Sign-In...', 'success');
+  }
+
+  // Immediately launch Google native account chooser
+  setTimeout(() => {
+    handleGoogleSignIn();
+  }, 200);
 }
 
 function selectSavedGoogleAccount(encodedAcc) {
@@ -187,43 +326,6 @@ function selectSavedGoogleAccount(encodedAcc) {
     const acc = JSON.parse(decodeURIComponent(encodedAcc));
     chooseGoogleAccount(acc.fullName, acc.email, acc.picture, acc.phone, acc.farmName);
   } catch (e) {}
-}
-
-function toggleCustomGoogleInput(show) {
-  const box = document.getElementById('customGoogleInputBox');
-  if (!box) return;
-  const willShow = show !== undefined ? show : (box.style.display === 'none' || !box.style.display);
-  box.style.display = willShow ? 'block' : 'none';
-  if (willShow) {
-    const emailInput = document.getElementById('customGoogleEmail');
-    if (emailInput) setTimeout(() => emailInput.focus(), 80);
-  }
-}
-
-function submitInlineGoogleAccount(event) {
-  if (event) event.preventDefault();
-  const emailInput = document.getElementById('customGoogleEmail');
-  const nameInput = document.getElementById('customGoogleName');
-  const phoneInput = document.getElementById('customGooglePhone');
-  const farmInput = document.getElementById('customGoogleFarm');
-
-  const email = emailInput ? emailInput.value.trim() : '';
-  const name = nameInput ? nameInput.value.trim() : '';
-  const phone = phoneInput ? phoneInput.value.trim() : '';
-  const farmName = farmInput ? farmInput.value.trim() : '';
-
-  if (!email || !email.includes('@')) {
-    alert('Please enter a valid Google / Gmail address.');
-    if (emailInput) emailInput.focus();
-    return;
-  }
-  if (!name) {
-    alert('Please enter your full name.');
-    if (nameInput) nameInput.focus();
-    return;
-  }
-
-  chooseGoogleAccount(name, email, '', phone, farmName);
 }
 
 function openAccountChooserModal() {
