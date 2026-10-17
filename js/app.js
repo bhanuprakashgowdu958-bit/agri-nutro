@@ -10,6 +10,7 @@ const cardSelectedSizes = {};
 let selectedCompareProducts = [];
 
 function initCatalog() {
+  checkGoogleOAuthHash();
   renderCatalog();
   setupFilterTabs();
   setupSearch();
@@ -43,6 +44,14 @@ function initGoogleAuthGateway() {
       // First-time visitor: display Google Sign-In Gateway immediately
       gateway.style.display = 'flex';
       gateway.classList.remove('hidden');
+
+      // Check if user has saved accounts on device to display directly
+      const accounts = getSavedGoogleAccounts();
+      const picker = document.getElementById('googleAccountsPicker');
+      if (accounts && accounts.length > 0 && picker) {
+        picker.style.display = 'block';
+        renderGoogleAccountsPicker();
+      }
     }
   } catch (e) {
     gateway.style.display = 'flex';
@@ -240,85 +249,106 @@ window.addEventListener('message', (event) => {
   }
 });
 
+function checkGoogleOAuthHash() {
+  if (window.location.hash && window.location.hash.includes('access_token=')) {
+    const params = new URLSearchParams(window.location.hash.substring(1));
+    const token = params.get('access_token');
+    if (token) {
+      history.replaceState(null, null, window.location.pathname + window.location.search);
+      fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then(r => r.json())
+      .then(profile => {
+        if (profile && profile.email) {
+          chooseGoogleAccount(profile.name || profile.email, profile.email, profile.picture);
+        }
+      })
+      .catch(err => console.error('OAuth token fetch error:', err));
+    }
+  }
+}
+
 function handleGoogleSignIn() {
   const clientId = getGoogleClientId();
 
-  // 1. If official Google Client ID is configured, launch live Google Identity Services popup
-  if (clientId && typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
-    try {
-      const client = google.accounts.oauth2.initTokenClient({
-        client_id: clientId,
-        scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
-        prompt: 'select_account', // <-- FORCES GOOGLE TO SHOW ALL ACCOUNTS FOR THE USER TO CHOOSE
-        callback: async (tokenResponse) => {
-          if (tokenResponse && tokenResponse.access_token) {
-            try {
-              const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
-              });
-              const profile = await res.json();
-              chooseGoogleAccount(profile.name || profile.email, profile.email, profile.picture);
-              return;
-            } catch (err) {
-              console.error('Error fetching Google UserInfo:', err);
+  // 1. If official Google Client ID is configured, launch live Google Identity Services popup or redirect
+  if (clientId) {
+    if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+      try {
+        const client = google.accounts.oauth2.initTokenClient({
+          client_id: clientId,
+          scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+          prompt: 'select_account',
+          callback: async (tokenResponse) => {
+            if (tokenResponse && tokenResponse.access_token) {
+              try {
+                const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                  headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+                });
+                const profile = await res.json();
+                chooseGoogleAccount(profile.name || profile.email, profile.email, profile.picture);
+                return;
+              } catch (err) {
+                console.error('Error fetching Google UserInfo:', err);
+              }
             }
           }
-        }
-      });
-      client.requestAccessToken({ prompt: 'select_account' });
-      return;
-    } catch (e) {
-      console.warn('Google GSI token request note:', e);
+        });
+        client.requestAccessToken({ prompt: 'select_account' });
+        return;
+      } catch (e) {
+        console.warn('Google GSI token request note:', e);
+      }
     }
-  }
-
-  // 2. If no Client ID is connected yet, open the Setup Modal so the user can easily paste their Client ID and launch real Google Auth!
-  openGoogleSetupModal();
-}
-
-function openGoogleSetupModal() {
-  const modal = document.getElementById('googleSetupModal');
-  if (modal) {
-    modal.style.display = 'flex';
-    modal.classList.add('open');
-    const input = document.getElementById('googleClientIdField');
-    if (input) {
-      input.value = getGoogleClientId();
-      setTimeout(() => input.focus(), 100);
-    }
-  }
-}
-
-function closeGoogleSetupModal() {
-  const modal = document.getElementById('googleSetupModal');
-  if (modal) {
-    modal.style.display = 'none';
-    modal.classList.remove('open');
-  }
-}
-
-function saveAndLaunchGoogleAuth(e) {
-  if (e) e.preventDefault();
-  const input = document.getElementById('googleClientIdField');
-  const val = input ? input.value.trim() : '';
-
-  if (!val || !val.includes('.apps.googleusercontent.com')) {
-    alert('Please paste a valid Google OAuth Client ID ending in ".apps.googleusercontent.com".\n\nYou can create one in 2 minutes for free at:\nhttps://console.cloud.google.com/apis/credentials');
-    if (input) input.focus();
+    // Direct redirect to Google OAuth account chooser
+    const redirectUri = window.location.origin + window.location.pathname;
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=email%20profile&prompt=select_account`;
+    window.location.href = authUrl;
     return;
   }
 
-  setGoogleClientId(val);
-  closeGoogleSetupModal();
+  // 2. If no Client ID connected, show Google Account Chooser & Email prompt directly
+  const picker = document.getElementById('googleAccountsPicker');
+  if (picker) {
+    picker.style.display = 'block';
+    renderGoogleAccountsPicker();
+    const saved = getSavedGoogleAccounts();
+    if (saved.length === 0) {
+      showGoogleEmailInput();
+    }
+  } else {
+    showGoogleEmailInput();
+  }
+}
 
-  if (window.cart && typeof window.cart.showToast === 'function') {
-    window.cart.showToast('Google Client ID connected! Launching Google Sign-In...', 'success');
+function showGoogleEmailInput() {
+  const section = document.getElementById('googleEmailInputSection');
+  const btn = document.getElementById('useAnotherAccountBtn');
+  if (section) section.style.display = 'block';
+  if (btn) btn.style.display = 'none';
+  const emailInput = document.getElementById('gatewayGoogleEmail');
+  if (emailInput) setTimeout(() => emailInput.focus(), 80);
+}
+
+function hideGoogleEmailInput() {
+  const section = document.getElementById('googleEmailInputSection');
+  const btn = document.getElementById('useAnotherAccountBtn');
+  if (section) section.style.display = 'none';
+  if (btn) btn.style.display = 'flex';
+}
+
+function handleDirectGoogleEmailSubmit(e) {
+  if (e) e.preventDefault();
+  const email = (document.getElementById('gatewayGoogleEmail').value || '').trim();
+  const name = (document.getElementById('gatewayGoogleName').value || '').trim();
+
+  if (!email || !email.includes('@')) {
+    alert('Please enter a valid Google email address.');
+    return;
   }
 
-  // Immediately launch Google native account chooser
-  setTimeout(() => {
-    handleGoogleSignIn();
-  }, 200);
+  chooseGoogleAccount(name, email, '');
 }
 
 function selectSavedGoogleAccount(encodedAcc) {
