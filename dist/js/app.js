@@ -52,6 +52,92 @@ function initGoogleAuthGateway() {
 // Google Client ID configuration for live Google Cloud OAuth 2.0 (optional)
 const GOOGLE_CLIENT_ID = window.NUTRIAGRO_GOOGLE_CLIENT_ID || '';
 
+// Device-saved Google accounts storage
+function getSavedGoogleAccounts() {
+  try {
+    const list = JSON.parse(localStorage.getItem('nutriagro_google_saved_accounts') || '[]');
+    return Array.isArray(list) ? list : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveGoogleAccountToDevice(account) {
+  if (!account || !account.email) return;
+  try {
+    let list = getSavedGoogleAccounts();
+    list = list.filter(a => a.email.toLowerCase() !== account.email.toLowerCase());
+    list.unshift(account);
+    localStorage.setItem('nutriagro_google_saved_accounts', JSON.stringify(list));
+  } catch (e) {}
+}
+
+function removeSavedGoogleAccount(email, event) {
+  if (event) event.stopPropagation();
+  try {
+    let list = getSavedGoogleAccounts();
+    list = list.filter(a => a.email.toLowerCase() !== email.toLowerCase());
+    localStorage.setItem('nutriagro_google_saved_accounts', JSON.stringify(list));
+    
+    // If currently logged-in account was removed, clear current session
+    const currentUser = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
+    if (currentUser && currentUser.email && currentUser.email.toLowerCase() === email.toLowerCase()) {
+      localStorage.removeItem('nutriagro_user');
+      updateHeaderUserStatus();
+    }
+    
+    renderGoogleAccountsPicker();
+    if (window.cart && typeof window.cart.showToast === 'function') {
+      window.cart.showToast(`Account ${email} removed from this device.`, 'info');
+    }
+  } catch (e) {}
+}
+
+function renderGoogleAccountsPicker() {
+  const container = document.getElementById('googleSavedAccountsList');
+  const picker = document.getElementById('googleAccountsPicker');
+  const heading = document.getElementById('googlePickerHeading');
+  const inputBox = document.getElementById('customGoogleInputBox');
+  if (!container || !picker) return;
+
+  const accounts = getSavedGoogleAccounts();
+  const currentUser = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
+  const currentEmail = (currentUser && currentUser.email) ? currentUser.email.toLowerCase() : '';
+
+  if (accounts.length === 0) {
+    // No saved accounts on this device yet: show input form
+    container.innerHTML = '';
+    if (heading) heading.textContent = 'Enter your Google Account:';
+    if (inputBox) inputBox.style.display = 'block';
+    const useAnotherBtn = document.getElementById('useAnotherAccountBtn');
+    if (useAnotherBtn) useAnotherBtn.style.display = 'none';
+  } else {
+    if (heading) heading.textContent = 'Choose an account:';
+    if (inputBox) inputBox.style.display = 'none';
+    const useAnotherBtn = document.getElementById('useAnotherAccountBtn');
+    if (useAnotherBtn) useAnotherBtn.style.display = 'flex';
+
+    container.innerHTML = accounts.map(acc => {
+      const isActive = acc.email.toLowerCase() === currentEmail;
+      const initial = (acc.fullName ? acc.fullName.charAt(0) : acc.email.charAt(0)).toUpperCase();
+      const safeAcc = encodeURIComponent(JSON.stringify(acc));
+      return `
+        <div class="google-account-option ${isActive ? 'active-account' : ''}" onclick="selectSavedGoogleAccount('${safeAcc}')" title="Sign In as ${acc.fullName || acc.email}">
+          <div class="account-avatar" style="background: ${isActive ? 'var(--color-primary)' : '#e8f0fe'}; color: ${isActive ? '#fff' : '#1a73e8'}; font-weight: 700;">
+            ${initial}
+          </div>
+          <div class="account-details" style="flex: 1; min-width: 0;">
+            <span class="account-name" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${acc.fullName || 'Google User'}</span>
+            <span class="account-email" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${acc.email}</span>
+          </div>
+          ${isActive ? '<span class="account-badge-active">Active</span>' : ''}
+          <button type="button" class="account-remove-btn" onclick="removeSavedGoogleAccount('${acc.email}', event)" title="Remove account from device">✕</button>
+        </div>
+      `;
+    }).join('');
+  }
+}
+
 // Listen for messages from Google Sign-In popup window
 window.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'NUTRIAGRO_GOOGLE_AUTH_SUCCESS') {
@@ -66,6 +152,7 @@ function handleGoogleSignIn() {
       const client = google.accounts.oauth2.initTokenClient({
         client_id: GOOGLE_CLIENT_ID,
         scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+        prompt: 'select_account',
         callback: async (tokenResponse) => {
           if (tokenResponse && tokenResponse.access_token) {
             try {
@@ -82,31 +169,95 @@ function handleGoogleSignIn() {
       client.requestAccessToken();
       return;
     } catch (e) {
-      console.warn('Google GSI token request, falling back:', e);
+      console.warn('Google GSI token request note:', e);
     }
   }
 
-  // 2. Direct 1-Click Fast Sign In with Google (Zero popup blockers, 100% reliable)
-  chooseGoogleAccount('Sardar Gurpreet Singh', 'gurpreet.dairy@gmail.com');
+  // 2. Open Google Account Chooser & Multi-Account Selector (never automatically log in with a fake account!)
+  const picker = document.getElementById('googleAccountsPicker');
+  if (picker) {
+    picker.style.display = 'flex';
+    renderGoogleAccountsPicker();
+    picker.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
 }
 
+function selectSavedGoogleAccount(encodedAcc) {
+  try {
+    const acc = JSON.parse(decodeURIComponent(encodedAcc));
+    chooseGoogleAccount(acc.fullName, acc.email, acc.picture, acc.phone, acc.farmName);
+  } catch (e) {}
+}
 
+function toggleCustomGoogleInput(show) {
+  const box = document.getElementById('customGoogleInputBox');
+  if (!box) return;
+  const willShow = show !== undefined ? show : (box.style.display === 'none' || !box.style.display);
+  box.style.display = willShow ? 'block' : 'none';
+  if (willShow) {
+    const emailInput = document.getElementById('customGoogleEmail');
+    if (emailInput) setTimeout(() => emailInput.focus(), 80);
+  }
+}
 
-async function chooseGoogleAccount(name, email, picture) {
+function submitInlineGoogleAccount(event) {
+  if (event) event.preventDefault();
+  const emailInput = document.getElementById('customGoogleEmail');
+  const nameInput = document.getElementById('customGoogleName');
+  const phoneInput = document.getElementById('customGooglePhone');
+  const farmInput = document.getElementById('customGoogleFarm');
+
+  const email = emailInput ? emailInput.value.trim() : '';
+  const name = nameInput ? nameInput.value.trim() : '';
+  const phone = phoneInput ? phoneInput.value.trim() : '';
+  const farmName = farmInput ? farmInput.value.trim() : '';
+
+  if (!email || !email.includes('@')) {
+    alert('Please enter a valid Google / Gmail address.');
+    if (emailInput) emailInput.focus();
+    return;
+  }
+  if (!name) {
+    alert('Please enter your full name.');
+    if (nameInput) nameInput.focus();
+    return;
+  }
+
+  chooseGoogleAccount(name, email, '', phone, farmName);
+}
+
+function openAccountChooserModal() {
+  const gateway = document.getElementById('googleAuthGateway');
+  if (gateway) {
+    gateway.style.display = 'flex';
+    gateway.classList.remove('hidden');
+    const picker = document.getElementById('googleAccountsPicker');
+    if (picker) {
+      picker.style.display = 'flex';
+      renderGoogleAccountsPicker();
+    }
+  }
+}
+
+async function chooseGoogleAccount(name, email, picture, phone = '', farmName = '') {
   const gateway = document.getElementById('googleAuthGateway');
   const btn = document.getElementById('googleGatewayBtn');
   if (btn) {
-    btn.innerHTML = '<span style="display:inline-block; animation: spin 1s linear infinite;">⏳</span> <span>Authenticating ' + name + '...</span>';
+    btn.innerHTML = '<span style="display:inline-block; animation: spin 1s linear infinite;">⏳</span> <span>Connecting ' + email + '...</span>';
   }
+
+  const cleanName = name || email.split('@')[0];
+  const userPhone = phone || '9876543210';
+  const userFarm = farmName || `${cleanName.split(' ')[0]}'s Commercial Farm`;
 
   const googleUser = {
     userId: 'GOOGLE-' + Math.floor(100000 + Math.random() * 900000),
-    fullName: name,
+    fullName: cleanName,
     email: email,
     picture: picture || '',
-    phone: '9876543210',
+    phone: userPhone,
     authProvider: 'google',
-    farmName: `${name.split(' ')[0]}'s Commercial Farm`,
+    farmName: userFarm,
     farmType: 'Dairy Cattle & Livestock',
     tier: 'Verified Google Member (10% Rebate)',
     signedInAt: new Date().toISOString()
@@ -114,11 +265,16 @@ async function chooseGoogleAccount(name, email, picture) {
 
   try {
     localStorage.setItem('nutriagro_user', JSON.stringify(googleUser));
+    saveGoogleAccountToDevice(googleUser);
+
     let usersList = JSON.parse(localStorage.getItem('nutriagro_users_list') || '[]');
-    if (!usersList.some(u => u.email === email)) {
+    const existingIdx = usersList.findIndex(u => (u.email && u.email.toLowerCase() === email.toLowerCase()) || (u.phone && u.phone === userPhone));
+    if (existingIdx >= 0) {
+      usersList[existingIdx] = { ...usersList[existingIdx], ...googleUser };
+    } else {
       usersList.unshift(googleUser);
-      localStorage.setItem('nutriagro_users_list', JSON.stringify(usersList));
     }
+    localStorage.setItem('nutriagro_users_list', JSON.stringify(usersList));
   } catch (e) {}
 
   // Sync to backend /api/users
@@ -137,32 +293,9 @@ async function chooseGoogleAccount(name, email, picture) {
     }
     updateHeaderUserStatus();
     if (window.cart && typeof window.cart.showToast === 'function') {
-      window.cart.showToast(`🌾 Signed in as ${name}! 10% wholesale discount (FARM10) unlocked.`, 'success');
+      window.cart.showToast(`🌾 Signed in as ${cleanName} (${email})! 10% wholesale discount (FARM10) unlocked.`, 'success');
     }
   }, 350);
-}
-
-function toggleCustomGoogleInput() {
-  const box = document.getElementById('customGoogleInputBox');
-  if (box) {
-    box.style.display = (box.style.display === 'none' || !box.style.display) ? 'block' : 'none';
-    if (box.style.display === 'block') {
-      const nameInput = document.getElementById('customGoogleName');
-      if (nameInput) nameInput.focus();
-    }
-  }
-}
-
-function submitInlineGoogleAccount() {
-  const nameInput = document.getElementById('customGoogleName');
-  const emailInput = document.getElementById('customGoogleEmail');
-  const name = (nameInput && nameInput.value.trim()) || 'Verified Google Farmer';
-  const email = (emailInput && emailInput.value.trim()) || 'farmer@gmail.com';
-  chooseGoogleAccount(name, email);
-}
-
-function openCustomGooglePrompt() {
-  toggleCustomGoogleInput();
 }
 
 function bypassAsGuest() {
@@ -185,23 +318,7 @@ function signOutUser() {
     sessionStorage.removeItem('nutriagro_guest');
   } catch (e) {}
   updateHeaderUserStatus();
-  const gateway = document.getElementById('googleAuthGateway');
-  if (gateway) {
-    gateway.style.display = 'flex';
-    gateway.classList.remove('hidden');
-    const btn = document.getElementById('googleGatewayBtn');
-    if (btn) {
-      btn.innerHTML = `
-        <svg class="google-svg" viewBox="0 0 24 24" width="22" height="22">
-          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-        </svg>
-        <span class="google-btn-text">Sign In with Google</span>
-      `;
-    }
-  }
+  openAccountChooserModal();
 }
 
 function handleHeaderAccountClick(e) {

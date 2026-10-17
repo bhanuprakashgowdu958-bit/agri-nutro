@@ -71,8 +71,8 @@
         </div>
       </div>
 
-      <!-- Main Google Sign-In Button (1-Click Instant Login) -->
-      <button type="button" class="google-btn" id="googleGatewayBtn" onclick="handleGoogleSignIn()" title="Sign In Instantly with Google">
+      <!-- Main Google Sign-In Button -->
+      <button type="button" class="google-btn" id="googleGatewayBtn" onclick="handleGoogleSignIn()" title="Sign In with Google">
         <svg class="google-svg" viewBox="0 0 24 24" width="22" height="22">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
           <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -82,44 +82,52 @@
         <span class="google-btn-text">Sign In with Google</span>
       </button>
 
-      <!-- Account Chooser / Demo Switcher -->
-      <div class="google-accounts-picker" id="googleAccountsPicker">
-        <div class="picker-heading">Choose Account or Quick-Sign In:</div>
-        <div class="google-account-option" onclick="chooseGoogleAccount('Sardar Gurpreet Singh', 'gurpreet.dairy@gmail.com')" title="Click to Sign In as Sardar Gurpreet Singh">
-          <div class="account-avatar">🚜</div>
-          <div class="account-details">
-            <span class="account-name">Sardar Gurpreet Singh</span>
-            <span class="account-email">gurpreet.dairy@gmail.com</span>
-          </div>
-          <span style="margin-left: auto; font-size: 0.72rem; color: #059669; font-weight: 700; background: #e8f5ee; padding: 2px 8px; border-radius: 10px;">1-Click</span>
-        </div>
-        <div class="google-account-option" onclick="chooseGoogleAccount('Ramesh Patel', 'ramesh.patel.dairy@gmail.com')" title="Click to Sign In as Ramesh Patel">
-          <div class="account-avatar">🌾</div>
-          <div class="account-details">
-            <span class="account-name">Ramesh Patel</span>
-            <span class="account-email">ramesh.patel.dairy@gmail.com</span>
-          </div>
-          <span style="margin-left: auto; font-size: 0.72rem; color: #059669; font-weight: 700; background: #e8f5ee; padding: 2px 8px; border-radius: 10px;">1-Click</span>
-        </div>
-        <div class="google-account-option" onclick="toggleCustomGoogleInput()" title="Type your own Name and Gmail ID">
-          <div class="account-avatar">👤</div>
-          <div class="account-details">
-            <span class="account-name">Use another Google account...</span>
-            <span class="account-email">Enter your name and Gmail address</span>
-          </div>
-          <span style="margin-left: auto; font-size: 0.76rem; color: var(--color-primary); font-weight: 600;">Edit ▾</span>
+      <!-- Dynamic Google Account Chooser & Multi-Account Selector -->
+      <div class="google-accounts-picker" id="googleAccountsPicker" style="display: none;">
+        <div class="picker-heading" id="googlePickerHeading">Choose an account:</div>
+        
+        <!-- List of real accounts saved on this device (dynamically populated) -->
+        <div id="googleSavedAccountsList" class="saved-accounts-list" style="display: flex; flex-direction: column; gap: 8px;">
+          <!-- Dynamically populated from localStorage -->
         </div>
 
-        <!-- Inline Custom Google Account Input -->
-        <div id="customGoogleInputBox" style="display: none; padding: 12px; background: #fff; border: 1.5px solid #1a73e8; border-radius: 8px; margin-top: 6px; text-align: left;">
-          <label style="display: block; font-size: 0.76rem; font-weight: 700; color: #5f6368; margin-bottom: 4px;">Your Full Name:</label>
-          <input type="text" id="customGoogleName" placeholder="e.g. Bhanu Prakash" style="width: 100%; box-sizing: border-box; padding: 8px 10px; margin-bottom: 8px; border: 1px solid #dadce0; border-radius: 4px; font-size: 0.88rem; outline: none;" />
-          <label style="display: block; font-size: 0.76rem; font-weight: 700; color: #5f6368; margin-bottom: 4px;">Your Gmail Address:</label>
-          <input type="email" id="customGoogleEmail" placeholder="e.g. bhanu@gmail.com" style="width: 100%; box-sizing: border-box; padding: 8px 10px; margin-bottom: 10px; border: 1px solid #dadce0; border-radius: 4px; font-size: 0.88rem; outline: none;" />
-          <button type="button" onclick="submitInlineGoogleAccount()" style="width: 100%; background: #1a73e8; color: #fff; border: none; padding: 10px; border-radius: 4px; font-weight: 600; font-size: 0.88rem; cursor: pointer;">
+        <!-- Add / Use Another Account Option -->
+        <div class="google-account-option add-account-option" onclick="toggleCustomGoogleInput(true)" id="useAnotherAccountBtn">
+          <div class="account-avatar" style="background: #e8f0fe; color: #1a73e8; font-size: 1.1rem; font-weight: 700;">+</div>
+          <div class="account-details">
+            <span class="account-name" style="color: #1a73e8; font-weight: 600;">Use another Google account</span>
+            <span class="account-email">Enter your own Gmail address</span>
+          </div>
+        </div>
+
+        <!-- Custom Account Entry Form -->
+        <form id="customGoogleInputBox" onsubmit="submitInlineGoogleAccount(event)" style="display: none; padding: 14px; background: #ffffff; border: 1.5px solid #1a73e8; border-radius: 10px; margin-top: 8px; text-align: left; box-shadow: 0 4px 12px rgba(26,115,232,0.12);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 0.82rem; font-weight: 700; color: #202124;">Sign in to your Google Account</span>
+            <button type="button" onclick="toggleCustomGoogleInput(false)" style="background: none; border: none; font-size: 1.1rem; cursor: pointer; color: #5f6368;" title="Cancel">✕</button>
+          </div>
+          
+          <label style="display: block; font-size: 0.74rem; font-weight: 700; color: #5f6368; margin-bottom: 3px;">Gmail or Google Email *</label>
+          <input type="email" id="customGoogleEmail" required placeholder="e.g. yourname@gmail.com" style="width: 100%; box-sizing: border-box; padding: 9px 12px; margin-bottom: 8px; border: 1.5px solid #dadce0; border-radius: 6px; font-size: 0.88rem; outline: none;" onfocus="this.style.borderColor='#1a73e8'" onblur="this.style.borderColor='#dadce0'" />
+          
+          <label style="display: block; font-size: 0.74rem; font-weight: 700; color: #5f6368; margin-bottom: 3px;">Your Full Name *</label>
+          <input type="text" id="customGoogleName" required placeholder="e.g. Your Full Name" style="width: 100%; box-sizing: border-box; padding: 9px 12px; margin-bottom: 8px; border: 1.5px solid #dadce0; border-radius: 6px; font-size: 0.88rem; outline: none;" onfocus="this.style.borderColor='#1a73e8'" onblur="this.style.borderColor='#dadce0'" />
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+            <div>
+              <label style="display: block; font-size: 0.74rem; font-weight: 700; color: #5f6368; margin-bottom: 3px;">Phone (WhatsApp) *</label>
+              <input type="tel" id="customGooglePhone" required placeholder="e.g. 9876543210" style="width: 100%; box-sizing: border-box; padding: 9px 12px; border: 1.5px solid #dadce0; border-radius: 6px; font-size: 0.88rem; outline: none;" onfocus="this.style.borderColor='#1a73e8'" onblur="this.style.borderColor='#dadce0'" />
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.74rem; font-weight: 700; color: #5f6368; margin-bottom: 3px;">Farm Name (Optional)</label>
+              <input type="text" id="customGoogleFarm" placeholder="e.g. My Farm" style="width: 100%; box-sizing: border-box; padding: 9px 12px; border: 1.5px solid #dadce0; border-radius: 6px; font-size: 0.88rem; outline: none;" onfocus="this.style.borderColor='#1a73e8'" onblur="this.style.borderColor='#dadce0'" />
+            </div>
+          </div>
+
+          <button type="submit" style="width: 100%; background: #1a73e8; color: #fff; border: none; padding: 10px; border-radius: 6px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: background 0.2s;">
             Continue with this Google Account →
           </button>
-        </div>
+        </form>
       </div>
 
       <!-- Agreement & Guest Link -->
@@ -201,8 +209,11 @@
             <a href="terms.html" class="user-menu-item" target="_blank" onclick="closeUserMenu()">
               <span>📜</span> Terms & Quality Guarantee
             </a>
+            <button type="button" class="user-menu-item" onclick="openAccountChooserModal(); closeUserMenu();" style="color: #1a73e8;">
+              <span>👥</span> Switch / Choose Account
+            </button>
             <button type="button" class="user-menu-item logout" onclick="signOutUser(); closeUserMenu();">
-              <span>🚪</span> Sign Out / Switch Account
+              <span>🚪</span> Sign Out
             </button>
           </div>
         </div>

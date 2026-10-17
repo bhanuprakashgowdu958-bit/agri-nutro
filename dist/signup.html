@@ -10,6 +10,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>" />
 
+  <!-- Official Google Identity Services SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
   <style>
     :root {
       --color-primary: #124d32;
@@ -945,16 +948,16 @@
             <p id="formSubtitle">Set up your profile in 1 click with Google or enter custom farm details below.</p>
           </div>
 
-          <!-- Fast 1-Click Google Sign In -->
+          <!-- Google Sign Up -->
           <div style="margin-bottom: 22px;">
-            <button type="button" class="google-btn" onclick="signUpWithGoogleFast()" style="width: 100%; border: 1.5px solid #dadce0; box-shadow: 0 2px 6px rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; border-radius: var(--radius-md); background: #fff; cursor: pointer; font-size: 0.95rem; font-weight: 600; color: #3c4043;">
+            <button type="button" class="google-btn" onclick="openGoogleAuthPrompt()" style="width: 100%; border: 1.5px solid #dadce0; box-shadow: 0 2px 6px rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; border-radius: var(--radius-md); background: #fff; cursor: pointer; font-size: 0.95rem; font-weight: 600; color: #3c4043;">
               <svg viewBox="0 0 24 24" width="20" height="20">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
               </svg>
-              <span>Instant 1-Click Sign Up with Google</span>
+              <span>Sign Up with Google</span>
             </button>
             <div style="display: flex; align-items: center; margin: 18px 0 10px; color: var(--color-gray-400); font-size: 0.76rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.04em;">
               <span style="flex: 1; height: 1px; background: var(--color-gray-200);"></span>
@@ -1151,11 +1154,7 @@
             <span>🚜 Create Farmer Account & Unlock Discounts</span>
           </button>
 
-          <!-- Demo Quick Fill Button -->
-          <button type="button" class="demo-autofill-btn" onclick="fillDemoFarmer()">
-            <span>⚡ 1-Click Fill Demo Progressive Farmer Details</span>
-          </button>
-        </form>
+          </form>
 
         <!-- Mode 2: Login Form (Hidden by default) -->
         <form id="loginForm" style="display: none;" onsubmit="handleFarmerLogin(event)">
@@ -1164,16 +1163,16 @@
             <p>Access your past feed orders, repeat deliveries, and farm credit status.</p>
           </div>
 
-          <!-- 1-Click Fast Google Sign In for Returning Farmers -->
+          <!-- Google Sign In for Returning Farmers -->
           <div style="margin-bottom: 20px;">
-            <button type="button" class="google-btn" onclick="signUpWithGoogleFast()" style="width: 100%; border: 1.5px solid #dadce0; box-shadow: 0 2px 6px rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; border-radius: var(--radius-md); background: #fff; cursor: pointer; font-size: 0.95rem; font-weight: 600; color: #3c4043; transition: all 0.2s;">
+            <button type="button" class="google-btn" onclick="openGoogleAuthPrompt()" style="width: 100%; border: 1.5px solid #dadce0; box-shadow: 0 2px 6px rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; border-radius: var(--radius-md); background: #fff; cursor: pointer; font-size: 0.95rem; font-weight: 600; color: #3c4043; transition: all 0.2s;">
               <svg viewBox="0 0 24 24" width="20" height="20">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
               </svg>
-              <span>Instant 1-Click Sign In with Google</span>
+              <span>Sign In with Google</span>
             </button>
             <div style="display: flex; align-items: center; margin: 18px 0 10px; color: var(--color-gray-400); font-size: 0.76rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.04em;">
               <span style="flex: 1; height: 1px; background: var(--color-gray-200);"></span>
@@ -1211,10 +1210,6 @@
           <button type="submit" class="submit-cta-btn">
             <span>🌾 Sign In to Farm Dashboard</span>
           </button>
-
-          <button type="button" class="demo-autofill-btn" onclick="fillDemoLogin()">
-            <span>⚡ 1-Click Sign In as Demo Farmer (Gurpreet Singh)</span>
-          </button>
         </form>
       </section>
     </main>
@@ -1245,6 +1240,71 @@
           View Placed Orders & Live Status
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- Interactive Google Multi-Account Chooser Modal -->
+  <div class="success-modal-overlay" id="googleAccountModal" role="dialog" aria-modal="true" style="z-index: 10001;">
+    <div class="success-modal-card" style="max-width: 480px; text-align: left; padding: 26px 24px; box-shadow: 0 24px 60px rgba(0,0,0,0.35);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; border-bottom: 1px solid var(--color-gray-200); padding-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <svg viewBox="0 0 24 24" width="24" height="24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <div>
+            <h3 style="font-family: var(--font-heading); font-size: 1.15rem; font-weight: 800; color: var(--color-dark); margin: 0;">Sign In with Google</h3>
+            <span style="font-size: 0.76rem; color: var(--color-dark-muted);">Choose your Google account for NutriAgro Feeds</span>
+          </div>
+        </div>
+        <button type="button" onclick="closeGoogleAccountModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--color-gray-400); line-height: 1; padding: 2px 6px;">&times;</button>
+      </div>
+
+      <div id="signupGooglePickerHeading" style="font-size: 0.84rem; font-weight: 700; color: var(--color-dark-muted); margin-bottom: 10px;">Choose an account:</div>
+
+      <!-- Saved Accounts Container -->
+      <div id="signupGoogleSavedAccounts" style="display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto;">
+      </div>
+
+      <!-- Use another account button -->
+      <div id="signupUseAnotherBtn" onclick="toggleSignupCustomGoogleForm(true)" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1.5px dashed #1a73e8; border-radius: var(--radius-md); background: #f8fbff; cursor: pointer; margin-top: 10px; transition: all 0.2s;">
+        <div style="width: 36px; height: 36px; border-radius: 50%; background: #e8f0fe; color: #1a73e8; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem;">+</div>
+        <div>
+          <div style="font-weight: 700; font-size: 0.88rem; color: #1a73e8;">Use another Google account</div>
+          <div style="font-size: 0.74rem; color: var(--color-dark-muted);">Enter your own Gmail address</div>
+        </div>
+      </div>
+
+      <!-- Inline Google Account Entry Form -->
+      <form id="signupCustomGoogleForm" onsubmit="submitSignupInlineGoogle(event)" style="display: none; padding: 14px; background: #fff; border: 1.5px solid #1a73e8; border-radius: 10px; margin-top: 12px; box-shadow: 0 4px 12px rgba(26,115,232,0.12);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span style="font-size: 0.84rem; font-weight: 700; color: #202124;">Enter Your Google Account</span>
+          <button type="button" onclick="toggleSignupCustomGoogleForm(false)" style="background: none; border: none; font-size: 1.1rem; cursor: pointer; color: #5f6368;" title="Cancel">✕</button>
+        </div>
+
+        <label style="display: block; font-size: 0.74rem; font-weight: 700; color: #5f6368; margin-bottom: 3px;">Gmail or Google Email *</label>
+        <input type="email" id="signupCustomGoogleEmail" required placeholder="e.g. yourname@gmail.com" style="width: 100%; box-sizing: border-box; padding: 9px 12px; margin-bottom: 8px; border: 1.5px solid #dadce0; border-radius: 6px; font-size: 0.88rem; outline: none;" />
+
+        <label style="display: block; font-size: 0.74rem; font-weight: 700; color: #5f6368; margin-bottom: 3px;">Your Full Name *</label>
+        <input type="text" id="signupCustomGoogleName" required placeholder="e.g. Your Full Name" style="width: 100%; box-sizing: border-box; padding: 9px 12px; margin-bottom: 8px; border: 1.5px solid #dadce0; border-radius: 6px; font-size: 0.88rem; outline: none;" />
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+          <div>
+            <label style="display: block; font-size: 0.74rem; font-weight: 700; color: #5f6368; margin-bottom: 3px;">Phone (WhatsApp) *</label>
+            <input type="tel" id="signupCustomGooglePhone" required placeholder="e.g. 9876543210" pattern="[0-9]{10}" maxlength="10" style="width: 100%; box-sizing: border-box; padding: 9px 12px; border: 1.5px solid #dadce0; border-radius: 6px; font-size: 0.88rem; outline: none;" />
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.74rem; font-weight: 700; color: #5f6368; margin-bottom: 3px;">Farm Name (Optional)</label>
+            <input type="text" id="signupCustomGoogleFarm" placeholder="e.g. My Farm" style="width: 100%; box-sizing: border-box; padding: 9px 12px; border: 1.5px solid #dadce0; border-radius: 6px; font-size: 0.88rem; outline: none;" />
+          </div>
+        </div>
+
+        <button type="submit" style="width: 100%; background: #1a73e8; color: #fff; border: none; padding: 10px; border-radius: 6px; font-weight: 700; font-size: 0.9rem; cursor: pointer;">
+          Continue with this Google Account →
+        </button>
+      </form>
     </div>
   </div>
 
@@ -1307,24 +1367,206 @@
       closeTermsModal();
     }
 
-    function signUpWithGoogleFast() {
-      const name = 'Sardar Gurpreet Singh';
-      const email = 'gurpreet.dairy@gmail.com';
+    const GOOGLE_CLIENT_ID = window.NUTRIAGRO_GOOGLE_CLIENT_ID || '';
+
+    function getSavedGoogleAccounts() {
+      try {
+        return JSON.parse(localStorage.getItem('nutriagro_google_saved_accounts') || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveGoogleAccountToDevice(acc) {
+      try {
+        let list = getSavedGoogleAccounts();
+        list = list.filter(a => a.email.toLowerCase() !== acc.email.toLowerCase());
+        list.unshift(acc);
+        localStorage.setItem('nutriagro_google_saved_accounts', JSON.stringify(list));
+      } catch (e) {}
+    }
+
+    function removeSignupGoogleAccount(email, event) {
+      if (event) event.stopPropagation();
+      try {
+        let list = getSavedGoogleAccounts().filter(a => a.email.toLowerCase() !== email.toLowerCase());
+        localStorage.setItem('nutriagro_google_saved_accounts', JSON.stringify(list));
+        
+        const currentUser = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
+        if (currentUser && currentUser.email && currentUser.email.toLowerCase() === email.toLowerCase()) {
+          localStorage.removeItem('nutriagro_user');
+        }
+        renderSignupGoogleAccounts();
+      } catch (e) {}
+    }
+
+    function renderSignupGoogleAccounts() {
+      const container = document.getElementById('signupGoogleSavedAccounts');
+      const heading = document.getElementById('signupGooglePickerHeading');
+      const formBox = document.getElementById('signupCustomGoogleForm');
+      const useAnotherBtn = document.getElementById('signupUseAnotherBtn');
+      if (!container) return;
+
+      const accounts = getSavedGoogleAccounts();
+      const currentUser = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
+      const currentEmail = (currentUser && currentUser.email) ? currentUser.email.toLowerCase() : '';
+
+      if (accounts.length === 0) {
+        container.innerHTML = '';
+        if (heading) heading.textContent = 'Enter your Google Account details:';
+        if (formBox) formBox.style.display = 'block';
+        if (useAnotherBtn) useAnotherBtn.style.display = 'none';
+      } else {
+        if (heading) heading.textContent = 'Choose an account:';
+        if (formBox) formBox.style.display = 'none';
+        if (useAnotherBtn) useAnotherBtn.style.display = 'flex';
+
+        container.innerHTML = accounts.map(acc => {
+          const isActive = acc.email.toLowerCase() === currentEmail;
+          const initial = (acc.fullName ? acc.fullName.charAt(0) : acc.email.charAt(0)).toUpperCase();
+          const safeAcc = encodeURIComponent(JSON.stringify(acc));
+          return `
+            <div onclick="selectSignupSavedAccount('${safeAcc}')" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1.5px solid ${isActive ? 'var(--color-primary)' : 'var(--color-gray-200)'}; border-radius: var(--radius-md); background: ${isActive ? 'rgba(18,77,50,0.06)' : '#fff'}; cursor: pointer; transition: all 0.2s;" title="Sign In as ${acc.fullName || acc.email}">
+              <div style="width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; background: ${isActive ? 'var(--color-primary)' : '#e8f0fe'}; color: ${isActive ? '#fff' : '#1a73e8'}; flex-shrink: 0;">
+                ${initial}
+              </div>
+              <div style="flex: 1; min-width: 0; text-align: left;">
+                <div style="font-weight: 700; font-size: 0.92rem; color: var(--color-dark); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${acc.fullName || 'Google User'}</div>
+                <div style="font-size: 0.78rem; color: var(--color-dark-muted); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${acc.email}</div>
+              </div>
+              ${isActive ? '<span style="font-size: 0.72rem; font-weight: 700; background: var(--color-primary); color: #fff; padding: 2px 8px; border-radius: 9999px;">Active</span>' : ''}
+              <button type="button" onclick="removeSignupGoogleAccount('${acc.email}', event)" title="Remove account from device" style="background: none; border: none; color: var(--color-gray-400); font-size: 1.1rem; cursor: pointer; padding: 4px 8px; line-height: 1;">✕</button>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function selectSignupSavedAccount(encodedAcc) {
+      try {
+        const acc = JSON.parse(decodeURIComponent(encodedAcc));
+        applyGoogleAuthUser(acc.fullName, acc.email, acc.picture, acc.phone, acc.farmName);
+      } catch (e) {}
+    }
+
+    function toggleSignupCustomGoogleForm(show) {
+      const formBox = document.getElementById('signupCustomGoogleForm');
+      if (!formBox) return;
+      const willShow = show !== undefined ? show : (formBox.style.display === 'none' || !formBox.style.display);
+      formBox.style.display = willShow ? 'block' : 'none';
+      if (willShow) {
+        const emailInput = document.getElementById('signupCustomGoogleEmail');
+        if (emailInput) setTimeout(() => emailInput.focus(), 80);
+      }
+    }
+
+    function submitSignupInlineGoogle(e) {
+      if (e) e.preventDefault();
+      const emailInput = document.getElementById('signupCustomGoogleEmail');
+      const nameInput = document.getElementById('signupCustomGoogleName');
+      const phoneInput = document.getElementById('signupCustomGooglePhone');
+      const farmInput = document.getElementById('signupCustomGoogleFarm');
+
+      const email = emailInput ? emailInput.value.trim() : '';
+      const name = nameInput ? nameInput.value.trim() : '';
+      const phone = phoneInput ? phoneInput.value.trim() : '';
+      const farmName = farmInput ? farmInput.value.trim() : '';
+
+      if (!email || !email.includes('@')) {
+        alert('Please enter a valid Google / Gmail address.');
+        if (emailInput) emailInput.focus();
+        return;
+      }
+      if (!name) {
+        alert('Please enter your full name.');
+        if (nameInput) nameInput.focus();
+        return;
+      }
+
+      applyGoogleAuthUser(name, email, '', phone, farmName);
+    }
+
+    function applyGoogleAuthUser(name, email, picture = '', phone = '', farmName = '') {
+      closeGoogleAccountModal();
+      const cleanName = (name || email.split('@')[0] || 'Farmer').trim();
+      const firstWord = cleanName.split(' ')[0];
+      const userPhone = phone || (document.getElementById('farmerPhone') ? document.getElementById('farmerPhone').value.trim() : '') || '9876543210';
+      const userFarm = farmName || `${firstWord}'s Commercial Farm`;
+
       const googleUser = {
         userId: 'GOOGLE-' + Math.floor(100000 + Math.random() * 900000),
-        fullName: name,
+        fullName: cleanName,
         email: email,
-        phone: '9876543210',
+        phone: userPhone,
         authProvider: 'google',
-        farmName: `${name.split(' ')[0]}'s Commercial Farm`,
-        farmType: 'Dairy Cattle & Buffalo',
+        farmName: userFarm,
+        farmType: 'Commercial Livestock & Dairy',
         tier: 'Verified Google Member (10% Rebate)',
         signedInAt: new Date().toISOString()
       };
+
       localStorage.setItem('nutriagro_user', JSON.stringify(googleUser));
-      document.getElementById('modalWelcomeTitle').textContent = `Welcome, ${name.split(' ')[0]}!`;
+      saveGoogleAccountToDevice({
+        fullName: cleanName,
+        email: email,
+        picture: picture,
+        phone: userPhone,
+        farmName: userFarm
+      });
+
+      try {
+        let usersList = JSON.parse(localStorage.getItem('nutriagro_users_list') || '[]');
+        usersList = usersList.filter(u => u.email !== email);
+        usersList.unshift(googleUser);
+        localStorage.setItem('nutriagro_users_list', JSON.stringify(usersList));
+      } catch (err) {}
+
+      document.getElementById('modalWelcomeTitle').textContent = `Welcome, ${firstWord}!`;
       document.getElementById('modalWelcomeSub').textContent = `Your Google account (${email}) is connected. 10% wholesale discount (FARM10) unlocked.`;
       document.getElementById('successModal').classList.add('open');
+    }
+
+    function openGoogleAuthPrompt() {
+      if (GOOGLE_CLIENT_ID && typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+        try {
+          const client = google.accounts.oauth2.initTokenClient({
+            client_id: GOOGLE_CLIENT_ID,
+            scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+            prompt: 'select_account',
+            callback: async (tokenResponse) => {
+              if (tokenResponse && tokenResponse.access_token) {
+                try {
+                  const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                    headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+                  });
+                  const profile = await res.json();
+                  applyGoogleAuthUser(profile.name || profile.email, profile.email, profile.picture);
+                  return;
+                } catch (err) {}
+              }
+            }
+          });
+          client.requestAccessToken();
+          return;
+        } catch (e) {
+          console.warn('Google GSI note:', e);
+        }
+      }
+
+      const modal = document.getElementById('googleAccountModal');
+      if (modal) {
+        modal.classList.add('open');
+        renderSignupGoogleAccounts();
+      }
+    }
+
+    function closeGoogleAccountModal() {
+      const modal = document.getElementById('googleAccountModal');
+      if (modal) modal.classList.remove('open');
+    }
+
+    function signUpWithGoogleFast() {
+      openGoogleAuthPrompt();
     }
 
     // Tab Switching
@@ -1443,30 +1685,6 @@
       status.style.display = 'none';
     }
 
-    // 1-Click Demo Farmer Fill
-    function fillDemoFarmer() {
-      document.getElementById('farmerName').value = 'Ramesh Patel';
-      document.getElementById('farmerPhone').value = '9876543210';
-      document.getElementById('farmerEmail').value = 'ramesh.patel.dairy@gmail.com';
-      document.getElementById('farmerPassword').value = 'NutriAgro2026!';
-      checkPwdStrength('NutriAgro2026!');
-      selectFarmType('Dairy Cattle & Buffalo', document.querySelectorAll('.farm-type-card')[0]);
-      document.getElementById('farmName').value = 'Patel High-Yield Dairy & Milk Chilling Center';
-      document.getElementById('herdSize').value = 'Commercial Dairy / Unit (40-150 Animals / 5,000-20,000 Birds)';
-      document.getElementById('pincode').value = '560100';
-      lookupPincode('560100');
-      document.getElementById('farmAddress').value = 'Survey No. 42, Hosur Road, Near Milk Chilling Hub';
-      document.getElementById('gstin').value = '29AABCP1234D1Z8';
-      document.getElementById('whatsappAlerts').checked = true;
-      document.getElementById('termsAgree').checked = true;
-    }
-
-    // 1-Click Demo Login
-    function fillDemoLogin() {
-      document.getElementById('loginPhone').value = '9876543210';
-      document.getElementById('loginPassword').value = 'NutriAgro2026!';
-    }
-
     // Form Submit Handler (Register)
     async function handleFarmerSubmit(e) {
       e.preventDefault();
@@ -1524,19 +1742,19 @@
       
       // Look for user in localStorage
       let usersList = JSON.parse(localStorage.getItem('nutriagro_users_list') || '[]');
-      let matched = usersList.find(u => u.phone === identifier || u.email === identifier);
+      let matched = usersList.find(u => (u.phone && u.phone === identifier) || (u.email && u.email.toLowerCase() === identifier.toLowerCase()));
 
       if (!matched) {
-        matched = {
-          userId: 'FARM-991204',
-          fullName: 'Sardar Gurpreet Singh',
-          phone: identifier.match(/^[0-9]+$/) ? identifier : '9876543210',
-          email: identifier.includes('@') ? identifier : 'gurpreet.dairy@gmail.com',
-          farmType: 'Dairy Cattle & Buffalo',
-          farmName: 'Golden Harvest Dairy Farm',
-          state: 'Punjab',
-          tier: 'Progressive Farmer Tier'
-        };
+        // Also check if user exists in saved Google accounts on this device
+        const savedAccounts = getSavedGoogleAccounts();
+        const matchedGoogle = savedAccounts.find(a => (a.email && a.email.toLowerCase() === identifier.toLowerCase()) || (a.phone && a.phone === identifier));
+        if (matchedGoogle) {
+          applyGoogleAuthUser(matchedGoogle.fullName, matchedGoogle.email, matchedGoogle.picture, matchedGoogle.phone, matchedGoogle.farmName);
+          return;
+        }
+
+        alert(`No account found for "${identifier}". Please create a farm account or sign in with Google.`);
+        return;
       }
 
       localStorage.setItem('nutriagro_user', JSON.stringify(matched));
@@ -1562,7 +1780,7 @@
           banner.style.cssText = 'background: rgba(226,146,13,0.15); border: 1px solid var(--color-accent-gold); border-radius: var(--radius-md); padding: 12px 16px; margin-bottom: 20px; font-size: 0.86rem; color: var(--color-dark); display: flex; align-items: center; justify-content: space-between;';
           banner.innerHTML = `
             <span>👋 Currently active session: <strong>${existing.fullName}</strong> (${existing.farmName || 'My Farm'})</span>
-            <button onclick="localStorage.removeItem('nutriagro_user'); location.reload();" style="background: none; border: none; color: var(--color-danger); font-weight: 700; cursor: pointer; text-decoration: underline;">Switch Account</button>
+            <button onclick="openGoogleAuthPrompt();" style="background: none; border: none; color: var(--color-primary); font-weight: 700; cursor: pointer; text-decoration: underline;">Switch Account</button>
           `;
           document.querySelector('.form-card').prepend(banner);
         }
