@@ -19,5 +19,8 @@
     "india"
   ],
   "author": "NutriAgro Feeds India Pvt. Ltd.",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "firebase": "^13.2.0"
+  }
 }

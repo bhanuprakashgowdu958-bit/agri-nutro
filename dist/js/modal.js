@@ -383,9 +383,19 @@ function handleCheckoutSubmit(e) {
     const orderId = 'NUTRI-' + Math.floor(100000 + Math.random() * 900000);
     const dateStr = new Date().toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' });
 
+    // Detect logged in user to associate order with account
+    let loggedUser = null;
+    try {
+      loggedUser = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
+    } catch (e) {}
+    const orderUserEmail = (loggedUser && loggedUser.email) ? loggedUser.email : (document.getElementById('checkoutEmail')?.value || '').trim();
+    const orderUserId = (loggedUser && loggedUser.userId) ? loggedUser.userId : '';
+
     // Build order object for tracking
     const orderObj = {
       orderId: orderId,
+      userId: orderUserId,
+      userEmail: orderUserEmail,
       date: dateStr,
       timestamp: Date.now(),
       farmerName: farmerName,
@@ -483,8 +493,30 @@ function getStoredOrders() {
   }
 }
 
+function getUserOrderCount() {
+  try {
+    const user = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
+    const all = getStoredOrders();
+    if (!user) return all.length;
+    const userEmail = (user.email || '').toLowerCase().trim();
+    const userPhone = (user.phone || '').replace(/\D/g, '');
+    const userId = (user.userId || '').toLowerCase().trim();
+    const matched = all.filter(o => {
+      const oEmail = (o.userEmail || o.email || '').toLowerCase().trim();
+      const oPhone = (o.phone || '').replace(/\D/g, '');
+      const oUid = (o.userId || '').toLowerCase().trim();
+      return (userEmail && oEmail && oEmail === userEmail) ||
+             (userId && oUid && oUid === userId) ||
+             (userPhone && oPhone && oPhone.length >= 10 && oPhone.endsWith(userPhone.slice(-10)));
+    });
+    return matched.length;
+  } catch (e) {
+    return 0;
+  }
+}
+
 function updateAllOrderBadges(count) {
-  const c = typeof count === 'number' ? count : getStoredOrders().length;
+  const c = typeof count === 'number' ? count : getUserOrderCount();
   
   const headerBadge = document.getElementById('headerOrdersCountBadge');
   if (headerBadge) {
@@ -994,55 +1026,151 @@ function switchTrackerTab(tabName) {
   }
 }
 
+let _ordersFilterMode = 'auto'; // 'auto', 'account', or 'all'
+
+function setOrdersFilterMode(mode) {
+  _ordersFilterMode = mode;
+  renderOrdersListView(getStoredOrders(), '');
+}
+
 function renderOrdersListView(orders, searchQuery = '') {
   const listContainer = document.getElementById('trackerOrdersListTab');
   if (!listContainer) return;
 
-  const countBadge = document.getElementById('ordersCountBadge');
-  if (countBadge) countBadge.textContent = orders.length;
+  // Retrieve active logged in user
+  let currentUser = null;
+  try {
+    currentUser = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
+  } catch (e) {}
 
-  // Filter if searchQuery provided
-  let filteredOrders = orders;
+  // Filter orders matching logged-in user's account
+  let accountOrders = [];
+  if (currentUser) {
+    const userEmail = (currentUser.email || '').toLowerCase().trim();
+    const userPhone = (currentUser.phone || '').replace(/\D/g, '');
+    const userId = (currentUser.userId || '').toLowerCase().trim();
+
+    accountOrders = orders.filter(o => {
+      if (!o) return false;
+      const orderEmail = (o.userEmail || o.email || '').toLowerCase().trim();
+      const orderPhone = (o.phone || '').replace(/\D/g, '');
+      const orderUserId = (o.userId || '').toLowerCase().trim();
+
+      const matchEmail = Boolean(userEmail && orderEmail && orderEmail === userEmail);
+      const matchUserId = Boolean(userId && orderUserId && orderUserId === userId);
+      const matchPhone = Boolean(userPhone && orderPhone && orderPhone.length >= 10 && orderPhone.endsWith(userPhone.slice(-10)));
+
+      return matchEmail || matchUserId || matchPhone;
+    });
+  }
+
+  // Determine effective display mode
+  const isAccountMode = currentUser && (_ordersFilterMode === 'account' || (_ordersFilterMode === 'auto'));
+  const activeOrders = isAccountMode ? accountOrders : orders;
+
+  const countBadge = document.getElementById('ordersCountBadge');
+  if (countBadge) {
+    countBadge.textContent = isAccountMode ? accountOrders.length : orders.length;
+  }
+
+  // Filter by search query if provided
+  let filteredOrders = activeOrders;
   if (searchQuery && searchQuery.trim()) {
     const q = searchQuery.trim().toLowerCase();
-    filteredOrders = orders.filter(o => 
+    filteredOrders = activeOrders.filter(o => 
       (o.orderId && o.orderId.toLowerCase().includes(q)) ||
       (o.farmerName && o.farmerName.toLowerCase().includes(q)) ||
       (o.phone && o.phone.toLowerCase().includes(q)) ||
-      (o.address && o.address.toLowerCase().includes(q))
+      (o.address && o.address.toLowerCase().includes(q)) ||
+      (o.userEmail && o.userEmail.toLowerCase().includes(q))
     );
   }
 
-  if (orders.length === 0) {
-    listContainer.innerHTML = `
-      <div style="text-align: center; padding: 40px 20px; background: var(--color-gray-50); border: 1.5px dashed var(--color-gray-300); border-radius: var(--radius-lg);">
-        <div style="font-size: 2.8rem; margin-bottom: 12px;">📋</div>
-        <h3 style="font-size: 1.25rem; margin-bottom: 6px; color: var(--color-dark);">No Orders Placed Yet</h3>
-        <p style="font-size: 0.88rem; color: var(--color-dark-muted); max-width: 480px; margin: 0 auto 20px auto;">
-          When orders are submitted through Direct Farm Checkout, they will appear here in your Received Orders List with live dispatch controls.
-        </p>
-        <button type="button" class="btn btn-primary" onclick="generateSampleOrder()" style="padding: 10px 22px;">
-          ➕ Generate Sample Customer Order
-        </button>
+  // Calculate totals for active list
+  const totalBags = filteredOrders.reduce((sum, o) => sum + (o.totalBags || 1), 0);
+  const totalAmount = filteredOrders.reduce((sum, o) => sum + (o.finalTotal || 0), 0);
+
+  // 1. Account / Sign-In Status Banner
+  let accountBannerHtml = '';
+  if (currentUser && currentUser.email) {
+    accountBannerHtml = `
+      <div style="background: linear-gradient(135deg, rgba(18, 77, 50, 0.08) 0%, rgba(226, 146, 13, 0.08) 100%); border: 1.5px solid rgba(18, 77, 50, 0.22); border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 42px; height: 42px; border-radius: 50%; background: var(--color-primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; flex-shrink: 0; box-shadow: 0 4px 10px rgba(18,77,50,0.25);">
+            ${(currentUser.fullName ? currentUser.fullName.charAt(0) : currentUser.email.charAt(0)).toUpperCase()}
+          </div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <strong style="font-size: 0.98rem; color: var(--color-dark);">${currentUser.fullName || 'Farmer Account'}</strong>
+              <span style="font-size: 0.72rem; font-weight: 800; background: var(--color-primary); color: #fff; padding: 2px 8px; border-radius: 9999px;">✓ Signed In</span>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--color-dark-muted); margin-top: 2px;">
+              <span>✉️ ${currentUser.email}</span>
+              ${currentUser.phone ? ` · <span>📞 +91 ${currentUser.phone}</span>` : ''}
+              ${currentUser.farmName ? ` · <span>🚜 ${currentUser.farmName}</span>` : ''}
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Mode Switcher -->
+        <div style="display: flex; gap: 6px; background: rgba(255,255,255,0.85); padding: 4px; border-radius: var(--radius-full); border: 1px solid var(--color-gray-200);">
+          <button type="button" onclick="setOrdersFilterMode('account')" style="border: none; padding: 6px 14px; border-radius: var(--radius-full); font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.2s; ${isAccountMode ? 'background: var(--color-primary); color: #fff; box-shadow: 0 2px 6px rgba(18,77,50,0.25);' : 'background: transparent; color: var(--color-dark-muted);'}">
+            👤 My Account Orders (${accountOrders.length})
+          </button>
+          <button type="button" onclick="setOrdersFilterMode('all')" style="border: none; padding: 6px 14px; border-radius: var(--radius-full); font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.2s; ${!isAccountMode ? 'background: var(--color-primary); color: #fff; box-shadow: 0 2px 6px rgba(18,77,50,0.25);' : 'background: transparent; color: var(--color-dark-muted);'}">
+            🔍 All Orders (${orders.length})
+          </button>
+        </div>
       </div>
     `;
-    return;
+  } else {
+    accountBannerHtml = `
+      <div style="background: #fff8eb; border: 1.5px solid var(--color-accent-gold); border-radius: var(--radius-md); padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.4rem;">🔑</span>
+          <div>
+            <div style="font-weight: 700; font-size: 0.9rem; color: var(--color-dark);">Sign in to view your account orders automatically</div>
+            <div style="font-size: 0.78rem; color: var(--color-dark-muted);">All feed shipments placed under your account will be linked and tracked in your portal.</div>
+          </div>
+        </div>
+        <a href="signup.html" class="btn btn-sm btn-primary" style="padding: 7px 16px; font-size: 0.82rem; font-weight: 700; text-decoration: none;">
+          Sign In / Create Account →
+        </a>
+      </div>
+    `;
   }
 
-  // Calculate totals
-  const totalBags = orders.reduce((sum, o) => sum + (o.totalBags || 1), 0);
-  const totalAmount = orders.reduce((sum, o) => sum + (o.finalTotal || 0), 0);
-
+  // 2. Empty State Handling
   let ordersCardsHtml = '';
-  if (filteredOrders.length === 0) {
+  if (isAccountMode && accountOrders.length === 0) {
     ordersCardsHtml = `
-      <div style="text-align:center; padding:30px; color:var(--color-dark-muted); background:#f8fafc; border-radius:var(--radius-md);">
-        No orders match "<strong>${searchQuery}</strong>". <button type="button" onclick="renderOrdersListView(getStoredOrders(), '')" style="background:none; border:none; color:var(--color-primary); font-weight:700; cursor:pointer;">Clear search</button>
+      <div style="text-align: center; padding: 42px 20px; background: var(--color-gray-50); border: 1.5px dashed var(--color-gray-300); border-radius: var(--radius-lg);">
+        <div style="font-size: 3rem; margin-bottom: 12px;">🌾</div>
+        <h3 style="font-size: 1.25rem; margin-bottom: 6px; color: var(--color-dark);">No Orders Under This Account Yet</h3>
+        <p style="font-size: 0.88rem; color: var(--color-dark-muted); max-width: 480px; margin: 0 auto 20px auto; line-height: 1.5;">
+          You are signed in as <strong>${currentUser.email}</strong>. Once you checkout an order from the feed catalog, it will automatically appear right here with live 4-stage tracking and mill invoices.
+        </p>
+        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+          <button type="button" class="btn btn-primary" onclick="closeOrderTrackerModal(); window.location.hash = '#feedCatalogSection';" style="padding: 10px 22px;">
+            🛒 Explore Commercial Feeds
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="setOrdersFilterMode('all')" style="padding: 10px 18px;">
+            🔍 Look Up by Phone / Order ID
+          </button>
+        </div>
+      </div>
+    `;
+  } else if (filteredOrders.length === 0) {
+    ordersCardsHtml = `
+      <div style="text-align:center; padding:32px 20px; color:var(--color-dark-muted); background:#f8fafc; border-radius:var(--radius-md); border:1.5px dashed var(--color-gray-300);">
+        <div style="font-size: 2rem; margin-bottom: 8px;">🔍</div>
+        <p>No orders match "<strong>${searchQuery}</strong>".</p>
+        <button type="button" onclick="renderOrdersListView(getStoredOrders(), '')" style="background:none; border:none; color:var(--color-primary); font-weight:700; cursor:pointer; text-decoration:underline; margin-top: 6px;">Clear search filter</button>
       </div>
     `;
   } else {
     ordersCardsHtml = filteredOrders.map(order => {
-      const step = order.currentStep || 2;
+      const step = order.currentStep || 1;
       const statusBadge = step === 1 
         ? '<span style="background:rgba(59,130,246,0.15); color:#2563eb; border:1px solid rgba(59,130,246,0.3); padding:4px 10px; border-radius:14px; font-size:0.76rem; font-weight:700;">🌾 1. Order Confirmed</span>'
         : (step === 2 
@@ -1070,6 +1198,7 @@ function renderOrdersListView(orders, searchQuery = '') {
                   #${order.orderId}
                 </span>
                 <span style="font-size: 0.78rem; color: var(--color-dark-muted);">· Placed: ${order.date || 'Today'}</span>
+                ${order.userEmail ? `<span style="font-size: 0.72rem; color: #047857; background: rgba(4,120,87,0.1); padding: 1px 6px; border-radius: 4px;">Linked Account</span>` : ''}
               </div>
             </div>
             <div>
@@ -1080,7 +1209,7 @@ function renderOrdersListView(orders, searchQuery = '') {
           <!-- Customer & Destination Details -->
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 0.84rem; margin-bottom: 14px;">
             <div>
-              <span style="color: var(--color-dark-muted); font-size: 0.75rem; display: block; font-weight: 700;">CUSTOMER & PHONE:</span>
+              <span style="color: var(--color-dark-muted); font-size: 0.75rem; display: block; font-weight: 700;">CUSTOMER & FARMGATE:</span>
               <strong style="font-size: 0.95rem; color: var(--color-dark);">${order.farmerName || 'Customer'}</strong>
               <div style="color: #047857; font-weight: 600; margin-top: 2px;">📞 ${order.phone || 'N/A'}</div>
               <div style="color: var(--color-dark-muted); font-size: 0.78rem; margin-top: 4px;">📍 ${order.address || 'Detected Location'}</div>
@@ -1104,19 +1233,12 @@ function renderOrdersListView(orders, searchQuery = '') {
                 <span>🛰️</span> Track Live Status
               </button>
               <a href="https://wa.me/${order.phone ? order.phone.replace(/\D/g,'') : '919876543210'}?text=Hello%20${encodeURIComponent(order.farmerName || 'Customer')},%20your%20NutriAgro%20Order%20${order.orderId}%20is%20${encodeURIComponent(order.status || 'in progress')}.%20ETA:%20${encodeURIComponent(order.eta || 'Tomorrow')}." target="_blank" class="btn btn-sm btn-secondary" style="padding: 6px 12px; font-size: 0.8rem; background: #25d366; color: #fff; border-color: #25d366; display: inline-flex; align-items: center; gap: 4px;">
-                <span>📲</span> WhatsApp Customer
+                <span>📲</span> WhatsApp Dispatch
               </a>
             </div>
 
-            <!-- Manage / Update Stage -->
-            <div style="display: flex; align-items: center; gap: 6px; font-size: 0.78rem;">
-              <span style="color: var(--color-dark-muted); font-weight: 700;">Update Status:</span>
-              <select onchange="updateOrderStatus('${order.orderId}', this.value)" style="padding: 5px 8px; font-size: 0.78rem; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: 600; background: #fff; cursor: pointer;">
-                <option value="1" ${step === 1 ? 'selected' : ''}>🌾 1. Confirmed</option>
-                <option value="2" ${step === 2 ? 'selected' : ''}>⚙️ 2. Milling & QA</option>
-                <option value="3" ${step === 3 ? 'selected' : ''}>🚚 3. Dispatched</option>
-                <option value="4" ${step === 4 ? 'selected' : ''}>🏡 4. Delivered</option>
-              </select>
+            <div style="font-size: 0.78rem; color: var(--color-dark-muted);">
+              <span>🚚 ETA: <strong>${order.eta || 'Tomorrow by 4:00 PM'}</strong></span>
             </div>
           </div>
         </div>
@@ -1125,23 +1247,26 @@ function renderOrdersListView(orders, searchQuery = '') {
   }
 
   listContainer.innerHTML = `
-    <!-- Top Statistics Strip -->
+    <!-- Top Account Banner -->
+    ${accountBannerHtml}
+
+    <!-- Statistics Strip -->
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: var(--radius-md); padding: 12px 18px; margin-bottom: 16px;">
       <div style="display: flex; gap: 18px; flex-wrap: wrap; font-size: 0.85rem;">
-        <div>📦 Total Orders: <strong style="color: var(--color-primary);">${orders.length}</strong></div>
-        <div>🌾 Total Bags: <strong>${totalBags} Bags</strong></div>
-        <div>💰 Total Revenue: <strong style="color: var(--color-primary);">₹${Math.round(totalAmount).toLocaleString('en-IN')}</strong></div>
+        <div>📦 Showing: <strong style="color: var(--color-primary);">${filteredOrders.length} Order${filteredOrders.length === 1 ? '' : 's'}</strong></div>
+        <div>🌾 Total Volume: <strong>${totalBags} Bags</strong></div>
+        <div>💰 Total Amount: <strong style="color: var(--color-primary);">₹${Math.round(totalAmount).toLocaleString('en-IN')}</strong></div>
       </div>
       <div>
-        <button type="button" class="btn btn-sm btn-secondary" onclick="generateSampleOrder()" style="padding: 4px 10px; font-size: 0.75rem;">
-          + Add Test Order
+        <button type="button" class="btn btn-sm btn-secondary" onclick="manualRefreshOrders()" style="padding: 4px 10px; font-size: 0.75rem;">
+          🔄 Refresh Orders
         </button>
       </div>
     </div>
 
     <!-- Search & Filter Bar -->
     <div style="margin-bottom: 16px;">
-      <input type="text" class="calc-input" placeholder="🔍 Search orders by Order ID, Customer Name, or Phone..." value="${searchQuery}" oninput="renderOrdersListView(getStoredOrders(), this.value)" style="margin: 0; padding: 10px 14px; font-size: 0.85rem;" />
+      <input type="text" class="calc-input" placeholder="🔍 Search ${isAccountMode ? 'your account orders' : 'all orders'} by Order ID, Feed Name, Phone..." value="${searchQuery}" oninput="renderOrdersListView(getStoredOrders(), this.value)" style="margin: 0; padding: 10px 14px; font-size: 0.85rem;" />
     </div>
 
     <!-- Cards List -->

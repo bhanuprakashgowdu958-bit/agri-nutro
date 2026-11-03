@@ -22,6 +22,18 @@ function initCatalog() {
   setupWhatsAppWidget();
   initGoogleAuthGateway();
   updateHeaderUserStatus();
+
+  // Check URL parameters (e.g. action=openTracker)
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('action') === 'openTracker' || params.get('tab') === 'orders') {
+      setTimeout(() => {
+        if (typeof openOrderTrackerModal === 'function') {
+          openOrderTrackerModal();
+        }
+      }, 350);
+    }
+  } catch (e) {}
 }
 
 // ── Google Authentication Gateway & User Profile Controller ────────────────
@@ -41,17 +53,9 @@ function initGoogleAuthGateway() {
       gateway.style.display = 'none';
       gateway.classList.add('hidden');
     } else {
-      // First-time visitor: display Google Sign-In Gateway immediately
+      // First-time visitor: display Clean Sign-In / Sign-Up Gateway immediately
       gateway.style.display = 'flex';
       gateway.classList.remove('hidden');
-
-      // Check if user has saved accounts on device to display directly
-      const accounts = getSavedGoogleAccounts();
-      const picker = document.getElementById('googleAccountsPicker');
-      if (accounts && accounts.length > 0 && picker) {
-        picker.style.display = 'block';
-        renderGoogleAccountsPicker();
-      }
     }
   } catch (e) {
     gateway.style.display = 'flex';
@@ -213,15 +217,26 @@ function renderGoogleAccountsPicker() {
   const currentEmail = (currentUser && currentUser.email) ? currentUser.email.toLowerCase() : '';
 
   if (accounts.length === 0) {
+    if (heading) heading.textContent = 'Instant Google Sign-In:';
     container.innerHTML = `
-      <div style="padding: 12px; font-size: 0.82rem; color: var(--color-dark-muted); text-align: center; background: #f8f9fa; border-radius: var(--radius-md);">
-        No saved Google accounts on this device yet.<br>Click below to sign in with Google.
+      <div style="background: #f8fdf9; border: 1.5px solid #86efac; border-radius: 8px; padding: 12px; text-align: left;">
+        <p style="margin: 0 0 8px; font-size: 0.8rem; color: #166534; font-weight: 600;">
+          Enter your Gmail address to sign in and unlock 10% wholesale rebate:
+        </p>
+        <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+          <input type="email" id="quickGoogleEmailInput" placeholder="your.name@gmail.com" onkeydown="if(event.key==='Enter') submitQuickGoogleEmail()" style="flex: 1; padding: 8px 10px; border: 1.5px solid #d1d5db; border-radius: 6px; font-size: 0.84rem; outline: none;" />
+          <button type="button" onclick="submitQuickGoogleEmail()" style="padding: 8px 12px; background: var(--color-primary); color: #fff; border: none; border-radius: 6px; font-weight: 700; font-size: 0.84rem; cursor: pointer; white-space: nowrap;">
+            Sign In
+          </button>
+        </div>
+        <button type="button" onclick="chooseGoogleAccount('Farmer Partner', 'farmer.nutriagro@gmail.com')" style="width: 100%; padding: 7px; background: #ecfdf5; border: 1px solid #10b981; color: #047857; font-weight: 700; border-radius: 6px; font-size: 0.78rem; cursor: pointer;">
+          ⚡ 1-Click Fast Sign-In as Farmer Partner
+        </button>
       </div>
     `;
-    if (heading) heading.textContent = 'Google Account:';
   } else {
     if (heading) heading.textContent = 'Choose an account:';
-    container.innerHTML = accounts.map(acc => {
+    const accountsHtml = accounts.map(acc => {
       const isActive = acc.email.toLowerCase() === currentEmail;
       const initial = (acc.fullName ? acc.fullName.charAt(0) : acc.email.charAt(0)).toUpperCase();
       const safeAcc = encodeURIComponent(JSON.stringify(acc));
@@ -239,7 +254,35 @@ function renderGoogleAccountsPicker() {
         </div>
       `;
     }).join('');
+
+    container.innerHTML = `
+      ${accountsHtml}
+      <div id="addAccountCollapse" style="margin-top: 6px;">
+        <div style="background: #f8fdf9; border: 1px dashed #86efac; border-radius: 6px; padding: 10px;">
+          <div style="display: flex; gap: 6px; margin-bottom: 6px;">
+            <input type="email" id="quickGoogleEmailInput" placeholder="Add other Google email (e.g. name@gmail.com)" onkeydown="if(event.key==='Enter') submitQuickGoogleEmail()" style="flex: 1; padding: 7px 9px; border: 1px solid #d1d5db; border-radius: 5px; font-size: 0.8rem;" />
+            <button type="button" onclick="submitQuickGoogleEmail()" style="padding: 7px 12px; background: var(--color-primary); color: #fff; border: none; border-radius: 5px; font-weight: 700; font-size: 0.8rem; cursor: pointer;">
+              Sign In
+            </button>
+          </div>
+          <button type="button" onclick="chooseGoogleAccount('Farmer Partner', 'farmer.nutriagro@gmail.com')" style="width: 100%; padding: 6px; background: #ecfdf5; border: 1px solid #10b981; color: #047857; font-weight: 700; border-radius: 5px; font-size: 0.75rem; cursor: pointer;">
+            ⚡ Instant 1-Click Sign In (Demo Google Farmer)
+          </button>
+        </div>
+      </div>
+    `;
   }
+}
+
+function submitQuickGoogleEmail() {
+  const input = document.getElementById('quickGoogleEmailInput');
+  const email = (input ? input.value : '').trim();
+  if (!email || !email.includes('@')) {
+    alert('Please enter a valid Google / Gmail address (e.g. farmer@gmail.com)');
+    return;
+  }
+  const cleanName = email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  chooseGoogleAccount(cleanName, email);
 }
 
 // Listen for messages from Google Sign-In popup window
@@ -269,86 +312,223 @@ function checkGoogleOAuthHash() {
   }
 }
 
-function handleGoogleSignIn() {
-  const clientId = getGoogleClientId();
+// ── Official Firebase Auth Integration ────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyDcnDOa5Q0T-WA1kQzXgYMWYmwRdvrapfc",
+  authDomain: "nutriagro-feeds.firebaseapp.com",
+  databaseURL: "https://nutriagro-feeds-default-rtdb.firebaseio.com",
+  projectId: "nutriagro-feeds",
+  storageBucket: "nutriagro-feeds.firebasestorage.app",
+  messagingSenderId: "72168249807",
+  appId: "1:72168249807:web:fe771d178d76f265901aba",
+  measurementId: "G-3ZGJV6N5Q5"
+};
 
-  // 1. If official Google Client ID is configured, launch live Google Identity Services popup or redirect
-  if (clientId) {
-    if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
-      try {
-        const client = google.accounts.oauth2.initTokenClient({
-          client_id: clientId,
-          scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
-          prompt: 'select_account',
-          callback: async (tokenResponse) => {
-            if (tokenResponse && tokenResponse.access_token) {
-              try {
-                const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                  headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
-                });
-                const profile = await res.json();
-                chooseGoogleAccount(profile.name || profile.email, profile.email, profile.picture);
-                return;
-              } catch (err) {
-                console.error('Error fetching Google UserInfo:', err);
-              }
-            }
-          }
-        });
-        client.requestAccessToken({ prompt: 'select_account' });
+if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+  try {
+    firebase.initializeApp(firebaseConfig);
+  } catch (e) {}
+}
+
+async function handleGoogleSignIn() {
+  // 1. Official Firebase Google Sign-In with Popup
+  if (typeof firebase !== 'undefined' && firebase.auth) {
+    try {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      const result = await firebase.auth().signInWithPopup(provider);
+      if (result && result.user) {
+        const u = result.user;
+        chooseGoogleAccount(u.displayName || 'Farmer Partner', u.email, u.photoURL || '');
         return;
-      } catch (e) {
-        console.warn('Google GSI token request note:', e);
       }
+    } catch (fbErr) {
+      console.warn('Firebase popup notice:', fbErr);
+      if (fbErr.code === 'auth/popup-closed-by-user') return;
     }
-    // Direct redirect to Google OAuth account chooser
-    const redirectUri = window.location.origin + window.location.pathname;
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=email%20profile&prompt=select_account`;
-    window.location.href = authUrl;
-    return;
   }
 
-  // 2. If no Client ID connected, show Google Account Chooser & Email prompt directly
-  const picker = document.getElementById('googleAccountsPicker');
-  if (picker) {
-    picker.style.display = 'block';
-    renderGoogleAccountsPicker();
-    const saved = getSavedGoogleAccounts();
-    if (saved.length === 0) {
-      showGoogleEmailInput();
+  // 2. Seamless Fast Fallback: Prompt for Google email
+  const email = prompt('Enter your Google / Gmail email to sign in:', 'farmer.nutriagro@gmail.com');
+  if (email && email.trim() && email.includes('@')) {
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanName = cleanEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    chooseGoogleAccount(cleanName, cleanEmail);
+  }
+}
+
+// ── Modal Auth Switcher & Form Handlers (Minimal & User-Friendly) ───────
+function switchModalAuthMode(mode) {
+  const title = document.getElementById('modalAuthTitle');
+  const subtitle = document.getElementById('modalAuthSubtitle');
+  const signupForm = document.getElementById('modalSignupForm');
+  const loginForm = document.getElementById('modalLoginForm');
+  const prompt = document.getElementById('mAuthFooterPrompt');
+  const link = document.getElementById('mAuthFooterLink');
+  const alertBox = document.getElementById('modalAuthAlert');
+  if (alertBox) alertBox.style.display = 'none';
+
+  if (mode === 'login') {
+    if (title) title.textContent = 'Welcome Back';
+    if (subtitle) subtitle.textContent = 'Sign in to access your farm orders & discounts';
+    if (signupForm) signupForm.style.display = 'none';
+    if (loginForm) loginForm.style.display = 'block';
+    if (prompt) prompt.textContent = "Don't have an account?";
+    if (link) {
+      link.textContent = 'Sign Up';
+      link.setAttribute('onclick', "switchModalAuthMode('signup')");
     }
   } else {
-    showGoogleEmailInput();
+    if (title) title.textContent = 'Create Your Account';
+    if (subtitle) subtitle.textContent = 'Join us to access certified millgate pricing & direct delivery';
+    if (signupForm) signupForm.style.display = 'block';
+    if (loginForm) loginForm.style.display = 'none';
+    if (prompt) prompt.textContent = 'Already have an account?';
+    if (link) {
+      link.textContent = 'Login';
+      link.setAttribute('onclick', "switchModalAuthMode('login')");
+    }
   }
 }
 
-function showGoogleEmailInput() {
-  const section = document.getElementById('googleEmailInputSection');
-  const btn = document.getElementById('useAnotherAccountBtn');
-  if (section) section.style.display = 'block';
-  if (btn) btn.style.display = 'none';
-  const emailInput = document.getElementById('gatewayGoogleEmail');
-  if (emailInput) setTimeout(() => emailInput.focus(), 80);
+function toggleModalPwd(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const isPwd = input.type === 'password';
+  input.type = isPwd ? 'text' : 'password';
+  btn.innerHTML = isPwd 
+    ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>'
+    : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
 }
 
-function hideGoogleEmailInput() {
-  const section = document.getElementById('googleEmailInputSection');
-  const btn = document.getElementById('useAnotherAccountBtn');
-  if (section) section.style.display = 'none';
-  if (btn) btn.style.display = 'flex';
+function showModalAlert(type, message) {
+  const alertBox = document.getElementById('modalAuthAlert');
+  if (!alertBox) return;
+  alertBox.style.display = 'flex';
+  if (type === 'error') {
+    alertBox.style.background = '#fef2f2';
+    alertBox.style.color = '#991b1b';
+    alertBox.style.border = '1px solid #f87171';
+    alertBox.innerHTML = `<span>⚠️</span> <span>${message}</span>`;
+  } else {
+    alertBox.style.background = '#f0fdf4';
+    alertBox.style.color = '#166534';
+    alertBox.style.border = '1px solid #86efac';
+    alertBox.innerHTML = `<span>✅</span> <span>${message}</span>`;
+  }
 }
 
-function handleDirectGoogleEmailSubmit(e) {
-  if (e) e.preventDefault();
-  const email = (document.getElementById('gatewayGoogleEmail').value || '').trim();
-  const name = (document.getElementById('gatewayGoogleName').value || '').trim();
+async function handleModalSignup(e) {
+  e.preventDefault();
+  const name = document.getElementById('mSignupName')?.value.trim();
+  const email = document.getElementById('mSignupEmail')?.value.trim().toLowerCase();
+  const pwd = document.getElementById('mSignupPassword')?.value;
+  const conf = document.getElementById('mSignupConfirmPassword')?.value;
+  const btn = document.getElementById('mSignupSubmitBtn');
 
-  if (!email || !email.includes('@')) {
-    alert('Please enter a valid Google email address.');
-    return;
+  if (!name) return showModalAlert('error', 'Please enter your full name.');
+  if (!email || !email.includes('@')) return showModalAlert('error', 'Please enter a valid email.');
+  if (pwd.length < 6) return showModalAlert('error', 'Password must be at least 6 characters.');
+  if (pwd !== conf) return showModalAlert('error', 'Passwords do not match.');
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span>Creating Account...</span>';
   }
 
-  chooseGoogleAccount(name, email, '');
+  const user = {
+    userId: 'FARM-' + Math.floor(100000 + Math.random() * 900000),
+    fullName: name,
+    email: email,
+    phone: '',
+    farmName: `${name}'s Farm`,
+    farmType: 'Commercial Livestock & Dairy',
+    tier: 'Verified Farm Member (10% Rebate)',
+    registeredAt: new Date().toISOString()
+  };
+
+  try {
+    fetch('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'register', fullName: name, email: email, password: pwd })
+    }).catch(() => {});
+  } catch (err) {}
+
+  localStorage.setItem('nutriagro_user', JSON.stringify(user));
+  let usersList = JSON.parse(localStorage.getItem('nutriagro_users_list') || '[]');
+  if (!usersList.some(u => u.email === email)) {
+    usersList.unshift(user);
+    localStorage.setItem('nutriagro_users_list', JSON.stringify(usersList));
+  }
+
+  const gateway = document.getElementById('googleAuthGateway');
+  if (gateway) {
+    gateway.style.display = 'none';
+    gateway.classList.add('hidden');
+  }
+  updateHeaderUserStatus();
+  if (window.cart && typeof window.cart.showToast === 'function') {
+    window.cart.showToast(`🌾 Account created! Welcome, ${name.split(' ')[0]}. 10% discount active!`, 'success');
+  }
+}
+
+async function handleModalLogin(e) {
+  e.preventDefault();
+  const ident = document.getElementById('mLoginEmail')?.value.trim();
+  const pwd = document.getElementById('mLoginPassword')?.value;
+  const btn = document.getElementById('mLoginSubmitBtn');
+
+  if (!ident) return showModalAlert('error', 'Please enter your email or phone.');
+  if (!pwd) return showModalAlert('error', 'Please enter your password.');
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span>Signing In...</span>';
+  }
+
+  let loggedUser = null;
+  try {
+    const res = await fetch('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'login', email: ident, phone: ident, password: pwd })
+    });
+    const data = await res.json();
+    if (res.ok && data.user) {
+      loggedUser = data.user;
+    } else if (res.status === 401 || res.status === 404) {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Sign In</span> →';
+      }
+      return showModalAlert('error', data.error || 'Incorrect email or password.');
+    }
+  } catch (e) {}
+
+  if (!loggedUser) {
+    const usersList = JSON.parse(localStorage.getItem('nutriagro_users_list') || '[]');
+    const match = usersList.find(u => (u.email && u.email.toLowerCase() === ident.toLowerCase()) || (u.phone && u.phone === ident));
+    if (!match) {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Sign In</span> →';
+      }
+      return showModalAlert('error', `No registered account found for "${ident}".`);
+    }
+    loggedUser = { ...match };
+  }
+
+  localStorage.setItem('nutriagro_user', JSON.stringify(loggedUser));
+  const gateway = document.getElementById('googleAuthGateway');
+  if (gateway) {
+    gateway.style.display = 'none';
+    gateway.classList.add('hidden');
+  }
+  updateHeaderUserStatus();
+  if (window.cart && typeof window.cart.showToast === 'function') {
+    window.cart.showToast(`🌾 Welcome back, ${loggedUser.fullName || 'Farmer'}!`, 'success');
+  }
 }
 
 function selectSavedGoogleAccount(encodedAcc) {
@@ -418,16 +598,14 @@ async function chooseGoogleAccount(name, email, picture, phone = '', farmName = 
     }).catch(() => {});
   } catch (e) {}
 
-  setTimeout(() => {
-    if (gateway) {
-      gateway.classList.add('hidden');
-      setTimeout(() => { gateway.style.display = 'none'; }, 350);
-    }
-    updateHeaderUserStatus();
-    if (window.cart && typeof window.cart.showToast === 'function') {
-      window.cart.showToast(`🌾 Signed in as ${cleanName} (${email})! 10% wholesale discount (FARM10) unlocked.`, 'success');
-    }
-  }, 350);
+  if (gateway) {
+    gateway.classList.add('hidden');
+    gateway.style.display = 'none';
+  }
+  updateHeaderUserStatus();
+  if (window.cart && typeof window.cart.showToast === 'function') {
+    window.cart.showToast(`🌾 Signed in as ${cleanName} (${email})! 10% wholesale discount (FARM10) unlocked.`, 'success');
+  }
 }
 
 function bypassAsGuest() {

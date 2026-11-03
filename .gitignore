@@ -1,4 +1,5 @@
 # Test & temporary files
+node_modules/
 *.png
 *.zip
 *.log

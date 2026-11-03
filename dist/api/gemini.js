@@ -290,9 +290,12 @@ module.exports = async function handler(req, res) {
     }
 
     const sysText = (body.systemInstruction?.parts?.[0]?.text || body.system_instruction?.parts?.[0]?.text || '').trim();
+    const defaultSysInstruction = `You are Dr. Thorne, Senior AI Agronomist & Feed Scientist at NutriAgro Feeds India.
+Provide crisp, authoritative, practical guidance for livestock farmers, dairy owners, and poultry producers. Emphasize scientific formulation benchmarks, proper feed conversion ratios (FCR), nutritional balance, and NutriAgro feeding recommendations.`;
+    const effectiveSysText = sysText || defaultSysInstruction;
 
     const geminiPayload = {
-      systemInstruction: sysText ? { parts: [{ text: sysText }] } : undefined,
+      systemInstruction: { parts: [{ text: effectiveSysText }] },
       contents: body.contents || [],
       generationConfig: body.generationConfig || {
         temperature: 0.6,
