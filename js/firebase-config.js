@@ -1,5 +1,5 @@
 // Official Firebase Configuration & Initialization for NutriAgro Feeds
-const firebaseConfig = {
+window.firebaseConfig = {
   apiKey: "AIzaSyDcnDOa5Q0T-WA1kQzXgYMWYmwRdvrapfc",
   authDomain: "nutriagro-feeds.firebaseapp.com",
   databaseURL: "https://nutriagro-feeds-default-rtdb.firebaseio.com",
@@ -13,7 +13,7 @@ const firebaseConfig = {
 // Initialize Firebase (Compat SDK for zero-build browser compatibility)
 if (typeof firebase !== 'undefined' && !firebase.apps.length) {
   try {
-    firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(window.firebaseConfig);
     if (typeof firebase.analytics === 'function') {
       try {
         firebase.analytics();

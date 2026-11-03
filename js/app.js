@@ -313,20 +313,9 @@ function checkGoogleOAuthHash() {
 }
 
 // ── Official Firebase Auth Integration ────────────────────────────────
-const firebaseConfig = {
-  apiKey: "AIzaSyDcnDOa5Q0T-WA1kQzXgYMWYmwRdvrapfc",
-  authDomain: "nutriagro-feeds.firebaseapp.com",
-  databaseURL: "https://nutriagro-feeds-default-rtdb.firebaseio.com",
-  projectId: "nutriagro-feeds",
-  storageBucket: "nutriagro-feeds.firebasestorage.app",
-  messagingSenderId: "72168249807",
-  appId: "1:72168249807:web:fe771d178d76f265901aba",
-  measurementId: "G-3ZGJV6N5Q5"
-};
-
-if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+if (typeof firebase !== 'undefined' && !firebase.apps.length && typeof window !== 'undefined' && window.firebaseConfig) {
   try {
-    firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(window.firebaseConfig);
   } catch (e) {}
 }
 
@@ -436,6 +425,25 @@ async function handleModalSignup(e) {
     btn.innerHTML = '<span>Creating Account...</span>';
   }
 
+  // Firebase Auth registration if available
+  if (typeof firebase !== 'undefined' && firebase.auth && email.includes('@')) {
+    try {
+      const fbCred = await firebase.auth().createUserWithEmailAndPassword(email, pwd);
+      if (fbCred && fbCred.user) {
+        await fbCred.user.updateProfile({ displayName: name }).catch(() => {});
+      }
+    } catch (fbErr) {
+      console.warn('Firebase signup notice:', fbErr);
+      if (fbErr.code === 'auth/email-already-in-use') {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>Sign Up</span> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+        }
+        return showModalAlert('error', 'This email is already registered. Please click Login below.');
+      }
+    }
+  }
+
   const user = {
     userId: 'FARM-' + Math.floor(100000 + Math.random() * 900000),
     fullName: name,
@@ -488,6 +496,37 @@ async function handleModalLogin(e) {
   }
 
   let loggedUser = null;
+
+  // 1. Check Firebase Auth if email provided
+  if (typeof firebase !== 'undefined' && firebase.auth && ident.includes('@')) {
+    try {
+      const fbCred = await firebase.auth().signInWithEmailAndPassword(ident, pwd);
+      if (fbCred && fbCred.user) {
+        const u = fbCred.user;
+        loggedUser = {
+          userId: u.uid,
+          fullName: u.displayName || ident.split('@')[0],
+          email: u.email,
+          phone: u.phoneNumber || '',
+          farmName: `${(u.displayName || ident.split('@')[0])}'s Commercial Farm`,
+          farmType: 'Dairy Cattle & Livestock',
+          tier: 'Verified Member (10% Rebate)',
+          signedInAt: new Date().toISOString()
+        };
+      }
+    } catch (fbErr) {
+      console.warn('Firebase login notice:', fbErr);
+      if (fbErr.code === 'auth/wrong-password' || fbErr.code === 'auth/invalid-credential') {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>Sign In</span> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+        }
+        return showModalAlert('error', 'Incorrect password. Please try again.');
+      }
+    }
+  }
+
+  // 2. Check Backend API
   try {
     const res = await fetch('/api/users', {
       method: 'POST',
@@ -632,7 +671,10 @@ function signOutUser() {
 }
 
 function handleHeaderAccountClick(e) {
-  if (e) e.stopPropagation();
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
   try {
     const user = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
     if (user && user.fullName) {
@@ -643,18 +685,25 @@ function handleHeaderAccountClick(e) {
       if (gateway) {
         gateway.style.display = 'flex';
         gateway.classList.remove('hidden');
+        if (typeof switchModalAuthMode === 'function') {
+          switchModalAuthMode('login');
+        }
         const card = gateway.querySelector('.gateway-card');
         if (card) {
           card.style.animation = 'none';
           card.offsetHeight; // force reflow
           card.style.animation = 'gatewayPop 0.35s cubic-bezier(0.16, 1, 0.3, 1)';
         }
+        setTimeout(() => {
+          const emailInput = document.getElementById('mLoginEmail');
+          if (emailInput) emailInput.focus();
+        }, 100);
       } else {
-        window.location.href = 'signup.html';
+        window.location.href = 'signup.html?tab=login';
       }
     }
   } catch (err) {
-    window.location.href = 'signup.html';
+    window.location.href = 'signup.html?tab=login';
   }
 }
 
