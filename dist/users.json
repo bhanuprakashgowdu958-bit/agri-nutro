@@ -1,25 +1,28 @@
 [
   {
-    "userId": "FARM-830176",
+    "userId": "GOOGLE-646776",
     "registeredAt": "2026-10-18T06:02:24.841Z",
-    "lastUpdated": "2026-11-03T06:10:21.651Z",
-    "fullName": "sss",
-    "phone": "9876543201",
+    "lastUpdated": "2026-11-03T07:27:26.952Z",
+    "fullName": "Bhanu Prakash",
+    "phone": "9876543210",
     "email": "bhanuprakashgowdu958@gmail.com",
     "passwordHash": "d23fea61cdbcbbe11c0e9a490cff5b707985c53ee46e10b530284a27a58ca15e",
     "salt": "fi2xjcc05b",
-    "farmType": "Dairy Cattle & Buffalo",
-    "farmName": "nnnn",
+    "farmType": "Dairy Cattle & Livestock",
+    "farmName": "Bhanu's Commercial Farm",
     "herdSize": "Progressive Farm (10-40 Animals / 500-5,000 Birds)",
     "pincode": "517429",
     "state": "Tamil Nadu",
     "address": "khabciabiuhoe",
     "gstin": "",
     "whatsappAlerts": false,
-    "tier": "Progressive Farmer (10% First-Order Rebate)"
+    "tier": "Verified Google Member (10% Rebate)",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocK9zToYcBQPTJJ6_t-ZnxAiiuGI1NW9H4OtPKcAuVJitKsUBKL7=s96-c",
+    "authProvider": "google",
+    "signedInAt": "2026-11-03T07:27:26.931Z"
   },
   {
-    "userId": "GOOGLE-909115",
+    "userId": "GOOGLE-642803",
     "fullName": "Farmer Nutriagro",
     "phone": "9876543210",
     "email": "farmer.nutriagro@gmail.com",
@@ -37,7 +40,7 @@
     "tier": "Verified Google Member (10% Rebate)",
     "picture": "",
     "authProvider": "google",
-    "signedInAt": "2026-11-03T06:29:55.338Z",
-    "lastUpdated": "2026-11-03T06:29:55.442Z"
+    "signedInAt": "2026-11-03T07:27:03.067Z",
+    "lastUpdated": "2026-11-03T07:27:03.201Z"
   }
 ]

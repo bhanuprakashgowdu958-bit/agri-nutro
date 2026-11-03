@@ -1167,6 +1167,29 @@
         } catch (fbErr) {
           console.warn('Firebase popup notice:', fbErr);
           if (fbErr.code === 'auth/popup-closed-by-user') return;
+
+          if (fbErr.code === 'auth/unauthorized-domain') {
+            const host = window.location.hostname;
+            showAlert('error', `Domain "${host}" is not authorised in Firebase. In Firebase Console -> Authentication -> Settings -> Authorised domains, click "Add domain" and add ${host}.`);
+            
+            setTimeout(() => {
+              const promptEmail = prompt(`Firebase requires adding "${host}" to Authorised domains in Firebase Console.\n\nEnter your Google email to sign in directly:`, 'farmer.nutriagro@gmail.com');
+              if (promptEmail && promptEmail.trim() && promptEmail.includes('@')) {
+                const cleanEmail = promptEmail.trim().toLowerCase();
+                const cleanName = cleanEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                completeGoogleAuth(cleanName, cleanEmail, '');
+              }
+            }, 150);
+            return;
+          }
+
+          if (fbErr.code === 'auth/popup-blocked') {
+            showAlert('error', 'Google Sign-In popup was blocked by browser. Please allow popups for this site.');
+            return;
+          }
+
+          showAlert('error', fbErr.message || 'Google Sign-In failed.');
+          return;
         }
       }
 

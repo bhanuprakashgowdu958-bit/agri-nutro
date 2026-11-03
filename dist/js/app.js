@@ -320,6 +320,9 @@ if (typeof firebase !== 'undefined' && !firebase.apps.length && typeof window !=
 }
 
 async function handleGoogleSignIn() {
+  const alertBox = document.getElementById('modalAuthAlert');
+  if (alertBox) alertBox.style.display = 'none';
+
   // 1. Official Firebase Google Sign-In with Popup
   if (typeof firebase !== 'undefined' && firebase.auth) {
     try {
@@ -334,6 +337,29 @@ async function handleGoogleSignIn() {
     } catch (fbErr) {
       console.warn('Firebase popup notice:', fbErr);
       if (fbErr.code === 'auth/popup-closed-by-user') return;
+
+      if (fbErr.code === 'auth/unauthorized-domain') {
+        const host = window.location.hostname;
+        showModalAlert('error', `Domain "<strong>${host}</strong>" is not yet authorised in Firebase. In Firebase Console &rarr; Auth &rarr; Settings &rarr; Authorised domains, click "Add domain" and add <strong>${host}</strong>.`);
+        
+        setTimeout(() => {
+          const email = prompt(`Firebase requires adding "${host}" to Authorised Domains in Firebase Console.\n\nEnter your Google email to sign in directly:`, 'farmer.nutriagro@gmail.com');
+          if (email && email.trim() && email.includes('@')) {
+            const cleanEmail = email.trim().toLowerCase();
+            const cleanName = cleanEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            chooseGoogleAccount(cleanName, cleanEmail);
+          }
+        }, 150);
+        return;
+      }
+
+      if (fbErr.code === 'auth/popup-blocked') {
+        showModalAlert('error', 'Google Sign-In popup was blocked by your browser. Please allow popups.');
+        return;
+      }
+
+      showModalAlert('error', fbErr.message || 'Could not sign in with Google.');
+      return;
     }
   }
 
