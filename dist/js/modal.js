@@ -539,6 +539,12 @@ function updateAllOrderBadges(count) {
     headerBadge.style.display = c > 0 ? 'inline-block' : 'none';
   }
 
+  const dropdownBadge = document.getElementById('dropdownOrdersCountBadge');
+  if (dropdownBadge) {
+    dropdownBadge.textContent = c;
+    dropdownBadge.style.display = c > 0 ? 'inline-block' : 'none';
+  }
+
   const modalBadge = document.getElementById('ordersCountBadge');
   if (modalBadge) {
     modalBadge.textContent = c;
