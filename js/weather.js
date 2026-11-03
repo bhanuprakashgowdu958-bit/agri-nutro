@@ -5,50 +5,124 @@
 
 // Interpret WMO weather codes to Google Weather icons & descriptions
 function getGwWeatherMeta(code, isNight = false) {
-  // SVG weather icons matching Google Weather style
+  // 0: Clear sky
   if (code === 0) {
     return {
       desc: isNight ? 'Clear' : 'Sunny',
       iconSvg: isNight
-        ? `<svg viewBox="0 0 64 64" width="56" height="56"><defs><linearGradient id="gwFullMoon" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4285f4"/><stop offset="100%" stop-color="#1a73e8"/></linearGradient></defs><path d="M38 12 A18 18 0 1 0 54 36 A19 19 0 0 1 38 12 Z" fill="url(#gwFullMoon)"/></svg>`
-        : `<svg viewBox="0 0 64 64" width="56" height="56"><circle cx="32" cy="32" r="14" fill="#fbbc04"/><g stroke="#fbbc04" stroke-width="3" stroke-linecap="round"><line x1="32" y1="6" x2="32" y2="12"/><line x1="32" y1="52" x2="32" y2="58"/><line x1="6" y1="32" x2="12" y2="32"/><line x1="52" y1="32" x2="58" y2="32"/><line x1="14" y1="14" x2="18" y2="18"/><line x1="46" y1="46" x2="50" y2="50"/><line x1="14" y1="50" x2="18" y2="46"/><line x1="46" y1="18" x2="50" y2="14"/></g></svg>`
+        ? `<svg viewBox="0 0 64 64" width="100%" height="100%"><path d="M38 14 A16 16 0 1 0 52 38 A17 17 0 0 1 38 14 Z" fill="#8ab4f8"/><circle cx="44" cy="18" r="1.5" fill="#e8eaed"/><circle cx="50" cy="28" r="1" fill="#e8eaed"/></svg>`
+        : `<svg viewBox="0 0 64 64" width="100%" height="100%"><circle cx="32" cy="32" r="13" fill="#fbbc04"/><g stroke="#fbbc04" stroke-width="3" stroke-linecap="round"><line x1="32" y1="7" x2="32" y2="13"/><line x1="32" y1="51" x2="32" y2="57"/><line x1="7" y1="32" x2="13" y2="32"/><line x1="51" y1="32" x2="57" y2="32"/><line x1="14.5" y1="14.5" x2="18.5" y2="18.5"/><line x1="45.5" y1="45.5" x2="49.5" y2="49.5"/><line x1="14.5" y1="49.5" x2="18.5" y2="45.5"/><line x1="45.5" y1="18.5" x2="49.5" y2="14.5"/></g></svg>`
     };
   }
-  if (code === 1 || code === 2) {
+
+  // 1: Mainly clear / Mostly sunny
+  if (code === 1) {
+    return {
+      desc: isNight ? 'Mostly clear' : 'Mostly sunny',
+      iconSvg: isNight
+        ? `<svg viewBox="0 0 64 64" width="100%" height="100%"><path d="M32 14 A14 14 0 1 0 44 34 A15 15 0 0 1 32 14 Z" fill="#8ab4f8"/><path d="M28 48 h18 a8 8 0 0 0 0-16 a10 10 0 0 0-18-2 a7 7 0 0 0 0 18 z" fill="#f1f5f9"/></svg>`
+        : `<svg viewBox="0 0 64 64" width="100%" height="100%"><circle cx="28" cy="24" r="12" fill="#fbbc04"/><g stroke="#fbbc04" stroke-width="2.5" stroke-linecap="round"><line x1="28" y1="6" x2="28" y2="9"/><line x1="12" y1="24" x2="15" y2="24"/><line x1="41" y1="24" x2="44" y2="24"/><line x1="16" y1="12" x2="19" y2="15"/><line x1="37" y1="12" x2="40" y2="15"/></g><path d="M26 48 h22 a8 8 0 0 0 0-16 a11 11 0 0 0-19-3 a7 7 0 0 0-3 19 z" fill="#f1f5f9"/></svg>`
+    };
+  }
+
+  // 2: Partly cloudy
+  if (code === 2) {
     return {
       desc: 'Partly cloudy',
       iconSvg: isNight
-        ? `<svg viewBox="0 0 64 64" width="56" height="56"><defs><linearGradient id="gwBlueMoon" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4285f4"/><stop offset="100%" stop-color="#1a73e8"/></linearGradient><linearGradient id="gwCloudSoft" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#cfd8dc"/></linearGradient></defs><path d="M26 10 C17 10 10 18 10 27 C10 36 17 43 26 43 C29 43 33 42 36 39 C29 38 23 32 23 24 C23 17 28 12 33 10 C31 10 28 10 26 10 Z" fill="url(#gwBlueMoon)"/><path d="M24 48 h22 a9 9 0 0 0 0-18 a12 12 0 0 0-21-3 a8 8 0 0 0-1 21 z" fill="url(#gwCloudSoft)"/></svg>`
-        : `<svg viewBox="0 0 64 64" width="56" height="56"><defs><linearGradient id="gwGoldSun" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fbbc04"/><stop offset="100%" stop-color="#f29900"/></linearGradient><linearGradient id="gwCloudDay" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#d0d7de"/></linearGradient></defs><circle cx="26" cy="23" r="13" fill="url(#gwGoldSun)"/><path d="M22 48 h24 a10 10 0 0 0 0-20 a13 13 0 0 0-23-4 a9 9 0 0 0-1 24 z" fill="url(#gwCloudDay)"/></svg>`
+        ? `<svg viewBox="0 0 64 64" width="100%" height="100%"><path d="M28 14 A13 13 0 1 0 38 32 A14 14 0 0 1 28 14 Z" fill="#8ab4f8"/><path d="M22 50 h24 a9 9 0 0 0 0-18 a12 12 0 0 0-21-3 a8 8 0 0 0-3 21 z" fill="#e2e8f0"/></svg>`
+        : `<svg viewBox="0 0 64 64" width="100%" height="100%"><circle cx="26" cy="24" r="12" fill="#fbbc04"/><path d="M22 50 h24 a9 9 0 0 0 0-18 a12 12 0 0 0-21-3 a8 8 0 0 0-3 21 z" fill="#f1f5f9"/></svg>`
     };
   }
+
+  // 3: Overcast
   if (code === 3) {
     return {
       desc: 'Overcast',
-      iconSvg: `<svg viewBox="0 0 64 64" width="56" height="56"><path d="M18 48h28a12 12 0 000-24 15 15 0 00-29-4 11 11 0 001 28z" fill="#9aa0a6"/><path d="M16 46h26a10 10 0 000-20 13 13 0 00-25-3 9 9 0 00-1 23z" fill="#bdc1c6"/></svg>`
+      iconSvg: `<svg viewBox="0 0 64 64" width="100%" height="100%"><path d="M22 36 h26 a10 10 0 0 0 0-20 a13 13 0 0 0-23-3 a9 9 0 0 0-3 23 z" fill="#94a3b8"/><path d="M16 48 h26 a10 10 0 0 0 0-20 a13 13 0 0 0-23-3 a9 9 0 0 0-3 23 z" fill="#f1f5f9"/></svg>`
     };
   }
-  if (code >= 51 && code <= 67) {
+
+  // 45, 48: Fog / Depositing rime fog
+  if (code === 45 || code === 48) {
     return {
-      desc: 'Rain',
-      iconSvg: `<svg viewBox="0 0 64 64" width="56" height="56"><path d="M18 38h26a11 11 0 000-22 13 13 0 00-25-4 10 10 0 00-1 26z" fill="#9aa0a6"/><g stroke="#4285f4" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="44" x2="19" y2="52"/><line x1="32" y1="44" x2="29" y2="52"/><line x1="42" y1="44" x2="39" y2="52"/></g></svg>`
+      desc: code === 48 ? 'Depositing rime fog' : 'Fog',
+      iconSvg: `<svg viewBox="0 0 64 64" width="100%" height="100%"><path d="M18 36 h28 a9 9 0 0 0 0-18 a12 12 0 0 0-21-3 a8 8 0 0 0-7 21 z" fill="#cbd5e1"/><g stroke="#94a3b8" stroke-width="2.8" stroke-linecap="round"><line x1="16" y1="44" x2="48" y2="44"/><line x1="20" y1="50" x2="44" y2="50"/><line x1="24" y1="56" x2="40" y2="56"/></g></svg>`
     };
   }
+
+  // 51, 53, 55: Drizzle (Light, Moderate, Dense)
+  if (code === 51 || code === 53 || code === 55) {
+    const intensity = code === 51 ? 'Light drizzle' : code === 55 ? 'Dense drizzle' : 'Drizzle';
+    return {
+      desc: intensity,
+      iconSvg: `<svg viewBox="0 0 64 64" width="100%" height="100%"><path d="M18 38 h28 a9 9 0 0 0 0-18 a12 12 0 0 0-21-3 a8 8 0 0 0-7 21 z" fill="#cbd5e1"/><g stroke="#60a5fa" stroke-width="2.2" stroke-linecap="round"><line x1="24" y1="44" x2="22" y2="50"/><line x1="33" y1="44" x2="31" y2="50"/><line x1="42" y1="44" x2="40" y2="50"/></g></svg>`
+    };
+  }
+
+  // 56, 57, 66, 67: Freezing Drizzle / Freezing Rain
+  if (code === 56 || code === 57 || code === 66 || code === 67) {
+    const isFreezingRain = code >= 66;
+    return {
+      desc: isFreezingRain ? 'Freezing rain' : 'Freezing drizzle',
+      iconSvg: `<svg viewBox="0 0 64 64" width="100%" height="100%"><path d="M18 38 h28 a9 9 0 0 0 0-18 a12 12 0 0 0-21-3 a8 8 0 0 0-7 21 z" fill="#94a3b8"/><g stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"><line x1="24" y1="44" x2="21" y2="52"/><line x1="34" y1="44" x2="31" y2="52"/><line x1="44" y1="44" x2="41" y2="52"/></g><circle cx="21" cy="56" r="1.5" fill="#a5f3fc"/><circle cx="31" cy="56" r="1.5" fill="#a5f3fc"/><circle cx="41" cy="56" r="1.5" fill="#a5f3fc"/></svg>`
+    };
+  }
+
+  // 61, 63, 65: Rain (Slight, Moderate, Heavy)
+  if (code === 61 || code === 63 || code === 65) {
+    const desc = code === 61 ? 'Light rain' : code === 65 ? 'Heavy rain' : 'Rain';
+    const cloudColor = code === 65 ? '#475569' : '#64748b';
+    return {
+      desc: desc,
+      iconSvg: `<svg viewBox="0 0 64 64" width="100%" height="100%"><path d="M18 38 h28 a10 10 0 0 0 0-20 a13 13 0 0 0-23-3 a9 9 0 0 0-5 23 z" fill="${cloudColor}"/><g stroke="#3b82f6" stroke-width="${code === 65 ? '3' : '2.5'}" stroke-linecap="round"><line x1="21" y1="44" x2="17" y2="54"/><line x1="29" y1="44" x2="25" y2="54"/><line x1="37" y1="44" x2="33" y2="54"/><line x1="45" y1="44" x2="41" y2="54"/></g></svg>`
+    };
+  }
+
+  // 71, 73, 75, 77: Snow Fall & Snow Grains
+  if (code === 71 || code === 73 || code === 75 || code === 77) {
+    const desc = code === 71 ? 'Light snow' : code === 75 ? 'Heavy snow' : code === 77 ? 'Snow grains' : 'Snow';
+    return {
+      desc: desc,
+      iconSvg: `<svg viewBox="0 0 64 64" width="100%" height="100%"><path d="M18 38 h28 a9 9 0 0 0 0-18 a12 12 0 0 0-21-3 a8 8 0 0 0-7 21 z" fill="#cbd5e1"/><g stroke="#93c5fd" stroke-width="2" stroke-linecap="round"><line x1="24" y1="45" x2="24" y2="53"/><line x1="20" y1="49" x2="28" y2="49"/><line x1="36" y1="45" x2="36" y2="53"/><line x1="32" y1="49" x2="40" y2="49"/></g><circle cx="24" cy="49" r="1" fill="#fff"/><circle cx="36" cy="49" r="1" fill="#fff"/></svg>`
+    };
+  }
+
+  // 80, 81, 82: Rain Showers (Slight, Moderate, Violent)
   if (code >= 80 && code <= 82) {
+    const desc = code === 80 ? 'Scattered showers' : code === 82 ? 'Heavy showers' : 'Rain showers';
     return {
-      desc: 'Rain showers',
-      iconSvg: `<svg viewBox="0 0 64 64" width="56" height="56"><circle cx="24" cy="20" r="9" fill="#fbbc04"/><path d="M18 40h24a10 10 0 000-20 12 12 0 00-23-4 9 9 0 00-1 24z" fill="#9aa0a6"/><g stroke="#4285f4" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="46" x2="19" y2="54"/><line x1="32" y1="46" x2="29" y2="54"/></g></svg>`
+      desc: desc,
+      iconSvg: isNight
+        ? `<svg viewBox="0 0 64 64" width="100%" height="100%"><path d="M28 14 A12 12 0 1 0 38 30 A13 13 0 0 1 28 14 Z" fill="#8ab4f8"/><path d="M18 42 h26 a9 9 0 0 0 0-18 a12 12 0 0 0-21-3 a8 8 0 0 0-5 21 z" fill="#64748b"/><g stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="47" x2="18" y2="56"/><line x1="31" y1="47" x2="27" y2="56"/><line x1="40" y1="47" x2="36" y2="56"/></g></svg>`
+        : `<svg viewBox="0 0 64 64" width="100%" height="100%"><circle cx="25" cy="22" r="11" fill="#fbbc04"/><path d="M18 42 h26 a9 9 0 0 0 0-18 a12 12 0 0 0-21-3 a8 8 0 0 0-5 21 z" fill="#64748b"/><g stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="47" x2="18" y2="56"/><line x1="31" y1="47" x2="27" y2="56"/><line x1="40" y1="47" x2="36" y2="56"/></g></svg>`
     };
   }
+
+  // 85, 86: Snow Showers
+  if (code === 85 || code === 86) {
+    return {
+      desc: code === 86 ? 'Heavy snow showers' : 'Snow showers',
+      iconSvg: `<svg viewBox="0 0 64 64" width="100%" height="100%"><circle cx="25" cy="22" r="11" fill="#fbbc04"/><path d="M18 42 h26 a9 9 0 0 0 0-18 a12 12 0 0 0-21-3 a8 8 0 0 0-5 21 z" fill="#cbd5e1"/><g stroke="#93c5fd" stroke-width="2" stroke-linecap="round"><line x1="24" y1="47" x2="24" y2="54"/><line x1="20.5" y1="50.5" x2="27.5" y2="50.5"/><line x1="36" y1="47" x2="36" y2="54"/><line x1="32.5" y1="50.5" x2="39.5" y2="50.5"/></g></svg>`
+    };
+  }
+
+  // 95, 96, 99: Thunderstorms
   if (code >= 95) {
+    const isHail = code === 96 || code === 99;
+    const desc = code === 99 ? 'Heavy thunderstorm' : code === 96 ? 'Thunderstorm with hail' : 'Thunderstorm';
     return {
-      desc: 'Thunderstorm',
-      iconSvg: `<svg viewBox="0 0 64 64" width="56" height="56"><path d="M18 36h26a11 11 0 000-22 13 13 0 00-25-4 10 10 0 00-1 26z" fill="#5f6368"/><polygon points="28,40 24,48 30,48 26,58 36,46 30,46" fill="#fbbc04"/></svg>`
+      desc: desc,
+      iconSvg: `<svg viewBox="0 0 64 64" width="100%" height="100%"><path d="M18 36 h26 a10 10 0 0 0 0-20 a13 13 0 0 0-23-3 a9 9 0 0 0-3 23 z" fill="#334155"/><polygon points="30,36 24,46 31,46 27,58 39,44 32,44" fill="#fbbf24"/>${isHail ? '<g stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round"><line x1="20" y1="44" x2="17" y2="52"/><line x1="42" y1="44" x2="39" y2="52"/></g>' : ''}</svg>`
     };
   }
+
+  // Fallback
   return {
-    desc: 'Fair',
-    iconSvg: `<svg viewBox="0 0 64 64" width="56" height="56"><circle cx="32" cy="32" r="14" fill="#fbbc04"/></svg>`
+    desc: isNight ? 'Clear' : 'Fair',
+    iconSvg: isNight
+      ? `<svg viewBox="0 0 64 64" width="100%" height="100%"><path d="M38 14 A16 16 0 1 0 52 38 A17 17 0 0 1 38 14 Z" fill="#8ab4f8"/></svg>`
+      : `<svg viewBox="0 0 64 64" width="100%" height="100%"><circle cx="32" cy="32" r="14" fill="#fbbc04"/></svg>`
   };
 }
 
@@ -158,9 +232,9 @@ async function loadAndRenderGoogleWeather() {
 
 function renderGoogleWeatherUI(data) {
   if (!data || !data.daily) return;
-  // 1. Render daily horizontal strip first
-  renderDailyStrip(data.daily);
-  // 2. Render selected day (defaults to Today, dayIdx = 1)
+  // 1. Render daily horizontal strip first (passing daily and current)
+  renderDailyStrip(data.daily, data.current);
+  // 2. Render selected day (defaults to Today, dayIdx = 0)
   renderSelectedDayWeather(selectedDayIdx);
 }
 
@@ -187,11 +261,18 @@ function renderSelectedDayWeather(dayIdx) {
   // 2. Current vs Selected Day Conditions
   const isToday = dayIdx === 0;
 
-  const maxT = toUnit(daily.temperature_2m_max[dayIdx] || 33);
-  const minT = toUnit(daily.temperature_2m_min[dayIdx] || 27);
-  const code = isToday ? current.weather_code : daily.weather_code[dayIdx];
+  const rawMaxC = daily.temperature_2m_max[dayIdx] || 33;
+  const rawMinC = daily.temperature_2m_min[dayIdx] || 27;
+  const maxT = toUnit(rawMaxC);
+  const minT = toUnit(rawMinC);
 
-  const isNight = isToday && (new Date().getHours() < 6 || new Date().getHours() > 18);
+  // For Today: prioritize current.weather_code so the main condition matches live right now
+  const code = isToday 
+    ? (current && current.weather_code !== undefined ? current.weather_code : daily.weather_code[0]) 
+    : daily.weather_code[dayIdx];
+
+  const nowHours = new Date().getHours();
+  const isNight = isToday && (nowHours < 6 || nowHours >= 18);
   const meta = getGwWeatherMeta(code, isNight);
 
   // Main Temperature Value & Range Tag
@@ -274,8 +355,8 @@ function renderSelectedDayWeather(dayIdx) {
   // 4. Render Hourly Graph for this exact selected day
   renderHourlyGraph(hourly, dayIdx);
 
-  // 5. Livestock THI & Feeding Advisory tailored for this day
-  renderDayFarmerAdvisory(dayIdx, maxT, dayHumidity, precipProb, isToday);
+  // 5. Livestock THI & Feeding Advisory tailored for this day (pass raw Celsius)
+  renderDayFarmerAdvisory(dayIdx, rawMaxC, dayHumidity, precipProb, isToday);
 }
 
 // Livestock & Farm Advisory tailored for farmers
@@ -403,8 +484,8 @@ function renderHourlyGraph(hourly, dayIdx = 0) {
   svg.innerHTML = svgContent;
 }
 
-// Render Daily Forecast Strip (Yesterday, Today, Tomorrow, Upcoming)
-function renderDailyStrip(daily) {
+// Render Daily Forecast Strip (Today + Upcoming 6 Days)
+function renderDailyStrip(daily, current) {
   const container = document.getElementById('gwDailyStrip');
   if (!container || !daily || !daily.time) return;
 
@@ -412,21 +493,37 @@ function renderDailyStrip(daily) {
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   let html = '';
 
+  const nowHours = new Date().getHours();
+  const isNightNow = (nowHours < 6 || nowHours >= 18);
+
   const count = Math.min(daily.time.length, 7);
   for (let i = 0; i < count; i++) {
+    const isToday = (i === 0);
     const dateObj = new Date(daily.time[i] + 'T00:00:00');
-    const dayStr = days[dateObj.getDay()];
+    const dayStr = isToday ? 'Today' : days[dateObj.getDay()];
     const dateNum = `${dateObj.getDate()} ${monthNames[dateObj.getMonth()]}`;
-    const code = daily.weather_code[i] || 0;
+
+    // For Today: use current.weather_code so the strip icon ALWAYS matches the live hero icon!
+    const code = isToday
+      ? (current && current.weather_code !== undefined ? current.weather_code : daily.weather_code[i] || 0)
+      : (daily.weather_code[i] || 0);
+
+    const isNight = isToday ? isNightNow : false;
     const maxT = toUnit(daily.temperature_2m_max[i] || 33);
     const minT = toUnit(daily.temperature_2m_min[i] || 27);
-    const meta = getGwWeatherMeta(code, false);
+    const meta = getGwWeatherMeta(code, isNight);
+
+    const precipProb = daily.precipitation_probability_max ? daily.precipitation_probability_max[i] : 0;
+    const precipBadge = precipProb >= 25 
+      ? `<div class="gw-day-precip" title="${precipProb}% rain probability">💧 ${precipProb}%</div>`
+      : '';
 
     html += `
       <div class="gw-day-col ${i === selectedDayIdx ? 'selected' : ''}" onclick="selectGwDay(${i})" title="Click to view full weather for ${dayStr}, ${dateNum}">
         <div class="gw-day-name">${dayStr}</div>
         <div class="gw-day-date">${dateNum}</div>
         <div class="gw-day-icon">${meta.iconSvg}</div>
+        ${precipBadge}
         <div class="gw-day-temps">
           <span class="gw-day-high">${maxT}°</span>
           <span class="gw-day-low">${minT}°</span>
@@ -467,7 +564,10 @@ function setWeatherUnit(unit) {
       cBtn.classList.remove('active');
     }
   }
-  if (cachedWeatherData) renderSelectedDayWeather(selectedDayIdx);
+  if (cachedWeatherData) {
+    renderDailyStrip(cachedWeatherData.daily, cachedWeatherData.current);
+    renderSelectedDayWeather(selectedDayIdx);
+  }
 }
 
 // Switch Forecast Metric Tab (Temperature, Precipitation, Wind)

@@ -1533,8 +1533,8 @@ button, input, select, textarea {
 }
 
 .gw-day-icon {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   margin: 0 auto 3px auto;
   display: flex;
   align-items: center;
@@ -1542,8 +1542,18 @@ button, input, select, textarea {
 }
 
 .gw-day-icon svg {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+
+.gw-day-precip {
+  font-size: 10px;
+  font-weight: 700;
+  color: #60a5fa;
+  margin-bottom: 2px;
+  letter-spacing: -0.01em;
+  line-height: 1;
 }
 
 .gw-day-temps {
@@ -5477,20 +5487,24 @@ html, body {
     text-overflow: ellipsis;
   }
 
+  .gw-main-condition,
   .gw-main-row {
     flex-wrap: wrap;
     gap: 8px;
   }
 
+  .gw-temp-val,
   .gw-temp-value {
     font-size: 34px;
   }
 
+  .gw-temp-units,
   .gw-temp-unit {
     font-size: 15px;
     top: -12px;
   }
 
+  .gw-details-list,
   .gw-meta-col {
     font-size: 11px;
   }
@@ -5515,6 +5529,7 @@ html, body {
     font-size: 10.5px;
   }
 
+  .gw-thi-status,
   .gw-thi-alert {
     font-size: 10.5px;
     padding: 6px 10px;
@@ -5648,6 +5663,7 @@ html, body {
     font-size: 1.65rem;
   }
 
+  .gw-temp-val,
   .gw-temp-value {
     font-size: 28px;
   }

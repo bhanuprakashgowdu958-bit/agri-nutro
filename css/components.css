@@ -1244,8 +1244,8 @@
 }
 
 .gw-day-icon {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   margin: 0 auto 3px auto;
   display: flex;
   align-items: center;
@@ -1253,8 +1253,18 @@
 }
 
 .gw-day-icon svg {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+
+.gw-day-precip {
+  font-size: 10px;
+  font-weight: 700;
+  color: #60a5fa;
+  margin-bottom: 2px;
+  letter-spacing: -0.01em;
+  line-height: 1;
 }
 
 .gw-day-temps {
