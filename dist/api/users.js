@@ -83,6 +83,47 @@ module.exports = async (req, res) => {
         return res.status(200).json({ success: true, users });
       }
 
+      if (body.action === 'update_profile') {
+        const identifier = (body.userId || body.email || body.phone || '').toString().toLowerCase().trim();
+        const normIdent = normalizePhone(body.phone || '');
+
+        let user = users.find(u => {
+          const em = (u.email || '').toLowerCase().trim();
+          const ph = normalizePhone(u.phone || '');
+          const uid = (u.userId || '').toLowerCase().trim();
+          return (uid && uid === identifier) || (em && em === identifier) || (normIdent && ph && ph === normIdent);
+        });
+
+        if (user) {
+          if (body.fullName) user.fullName = body.fullName.trim();
+          if (body.email) user.email = body.email.trim().toLowerCase();
+          if (body.phone) user.phone = body.phone.trim();
+          if (body.picture !== undefined) user.picture = body.picture;
+          user.lastUpdated = new Date().toISOString();
+        } else {
+          user = {
+            userId: body.userId || `FARM-${Math.floor(100000 + Math.random() * 900000)}`,
+            fullName: body.fullName || 'Farm User',
+            email: body.email || '',
+            phone: body.phone || '',
+            picture: body.picture || '',
+            registeredAt: new Date().toISOString(),
+            lastUpdated: new Date().toISOString()
+          };
+          users.unshift(user);
+        }
+
+        memoryUsers = users;
+        saveLocalUsers(users);
+
+        const { password, passwordHash, salt, ...safeUser } = user;
+        return res.status(200).json({
+          success: true,
+          message: 'Profile updated successfully',
+          user: safeUser
+        });
+      }
+
       if (body.action === 'google_auth') {
         const gEmail = (body.email || '').toString().toLowerCase().trim();
         const gName = (body.fullName || '').toString().trim();

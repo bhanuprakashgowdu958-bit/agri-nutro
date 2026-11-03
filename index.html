@@ -165,6 +165,95 @@
     </div>
   </div>
 
+  <!-- ==========================================
+       USER PROFILE MODAL (Avatar, Name, Email, Mobile)
+       ========================================== -->
+  <div class="google-auth-gateway" id="userProfileModal" aria-modal="true" role="dialog" style="display: none;">
+    <div class="gateway-backdrop" onclick="closeUserProfileModal()"></div>
+    <div class="gateway-card" style="max-width: 440px; border-radius: 24px; padding: 36px 30px; position: relative; text-align: left; box-shadow: 0 20px 40px -15px rgba(0,0,0,0.15);">
+      <!-- Close Button -->
+      <button type="button" onclick="closeUserProfileModal()" style="position: absolute; top: 16px; right: 18px; background: none; border: none; font-size: 1.3rem; color: #64748b; cursor: pointer; padding: 4px 8px; line-height: 1; z-index: 2;" title="Close" aria-label="Close">✕</button>
+
+      <!-- Header -->
+      <div style="text-align: center; margin-bottom: 22px;">
+        <h2 style="font-family: var(--font-heading); font-size: 1.75rem; font-weight: 800; color: #0a1931; margin-bottom: 6px; letter-spacing: -0.02em;">My Profile</h2>
+        <p style="font-size: 0.9rem; color: #64748b; margin: 0;">Update your personal & contact information</p>
+      </div>
+
+      <!-- Alert Notification -->
+      <div id="profileAlertBox" style="display: none; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 16px;"></div>
+
+      <form id="userProfileForm" onsubmit="handleProfileSave(event)">
+        <!-- 1. Profile Photo / Avatar -->
+        <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
+          <div style="position: relative; width: 84px; height: 84px; margin-bottom: 10px;">
+            <div id="profileAvatarPreview" style="width: 84px; height: 84px; border-radius: 50%; background: #059669; color: #fff; font-size: 2.1rem; font-weight: 800; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 3px solid #e2e8f0; box-shadow: 0 4px 12px rgba(5,150,105,0.18);">
+              B
+            </div>
+            <label for="profilePhotoInput" style="position: absolute; bottom: -2px; right: -2px; width: 30px; height: 30px; background: #059669; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2.5px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.2);" title="Change Photo">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </label>
+            <input type="file" id="profilePhotoInput" accept="image/*" onchange="handleProfilePhotoUpload(event)" style="display: none;" />
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button type="button" onclick="document.getElementById('profilePhotoInput').click()" style="background: none; border: none; color: #059669; font-size: 0.82rem; font-weight: 700; cursor: pointer; text-decoration: underline;">
+              Change Photo
+            </button>
+            <span style="color: #cbd5e1;">·</span>
+            <button type="button" onclick="removeProfilePhoto()" style="background: none; border: none; color: #64748b; font-size: 0.82rem; cursor: pointer;">
+              Remove
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Full Name -->
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+            Full Name <span style="color: #ef4444;">*</span>
+          </label>
+          <div style="position: relative;">
+            <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #64748b; pointer-events: none;">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+            <input type="text" id="profileFullName" required placeholder="Enter full name" style="width: 100%; height: 48px; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 0 16px 0 46px; font-size: 0.95rem; color: #0f172a; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#059669'" onblur="this.style.borderColor='#e2e8f0'" />
+          </div>
+        </div>
+
+        <!-- 3. Email Address -->
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+            Email Address <span style="color: #ef4444;">*</span>
+          </label>
+          <div style="position: relative;">
+            <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #64748b; pointer-events: none;">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            </span>
+            <input type="email" id="profileEmail" required placeholder="name@example.com" style="width: 100%; height: 48px; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 0 16px 0 46px; font-size: 0.95rem; color: #0f172a; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#059669'" onblur="this.style.borderColor='#e2e8f0'" />
+          </div>
+        </div>
+
+        <!-- 4. Mobile Number -->
+        <div style="margin-bottom: 22px;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+            Mobile Number <span style="color: #ef4444;">*</span>
+          </label>
+          <div style="position: relative;">
+            <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #475569; pointer-events: none; font-weight: 700; font-size: 0.92rem;">
+              🇮🇳 +91
+            </span>
+            <input type="tel" id="profilePhone" maxlength="10" required placeholder="10-digit mobile number" style="width: 100%; height: 48px; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 0 16px 0 74px; font-size: 0.95rem; color: #0f172a; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#059669'" onblur="this.style.borderColor='#e2e8f0'" oninput="this.value = this.value.replace(/\D/g, '')" />
+          </div>
+        </div>
+
+        <!-- Save Button -->
+        <button type="submit" id="saveProfileBtn" style="width: 100%; height: 50px; background: #059669; color: #fff; border: none; border-radius: 12px; font-size: 1.02rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25); transition: background 0.2s;">
+          <span>Save Changes</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
+      </form>
+    </div>
+  </div>
+
   <!-- 1. Top Announcement Bar -->
   <aside class="top-announcement-bar" aria-label="Special Offers">
     <div class="top-bar-content">
@@ -217,17 +306,17 @@
 
           <!-- User Profile Dropdown -->
           <div class="user-menu-dropdown" id="userMenuDropdown">
-            <div class="user-menu-header">
+            <div class="user-menu-header" onclick="openUserProfileModal(); closeUserMenu();" style="cursor: pointer;" title="Click to view and edit your profile">
               <div class="user-menu-name" id="userDropdownName">Google User</div>
               <div class="user-menu-email" id="userDropdownEmail">user@gmail.com</div>
               <span style="display: inline-block; font-size: 0.72rem; font-weight: 700; color: #059669; background: rgba(5,150,105,0.1); padding: 2px 6px; border-radius: 4px; margin-top: 4px;">✓ Verified Member (10% Rebate)</span>
             </div>
+            <button type="button" class="user-menu-item" onclick="openUserProfileModal(); closeUserMenu();">
+              <span>👤</span> My Profile
+            </button>
             <button type="button" class="user-menu-item" onclick="openOrderTrackerModal(); closeUserMenu();">
               <span>📦</span> My Placed Orders
             </button>
-            <a href="signup.html" class="user-menu-item" onclick="closeUserMenu()">
-              <span>🚜</span> Farm Profile & Preferences
-            </a>
             <a href="terms.html" class="user-menu-item" target="_blank" onclick="closeUserMenu()">
               <span>📜</span> Terms & Quality Guarantee
             </a>

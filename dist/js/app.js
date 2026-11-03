@@ -762,14 +762,20 @@ function updateHeaderUserStatus() {
       const initial = firstName.charAt(0).toUpperCase();
 
       accountLabel.textContent = `Hi, ${firstName}`;
-      accountBtn.title = `Signed in: ${user.fullName} (${user.email || 'Google Account'})`;
+      accountBtn.title = `Signed in: ${user.fullName} (${user.email || 'Account'})`;
       accountBtn.style.background = 'rgba(27, 106, 70, 0.15)';
       accountBtn.style.borderColor = 'var(--color-primary)';
 
       if (defaultIcon) defaultIcon.style.display = 'none';
       if (avatarBadge) {
         avatarBadge.style.display = 'flex';
-        avatarBadge.textContent = initial;
+        if (user.picture) {
+          avatarBadge.innerHTML = `<img src="${user.picture}" alt="${firstName}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />`;
+          avatarBadge.style.padding = '0';
+        } else {
+          avatarBadge.textContent = initial;
+          avatarBadge.style.padding = '';
+        }
       }
       if (nameEl) nameEl.textContent = user.fullName;
       if (emailEl) emailEl.textContent = user.email || 'Google User';
@@ -785,6 +791,190 @@ function updateHeaderUserStatus() {
       if (emailEl) emailEl.textContent = 'Not signed in';
     }
   } catch (e) {}
+}
+
+// ── User Profile Controller (Avatar, Full Name, Email, Mobile) ────────
+let _uploadedProfilePhoto = '';
+
+function openUserProfileModal() {
+  const user = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
+  if (!user || !user.fullName) {
+    handleHeaderAccountClick();
+    return;
+  }
+
+  const modal = document.getElementById('userProfileModal');
+  if (!modal) return;
+
+  const nameInput = document.getElementById('profileFullName');
+  const emailInput = document.getElementById('profileEmail');
+  const phoneInput = document.getElementById('profilePhone');
+  const alertBox = document.getElementById('profileAlertBox');
+
+  if (alertBox) alertBox.style.display = 'none';
+
+  if (nameInput) nameInput.value = user.fullName || '';
+  if (emailInput) emailInput.value = user.email || '';
+  if (phoneInput) {
+    const rawPhone = (user.phone || '').replace(/\D/g, '');
+    phoneInput.value = rawPhone.length > 10 ? rawPhone.slice(-10) : rawPhone;
+  }
+
+  _uploadedProfilePhoto = user.picture || '';
+  renderAvatarPreview(_uploadedProfilePhoto, user.fullName || 'User');
+
+  modal.style.display = 'flex';
+  modal.classList.remove('hidden');
+}
+
+function closeUserProfileModal() {
+  const modal = document.getElementById('userProfileModal');
+  if (modal) {
+    modal.classList.add('hidden');
+    setTimeout(() => { modal.style.display = 'none'; }, 300);
+  }
+}
+
+function renderAvatarPreview(photoUrl, name) {
+  const preview = document.getElementById('profileAvatarPreview');
+  if (!preview) return;
+  if (photoUrl) {
+    preview.innerHTML = `<img src="${photoUrl}" alt="Profile Photo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />`;
+  } else {
+    const initial = (name ? name.trim().charAt(0) : 'U').toUpperCase();
+    preview.innerHTML = initial;
+  }
+}
+
+function handleProfilePhotoUpload(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+
+  if (file.size > 2 * 1024 * 1024) {
+    showProfileAlert('error', 'Photo file size must be under 2MB.');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    _uploadedProfilePhoto = evt.target.result;
+    renderAvatarPreview(_uploadedProfilePhoto, document.getElementById('profileFullName')?.value || 'User');
+    showProfileAlert('success', 'Photo loaded! Click "Save Changes" to apply.');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeProfilePhoto() {
+  _uploadedProfilePhoto = '';
+  renderAvatarPreview('', document.getElementById('profileFullName')?.value || 'User');
+  showProfileAlert('info', 'Photo removed. Click "Save Changes" to apply.');
+}
+
+function showProfileAlert(type, message) {
+  const alertBox = document.getElementById('profileAlertBox');
+  if (!alertBox) return;
+  alertBox.style.display = 'flex';
+  if (type === 'error') {
+    alertBox.style.background = '#fef2f2';
+    alertBox.style.color = '#991b1b';
+    alertBox.style.border = '1px solid #f87171';
+    alertBox.innerHTML = `<span>⚠️</span> <span>${message}</span>`;
+  } else if (type === 'info') {
+    alertBox.style.background = '#eff6ff';
+    alertBox.style.color = '#1e40af';
+    alertBox.style.border = '1px solid #93c5fd';
+    alertBox.innerHTML = `<span>ℹ️</span> <span>${message}</span>`;
+  } else {
+    alertBox.style.background = '#f0fdf4';
+    alertBox.style.color = '#166534';
+    alertBox.style.border = '1px solid #86efac';
+    alertBox.innerHTML = `<span>✅</span> <span>${message}</span>`;
+  }
+}
+
+async function handleProfileSave(e) {
+  e.preventDefault();
+  const name = document.getElementById('profileFullName')?.value.trim();
+  const email = document.getElementById('profileEmail')?.value.trim().toLowerCase();
+  const phone = document.getElementById('profilePhone')?.value.trim();
+  const btn = document.getElementById('saveProfileBtn');
+
+  if (!name) return showProfileAlert('error', 'Please enter your Full Name.');
+  if (!email || !email.includes('@')) return showProfileAlert('error', 'Please enter a valid Email address.');
+  if (!phone || phone.length < 10) return showProfileAlert('error', 'Please enter a valid 10-digit Mobile number.');
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span>Saving...</span>';
+  }
+
+  try {
+    let user = JSON.parse(localStorage.getItem('nutriagro_user') || '{}');
+    const oldEmail = user.email;
+    const oldPhone = user.phone;
+
+    user.fullName = name;
+    user.email = email;
+    user.phone = phone;
+    user.picture = _uploadedProfilePhoto;
+    user.updatedAt = new Date().toISOString();
+
+    localStorage.setItem('nutriagro_user', JSON.stringify(user));
+
+    // Update in users list
+    let usersList = JSON.parse(localStorage.getItem('nutriagro_users_list') || '[]');
+    const idx = usersList.findIndex(u => (u.userId && u.userId === user.userId) || (u.email && u.email === oldEmail) || (u.phone && u.phone === oldPhone));
+    if (idx >= 0) {
+      usersList[idx] = { ...usersList[idx], ...user };
+    } else {
+      usersList.unshift(user);
+    }
+    localStorage.setItem('nutriagro_users_list', JSON.stringify(usersList));
+
+    // Sync to /api/users
+    fetch('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'update_profile', ...user })
+    }).catch(() => {});
+
+    // Sync to Firebase if auth current user
+    if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+      try {
+        await firebase.auth().currentUser.updateProfile({
+          displayName: name,
+          photoURL: _uploadedProfilePhoto || ''
+        });
+      } catch (fbErr) {}
+    }
+
+    // Pre-fill checkout form if open/rendered
+    const checkoutName = document.getElementById('checkoutFarmerName');
+    const checkoutPhone = document.getElementById('checkoutPhone');
+    if (checkoutName) checkoutName.value = name;
+    if (checkoutPhone) checkoutPhone.value = phone;
+
+    updateHeaderUserStatus();
+    showProfileAlert('success', 'Profile updated successfully!');
+
+    if (window.cart && typeof window.cart.showToast === 'function') {
+      window.cart.showToast(`🌾 Profile updated! Hi, ${name.split(' ')[0]}.`, 'success');
+    }
+
+    setTimeout(() => {
+      closeUserProfileModal();
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Save Changes</span> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+      }
+    }, 700);
+  } catch (err) {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<span>Save Changes</span>';
+    }
+    showProfileAlert('error', 'Failed to save changes. Please try again.');
+  }
 }
 
 function renderCatalog() {
