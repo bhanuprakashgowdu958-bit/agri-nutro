@@ -495,21 +495,36 @@ function getStoredOrders() {
 
 function getUserOrderCount() {
   try {
-    const user = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
     const all = getStoredOrders();
-    if (!user) return all.length;
-    const userEmail = (user.email || '').toLowerCase().trim();
-    const userPhone = (user.phone || '').replace(/\D/g, '');
-    const userId = (user.userId || '').toLowerCase().trim();
-    const matched = all.filter(o => {
-      const oEmail = (o.userEmail || o.email || '').toLowerCase().trim();
-      const oPhone = (o.phone || '').replace(/\D/g, '');
-      const oUid = (o.userId || '').toLowerCase().trim();
-      return (userEmail && oEmail && oEmail === userEmail) ||
-             (userId && oUid && oUid === userId) ||
-             (userPhone && oPhone && oPhone.length >= 10 && oPhone.endsWith(userPhone.slice(-10)));
-    });
-    return matched.length;
+    const user = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
+    if (user) {
+      const userEmail = (user.email || '').toLowerCase().trim();
+      const userPhone = (user.phone || '').replace(/\D/g, '');
+      const userId = (user.userId || '').toLowerCase().trim();
+      const userName = (user.fullName || '').toLowerCase().trim();
+
+      const matched = all.filter(o => {
+        if (!o) return false;
+        const oEmail = (o.userEmail || o.email || '').toLowerCase().trim();
+        const oPhone = (o.phone || '').replace(/\D/g, '');
+        const oUid = (o.userId || '').toLowerCase().trim();
+        const oName = (o.farmerName || '').toLowerCase().trim();
+
+        return (userEmail && oEmail && oEmail === userEmail) ||
+               (userId && oUid && oUid === userId) ||
+               (userPhone && oPhone && userPhone.length >= 10 && oPhone.endsWith(userPhone.slice(-10))) ||
+               (userName && oName && userName.length > 3 && oName === userName);
+      });
+      return matched.length;
+    }
+
+    // Guest visitor: only count orders placed in this browser session
+    const myOrderIds = JSON.parse(localStorage.getItem('nutriagro_my_order_ids') || '[]');
+    const latestId = localStorage.getItem('nutriagro_my_latest_order_id');
+    if (latestId && !myOrderIds.includes(latestId)) {
+      myOrderIds.push(latestId);
+    }
+    return myOrderIds.filter(id => all.some(o => o && o.orderId === id)).length;
   } catch (e) {
     return 0;
   }
@@ -558,7 +573,7 @@ async function fetchOrdersFromServer(callback) {
         );
         cleanServer.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
         localStorage.setItem('nutriagro_orders', JSON.stringify(cleanServer));
-        updateAllOrderBadges(cleanServer.length);
+        updateAllOrderBadges();
         checkCustomerOrderStatusChanges(cleanServer);
         if (typeof callback === 'function') callback(cleanServer);
         return cleanServer;
@@ -591,7 +606,7 @@ async function fetchOrdersFromServer(callback) {
     }
   } catch (err) {}
   const current = getStoredOrders();
-  updateAllOrderBadges(current.length);
+  updateAllOrderBadges();
   if (typeof callback === 'function') callback(current);
   return current;
 }
@@ -603,13 +618,20 @@ async function saveOrder(orderObj) {
     localStorage.setItem('nutriagro_orders', JSON.stringify(local));
     localStorage.setItem('nutriagro_last_order_timestamp', String(Date.now()));
 
+    // Record order ID to user's device history
+    const myOrderIds = JSON.parse(localStorage.getItem('nutriagro_my_order_ids') || '[]');
+    if (!myOrderIds.includes(orderObj.orderId)) {
+      myOrderIds.unshift(orderObj.orderId);
+      localStorage.setItem('nutriagro_my_order_ids', JSON.stringify(myOrderIds));
+    }
+
     localStorage.setItem('nutriagro_my_latest_order_id', orderObj.orderId);
     localStorage.setItem('nutriagro_tracked_status_' + orderObj.orderId, JSON.stringify({
       currentStep: orderObj.currentStep || 1,
       status: orderObj.status || 'Order Confirmed & Logged'
     }));
 
-    updateAllOrderBadges(local.length);
+    updateAllOrderBadges();
 
     // Instant cross-tab broadcast to open Admin Hub on same machine
     try {
@@ -959,7 +981,7 @@ function openOrderTrackerModal(targetOrderId) {
 
   const orders = getStoredOrders();
   const countBadge = document.getElementById('ordersCountBadge');
-  if (countBadge) countBadge.textContent = orders.length;
+  if (countBadge) countBadge.textContent = getUserOrderCount();
 
   if (targetOrderId) {
     // If a specific order ID was requested (e.g. from checkout or direct track button)
@@ -998,7 +1020,7 @@ function switchTrackerTab(tabName) {
   const orders = getStoredOrders();
 
   const countBadge = document.getElementById('ordersCountBadge');
-  if (countBadge) countBadge.textContent = orders.length;
+  if (countBadge) countBadge.textContent = getUserOrderCount();
 
   if (tabName === 'list') {
     if (listTab) listTab.style.display = 'block';
@@ -1043,35 +1065,47 @@ function renderOrdersListView(orders, searchQuery = '') {
     currentUser = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
   } catch (e) {}
 
-  // Filter orders matching logged-in user's account
+  // Filter orders strictly matching logged-in user's account
   let accountOrders = [];
   if (currentUser) {
     const userEmail = (currentUser.email || '').toLowerCase().trim();
     const userPhone = (currentUser.phone || '').replace(/\D/g, '');
     const userId = (currentUser.userId || '').toLowerCase().trim();
+    const userName = (currentUser.fullName || '').toLowerCase().trim();
 
     accountOrders = orders.filter(o => {
       if (!o) return false;
       const orderEmail = (o.userEmail || o.email || '').toLowerCase().trim();
       const orderPhone = (o.phone || '').replace(/\D/g, '');
       const orderUserId = (o.userId || '').toLowerCase().trim();
+      const orderName = (o.farmerName || '').toLowerCase().trim();
 
       const matchEmail = Boolean(userEmail && orderEmail && orderEmail === userEmail);
       const matchUserId = Boolean(userId && orderUserId && orderUserId === userId);
       const matchPhone = Boolean(userPhone && orderPhone && orderPhone.length >= 10 && orderPhone.endsWith(userPhone.slice(-10)));
+      const matchName = Boolean(userName && orderName && userName.length > 3 && orderName === userName);
 
-      return matchEmail || matchUserId || matchPhone;
+      return matchEmail || matchUserId || matchPhone || matchName;
     });
+  } else {
+    // Guest visitor: only orders placed from this browser device
+    const myOrderIds = JSON.parse(localStorage.getItem('nutriagro_my_order_ids') || '[]');
+    const latestId = localStorage.getItem('nutriagro_my_latest_order_id');
+    if (latestId && !myOrderIds.includes(latestId)) {
+      myOrderIds.push(latestId);
+    }
+    accountOrders = orders.filter(o => o && o.orderId && myOrderIds.includes(o.orderId));
   }
 
-  // Determine effective display mode
-  const isAccountMode = currentUser && (_ordersFilterMode === 'account' || (_ordersFilterMode === 'auto'));
-  const activeOrders = isAccountMode ? accountOrders : orders;
+  // Active orders strictly scoped to this user only - Never expose other customers' orders!
+  const activeOrders = accountOrders;
 
+  // Sync count badges to this user's orders
   const countBadge = document.getElementById('ordersCountBadge');
   if (countBadge) {
-    countBadge.textContent = isAccountMode ? accountOrders.length : orders.length;
+    countBadge.textContent = accountOrders.length;
   }
+  updateAllOrderBadges(accountOrders.length);
 
   // Filter by search query if provided
   let filteredOrders = activeOrders;
@@ -1112,14 +1146,10 @@ function renderOrdersListView(orders, searchQuery = '') {
           </div>
         </div>
 
-        <!-- Filter Mode Switcher -->
-        <div style="display: flex; gap: 6px; background: rgba(255,255,255,0.85); padding: 4px; border-radius: var(--radius-full); border: 1px solid var(--color-gray-200);">
-          <button type="button" onclick="setOrdersFilterMode('account')" style="border: none; padding: 6px 14px; border-radius: var(--radius-full); font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.2s; ${isAccountMode ? 'background: var(--color-primary); color: #fff; box-shadow: 0 2px 6px rgba(18,77,50,0.25);' : 'background: transparent; color: var(--color-dark-muted);'}">
-            👤 My Account Orders (${accountOrders.length})
-          </button>
-          <button type="button" onclick="setOrdersFilterMode('all')" style="border: none; padding: 6px 14px; border-radius: var(--radius-full); font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.2s; ${!isAccountMode ? 'background: var(--color-primary); color: #fff; box-shadow: 0 2px 6px rgba(18,77,50,0.25);' : 'background: transparent; color: var(--color-dark-muted);'}">
-            🔍 All Orders (${orders.length})
-          </button>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="background: rgba(18,77,50,0.12); color: var(--color-primary); font-weight: 700; font-size: 0.82rem; padding: 6px 14px; border-radius: var(--radius-full); border: 1px solid rgba(18,77,50,0.2);">
+            📦 My Account Orders (${accountOrders.length})
+          </span>
         </div>
       </div>
     `;
@@ -1129,42 +1159,62 @@ function renderOrdersListView(orders, searchQuery = '') {
         <div style="display: flex; align-items: center; gap: 10px;">
           <span style="font-size: 1.4rem;">🔑</span>
           <div>
-            <div style="font-weight: 700; font-size: 0.9rem; color: var(--color-dark);">Sign in to view your account orders automatically</div>
-            <div style="font-size: 0.78rem; color: var(--color-dark-muted);">All feed shipments placed under your account will be linked and tracked in your portal.</div>
+            <div style="font-weight: 700; font-size: 0.9rem; color: var(--color-dark);">Sign in to view your orders automatically</div>
+            <div style="font-size: 0.78rem; color: var(--color-dark-muted);">All feed shipments placed under your account will be securely tracked in your private portal.</div>
           </div>
         </div>
-        <a href="signup.html" class="btn btn-sm btn-primary" style="padding: 7px 16px; font-size: 0.82rem; font-weight: 700; text-decoration: none;">
+        <button type="button" onclick="closeOrderTrackerModal(); handleHeaderAccountClick();" class="btn btn-sm btn-primary" style="padding: 7px 16px; font-size: 0.82rem; font-weight: 700;">
           Sign In / Create Account →
-        </a>
+        </button>
       </div>
     `;
   }
 
   // 2. Empty State Handling
   let ordersCardsHtml = '';
-  if (isAccountMode && accountOrders.length === 0) {
-    ordersCardsHtml = `
-      <div style="text-align: center; padding: 42px 20px; background: var(--color-gray-50); border: 1.5px dashed var(--color-gray-300); border-radius: var(--radius-lg);">
-        <div style="font-size: 3rem; margin-bottom: 12px;">🌾</div>
-        <h3 style="font-size: 1.25rem; margin-bottom: 6px; color: var(--color-dark);">No Orders Under This Account Yet</h3>
-        <p style="font-size: 0.88rem; color: var(--color-dark-muted); max-width: 480px; margin: 0 auto 20px auto; line-height: 1.5;">
-          You are signed in as <strong>${currentUser.email}</strong>. Once you checkout an order from the feed catalog, it will automatically appear right here with live 4-stage tracking and mill invoices.
-        </p>
-        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-          <button type="button" class="btn btn-primary" onclick="closeOrderTrackerModal(); window.location.hash = '#feedCatalogSection';" style="padding: 10px 22px;">
-            🛒 Explore Commercial Feeds
-          </button>
-          <button type="button" class="btn btn-secondary" onclick="setOrdersFilterMode('all')" style="padding: 10px 18px;">
-            🔍 Look Up by Phone / Order ID
-          </button>
+  if (accountOrders.length === 0) {
+    if (currentUser) {
+      ordersCardsHtml = `
+        <div style="text-align: center; padding: 42px 20px; background: var(--color-gray-50); border: 1.5px dashed var(--color-gray-300); border-radius: var(--radius-lg);">
+          <div style="font-size: 3rem; margin-bottom: 12px;">🌾</div>
+          <h3 style="font-size: 1.25rem; margin-bottom: 6px; color: var(--color-dark);">No Orders Placed Yet</h3>
+          <p style="font-size: 0.88rem; color: var(--color-dark-muted); max-width: 480px; margin: 0 auto 20px auto; line-height: 1.5;">
+            You are signed in as <strong>${currentUser.fullName || currentUser.email}</strong>. Once you checkout an order from the feed catalog, it will automatically appear right here with real-time tracking, automated milling status, and delivery ETA.
+          </p>
+          <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+            <button type="button" class="btn btn-primary" onclick="closeOrderTrackerModal(); window.location.hash = '#feedCatalogSection';" style="padding: 10px 24px; font-weight: 700;">
+              🛒 Explore Feed Catalog
+            </button>
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    } else {
+      ordersCardsHtml = `
+        <div style="text-align: center; padding: 36px 20px; background: var(--color-gray-50); border: 1.5px dashed var(--color-gray-300); border-radius: var(--radius-lg);">
+          <div style="font-size: 2.8rem; margin-bottom: 10px;">📦</div>
+          <h3 style="font-size: 1.2rem; margin-bottom: 6px; color: var(--color-dark);">Track Your Livestock Feed Order</h3>
+          <p style="font-size: 0.86rem; color: var(--color-dark-muted); max-width: 460px; margin: 0 auto 16px auto; line-height: 1.5;">
+            Sign in to view your orders automatically, or enter your Order ID or registered phone number below to track a single order:
+          </p>
+          <div style="display: flex; gap: 8px; max-width: 420px; margin: 0 auto 16px auto;">
+            <input type="text" id="guestTrackInput" class="calc-input" placeholder="e.g. NUTRI-152932 or 10-digit Phone..." style="margin: 0; padding: 10px 14px; font-size: 0.9rem;" onkeydown="if(event.key==='Enter') lookupSingleOrderAsGuest()" />
+            <button type="button" class="btn btn-primary" onclick="lookupSingleOrderAsGuest()" style="white-space: nowrap; padding: 0 20px; font-weight: 700;">
+              Track
+            </button>
+          </div>
+          <div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeOrderTrackerModal(); handleHeaderAccountClick();" style="padding: 6px 16px; font-size: 0.82rem;">
+              🔑 Sign In to Your Account
+            </button>
+          </div>
+        </div>
+      `;
+    }
   } else if (filteredOrders.length === 0) {
     ordersCardsHtml = `
       <div style="text-align:center; padding:32px 20px; color:var(--color-dark-muted); background:#f8fafc; border-radius:var(--radius-md); border:1.5px dashed var(--color-gray-300);">
         <div style="font-size: 2rem; margin-bottom: 8px;">🔍</div>
-        <p>No orders match "<strong>${searchQuery}</strong>".</p>
+        <p>No orders in your account match "<strong>${searchQuery}</strong>".</p>
         <button type="button" onclick="renderOrdersListView(getStoredOrders(), '')" style="background:none; border:none; color:var(--color-primary); font-weight:700; cursor:pointer; text-decoration:underline; margin-top: 6px;">Clear search filter</button>
       </div>
     `;
@@ -1246,10 +1296,7 @@ function renderOrdersListView(orders, searchQuery = '') {
     }).join('');
   }
 
-  listContainer.innerHTML = `
-    <!-- Top Account Banner -->
-    ${accountBannerHtml}
-
+  const statsStripHtml = accountOrders.length > 0 ? `
     <!-- Statistics Strip -->
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: var(--radius-md); padding: 12px 18px; margin-bottom: 16px;">
       <div style="display: flex; gap: 18px; flex-wrap: wrap; font-size: 0.85rem;">
@@ -1258,22 +1305,53 @@ function renderOrdersListView(orders, searchQuery = '') {
         <div>💰 Total Amount: <strong style="color: var(--color-primary);">₹${Math.round(totalAmount).toLocaleString('en-IN')}</strong></div>
       </div>
       <div>
-        <button type="button" class="btn btn-sm btn-secondary" onclick="manualRefreshOrders()" style="padding: 4px 10px; font-size: 0.75rem;">
-          🔄 Refresh Orders
+        <button type="button" class="btn btn-sm btn-secondary" onclick="manualRefreshOrders()" id="manualRefreshBtn" style="padding: 4px 10px; font-size: 0.75rem;">
+          🔄 Refresh
         </button>
       </div>
     </div>
 
-    <!-- Search & Filter Bar -->
+    <!-- Search Bar -->
     <div style="margin-bottom: 16px;">
-      <input type="text" class="calc-input" placeholder="🔍 Search ${isAccountMode ? 'your account orders' : 'all orders'} by Order ID, Feed Name, Phone..." value="${searchQuery}" oninput="renderOrdersListView(getStoredOrders(), this.value)" style="margin: 0; padding: 10px 14px; font-size: 0.85rem;" />
+      <input type="text" class="calc-input" placeholder="🔍 Search your account orders by Order ID, Feed Name..." value="${searchQuery}" oninput="renderOrdersListView(getStoredOrders(), this.value)" style="margin: 0; padding: 10px 14px; font-size: 0.85rem;" />
     </div>
+  ` : '';
+
+  listContainer.innerHTML = `
+    <!-- Top Account Banner -->
+    ${accountBannerHtml}
+
+    ${statsStripHtml}
 
     <!-- Cards List -->
     <div style="max-height: 480px; overflow-y: auto; padding-right: 4px;">
       ${ordersCardsHtml}
     </div>
   `;
+}
+
+function lookupSingleOrderAsGuest() {
+  const input = document.getElementById('guestTrackInput');
+  const val = (input ? input.value : '').trim().toLowerCase();
+  if (!val) {
+    if (window.cart && window.cart.showToast) window.cart.showToast('Please enter an Order ID or Phone number', 'error');
+    return;
+  }
+  const orders = getStoredOrders();
+  const match = orders.find(o => 
+    (o.orderId && o.orderId.toLowerCase() === val) ||
+    (o.phone && o.phone.replace(/\D/g, '') === val.replace(/\D/g, ''))
+  );
+  if (match) {
+    switchTrackerTab('tracking');
+    const trackerInput = document.getElementById('orderTrackerInput');
+    if (trackerInput) trackerInput.value = match.orderId;
+    renderOrderTrackingCard(match, orders);
+  } else {
+    if (window.cart && window.cart.showToast) {
+      window.cart.showToast(`No order found matching "${val}". Please check your Order ID.`, 'error');
+    }
+  }
 }
 
 function updateOrderStatus(orderId, newStepVal) {
@@ -1382,7 +1460,7 @@ function renderOrderTrackingCard(order, allOrders) {
     <!-- Top Back to Orders List Button -->
     <div style="margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
       <button type="button" class="btn btn-sm btn-secondary" onclick="switchTrackerTab('list')" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; padding: 6px 14px;">
-        ← Back to All Orders List (${allOrders.length})
+        ← Back to My Orders
       </button>
       <span style="font-size: 0.78rem; color: var(--color-dark-muted);">Live Freight Tracking</span>
     </div>
