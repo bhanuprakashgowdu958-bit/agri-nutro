@@ -1900,15 +1900,27 @@
             </div>
           `;
         } else if (step === 4) {
-          // Delivered State: Status cannot be changed. Only action buttons shown.
           footerHtml = `
-            <div class="order-card-footer" style="display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 10px;">
-              <div class="action-btns-group">
+            <div class="order-card-footer" style="background: rgba(16, 185, 129, 0.06); border-top: 1.5px solid rgba(16, 185, 129, 0.28); padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.35rem;">✅</span>
+                <div style="font-weight: 800; font-size: 0.92rem; color: #065f46; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <span>Order Fulfilled & Delivered to Farmgate</span>
+                  <span style="background: #059669; color: #ffffff; font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 9999px; letter-spacing: 0.04em; display: inline-flex; align-items: center; gap: 3px;">
+                    <span>🔒</span> LOCKED · FINAL STAGE
+                  </span>
+                </div>
+              </div>
+
+              <div class="action-btns-group" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <a href="https://wa.me/${cleanPhone}?text=${encodeURIComponent(whatsappText)}" target="_blank" class="btn btn-sm btn-whatsapp">
-                  <span>📲</span> WhatsApp Customer Alert
+                  <span>📲</span> WhatsApp Delivery Receipt
                 </a>
                 <button type="button" class="btn btn-sm btn-light" style="color: #0f172a;" onclick="printOrderInvoice('${order.orderId}')">
                   <span>🖨️</span> Print Invoice
+                </button>
+                <button type="button" class="btn btn-sm" onclick="reopenDeliveredOrder('${order.orderId}')" style="background: #ffffff; color: #64748b; border: 1px dashed #cbd5e1; font-size: 0.74rem; padding: 6px 10px; border-radius: 6px; cursor: pointer;" title="Only click if order was marked delivered by mistake">
+                  <span>↩️</span> Re-open (Correction)
                 </button>
               </div>
             </div>
@@ -2056,6 +2068,64 @@
       } else {
         showToast(`✅ Order #${orderId} status updated to: ${match.status}! Customer notified.`, 'success');
       }
+      renderDashboard();
+    }
+
+    async function reopenDeliveredOrder(orderId) {
+      const match = allOrders.find(o => o.orderId === orderId);
+      if (!match) return;
+
+      const confirmReopen = confirm(`Order #${orderId} is currently marked as Delivered to Farm Gate.\n\nAre you sure you want to re-open this order back to Step 3 (Dispatched on Agro Freight Truck)?`);
+      if (!confirmReopen) return;
+
+      match.currentStep = 3;
+      match.status = 'Dispatched on Agro Freight Truck';
+      match.lastUpdated = new Date().toISOString();
+
+      localStorage.setItem('nutriagro_orders', JSON.stringify(allOrders));
+
+      // BroadcastChannel for instant cross-tab / cross-window sync
+      try {
+        if (typeof BroadcastChannel !== 'undefined') {
+          const ch = new BroadcastChannel('nutriagro_orders_channel');
+          ch.postMessage({
+            type: 'STATUS_UPDATED',
+            orderId: orderId,
+            currentStep: 3,
+            status: match.status,
+            timestamp: Date.now()
+          });
+        }
+      } catch (bcErr) {}
+
+      // 1. Direct Cloud Sync to Firebase Realtime Database
+      try {
+        fetch(`${FIREBASE_RTDB_ORDERS_URL}/${encodeURIComponent(orderId)}.json`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            currentStep: 3,
+            status: match.status,
+            lastUpdated: match.lastUpdated
+          })
+        }).catch(() => {});
+      } catch (fbErr) {}
+
+      // 2. Push to backend server
+      try {
+        await fetch(getApiEndpoint(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'update_status',
+            orderId: orderId,
+            currentStep: 3,
+            status: match.status
+          })
+        });
+      } catch (err) {}
+
+      showToast(`↩️ Order #${orderId} re-opened to Step 3 (Dispatched). Returned to Active Orders.`, 'info');
       renderDashboard();
     }
 
