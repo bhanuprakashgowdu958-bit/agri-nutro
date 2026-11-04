@@ -553,38 +553,69 @@ function getStoredOrders() {
   }
 }
 
+/**
+ * Strictly scopes orders to the authenticated customer account.
+ * Under no circumstances does this ever return another customer's orders.
+ */
+function getMyCustomerOrders(allOrders) {
+  const orders = Array.isArray(allOrders) ? allOrders : getStoredOrders();
+  let currentUser = null;
+  try {
+    currentUser = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
+  } catch (e) {}
+
+  if (currentUser && (currentUser.email || currentUser.userId || currentUser.phone)) {
+    const userEmail = (currentUser.email || '').toLowerCase().trim();
+    const userId = (currentUser.userId || '').toLowerCase().trim();
+    const userPhone = (currentUser.phone || '').replace(/\D/g, '');
+
+    return orders.filter(o => {
+      if (!o || !o.orderId) return false;
+      const orderEmail = (o.userEmail || o.email || '').toLowerCase().trim();
+      const orderUserId = (o.userId || '').toLowerCase().trim();
+      const orderPhone = (o.phone || '').replace(/\D/g, '');
+
+      // 1. Primary match: Email address
+      if (userEmail && orderEmail && userEmail === orderEmail) {
+        return true;
+      }
+      // 2. Primary match: Account User ID
+      if (userId && orderUserId && userId === orderUserId) {
+        return true;
+      }
+      // 3. Verified Phone Number (10 digits)
+      if (userPhone.length >= 10 && orderPhone.length >= 10 && userPhone.slice(-10) === orderPhone.slice(-10)) {
+        // Guard against cross-account collisions: if order is linked to a different email, do NOT match
+        if (orderEmail && userEmail && orderEmail !== userEmail) {
+          return false;
+        }
+        return true;
+      }
+      return false;
+    });
+  }
+
+  // Guest Visitor (Not Signed In): Only orders placed from this browser device
+  const guestOrderIds = JSON.parse(localStorage.getItem('nutriagro_my_order_ids') || '[]');
+  const latestGuestId = localStorage.getItem('nutriagro_my_latest_order_id');
+  if (latestGuestId && !guestOrderIds.includes(latestGuestId)) {
+    guestOrderIds.push(latestGuestId);
+  }
+
+  if (guestOrderIds.length === 0) {
+    return [];
+  }
+
+  return orders.filter(o => {
+    if (!o || !o.orderId) return false;
+    return guestOrderIds.includes(o.orderId);
+  });
+}
+
 function getUserOrderCount() {
   try {
     const all = getStoredOrders();
-    const user = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
-    if (user) {
-      const userEmail = (user.email || '').toLowerCase().trim();
-      const userPhone = (user.phone || '').replace(/\D/g, '');
-      const userId = (user.userId || '').toLowerCase().trim();
-      const userName = (user.fullName || '').toLowerCase().trim();
-
-      const matched = all.filter(o => {
-        if (!o) return false;
-        const oEmail = (o.userEmail || o.email || '').toLowerCase().trim();
-        const oPhone = (o.phone || '').replace(/\D/g, '');
-        const oUid = (o.userId || '').toLowerCase().trim();
-        const oName = (o.farmerName || '').toLowerCase().trim();
-
-        return (userEmail && oEmail && oEmail === userEmail) ||
-               (userId && oUid && oUid === userId) ||
-               (userPhone && oPhone && userPhone.length >= 10 && oPhone.endsWith(userPhone.slice(-10))) ||
-               (userName && oName && userName.length > 3 && oName === userName);
-      });
-      return matched.length;
-    }
-
-    // Guest visitor: only count orders placed in this browser session
-    const myOrderIds = JSON.parse(localStorage.getItem('nutriagro_my_order_ids') || '[]');
-    const latestId = localStorage.getItem('nutriagro_my_latest_order_id');
-    if (latestId && !myOrderIds.includes(latestId)) {
-      myOrderIds.push(latestId);
-    }
-    return myOrderIds.filter(id => all.some(o => o && o.orderId === id)).length;
+    return getMyCustomerOrders(all).length;
   } catch (e) {
     return 0;
   }
@@ -963,10 +994,14 @@ function dismissCustomerStatusBanner() {
 }
 
 function checkCustomerOrderStatusChanges(allOrders) {
-  const myOrderId = localStorage.getItem('nutriagro_my_latest_order_id');
+  const myOrders = getMyCustomerOrders(allOrders);
+  if (!myOrders || myOrders.length === 0) return;
+
+  const myOrderId = localStorage.getItem('nutriagro_my_latest_order_id') || myOrders[0].orderId;
   if (!myOrderId) return;
 
-  const match = allOrders.find(o => o.orderId && o.orderId.toLowerCase() === myOrderId.toLowerCase());
+  // Strictly verify the order belongs to this customer account
+  const match = myOrders.find(o => o.orderId && o.orderId.toLowerCase() === myOrderId.toLowerCase());
   if (!match) return;
 
   const key = 'nutriagro_tracked_status_' + match.orderId;
@@ -988,7 +1023,7 @@ function checkCustomerOrderStatusChanges(allOrders) {
     if (trackerModal && trackerModal.classList.contains('active')) {
       const trackingTab = document.getElementById('trackerLiveTrackingTab');
       if (trackingTab && trackingTab.style.display !== 'none') {
-        renderOrderTrackingCard(match, allOrders);
+        renderOrderTrackingCard(match, myOrders);
       }
     }
   } else if (!prev.currentStep) {
@@ -1045,23 +1080,25 @@ function openOrderTrackerModal(targetOrderId) {
   const overlay = document.getElementById('modalOverlay');
   if (!modal || !overlay) return;
 
-  const orders = getStoredOrders();
+  const allOrders = getStoredOrders();
+  const myOrders = getMyCustomerOrders(allOrders);
   const countBadge = document.getElementById('ordersCountBadge');
-  if (countBadge) countBadge.textContent = getUserOrderCount();
+  if (countBadge) countBadge.textContent = myOrders.length;
 
   if (targetOrderId) {
     // If a specific order ID was requested (e.g. from checkout or direct track button)
     switchTrackerTab('tracking');
     const inputEl = document.getElementById('orderTrackerInput');
     if (inputEl) inputEl.value = targetOrderId;
-    const match = orders.find(o => o.orderId.toLowerCase() === targetOrderId.toLowerCase());
+    const match = myOrders.find(o => o.orderId.toLowerCase() === targetOrderId.toLowerCase()) ||
+                  allOrders.find(o => o.orderId.toLowerCase() === targetOrderId.toLowerCase());
     if (match) {
-      renderOrderTrackingCard(match, orders);
+      renderOrderTrackingCard(match, myOrders);
     } else {
-      renderSampleTrackingOrder(targetOrderId, orders);
+      renderOrderNotFoundCard(targetOrderId);
     }
   } else {
-    // Default when opening from navigation menu: Open the Orders List!
+    // Default when opening from navigation menu: Open the Customer Orders List!
     switchTrackerTab('list');
   }
 
@@ -1083,47 +1120,48 @@ function switchTrackerTab(tabName) {
   const trackingTab = document.getElementById('trackerLiveTrackingTab');
   const btnList = document.getElementById('tabBtnOrdersList');
   const btnTracking = document.getElementById('tabBtnLiveTracking');
-  const orders = getStoredOrders();
+  const allOrders = getStoredOrders();
+  const myOrders = getMyCustomerOrders(allOrders);
 
   const countBadge = document.getElementById('ordersCountBadge');
-  if (countBadge) countBadge.textContent = getUserOrderCount();
+  if (countBadge) countBadge.textContent = myOrders.length;
 
   if (tabName === 'list') {
     if (listTab) listTab.style.display = 'block';
     if (trackingTab) trackingTab.style.display = 'none';
     if (btnList) btnList.classList.add('active');
     if (btnTracking) btnTracking.classList.remove('active');
-    renderOrdersListView(orders);
+    renderOrdersListView(allOrders);
   } else {
     if (listTab) listTab.style.display = 'none';
     if (trackingTab) trackingTab.style.display = 'block';
     if (btnList) btnList.classList.remove('active');
     if (btnTracking) btnTracking.classList.add('active');
     
-    // If tracking tab has no card yet, render the latest order
+    // For live tracking: ONLY auto-load this customer's own order
     const container = document.getElementById('orderTrackerResultContainer');
-    if (container && (!container.innerHTML.trim() || container.innerHTML.includes('No Orders Placed Yet'))) {
-      if (orders.length > 0) {
-        const inputEl = document.getElementById('orderTrackerInput');
-        if (inputEl) inputEl.value = orders[0].orderId;
-        renderOrderTrackingCard(orders[0], orders);
+    const inputEl = document.getElementById('orderTrackerInput');
+    const currentInputVal = inputEl ? inputEl.value.trim().toLowerCase() : '';
+    const alreadyShown = myOrders.find(o => o.orderId.toLowerCase() === currentInputVal);
+
+    if (!alreadyShown) {
+      if (myOrders.length > 0) {
+        if (inputEl) inputEl.value = myOrders[0].orderId;
+        renderOrderTrackingCard(myOrders[0], myOrders);
       } else {
-        renderEmptyOrderTrackerState(orders);
+        if (inputEl) inputEl.value = '';
+        renderEmptyOrderTrackerState(myOrders);
       }
     }
   }
 }
 
-let _ordersFilterMode = 'auto'; // 'auto', 'account', or 'all'
-
-function setOrdersFilterMode(mode) {
-  _ordersFilterMode = mode;
-  renderOrdersListView(getStoredOrders(), '');
-}
-
 function renderOrdersListView(orders, searchQuery = '') {
   const listContainer = document.getElementById('trackerOrdersListTab');
   if (!listContainer) return;
+
+  const allOrders = Array.isArray(orders) ? orders : getStoredOrders();
+  const accountOrders = getMyCustomerOrders(allOrders);
 
   // Retrieve active logged in user
   let currentUser = null;
@@ -1131,43 +1169,15 @@ function renderOrdersListView(orders, searchQuery = '') {
     currentUser = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
   } catch (e) {}
 
-  // Filter orders strictly matching logged-in user's account
-  let accountOrders = [];
-  if (currentUser) {
-    const userEmail = (currentUser.email || '').toLowerCase().trim();
-    const userPhone = (currentUser.phone || '').replace(/\D/g, '');
-    const userId = (currentUser.userId || '').toLowerCase().trim();
-    const userName = (currentUser.fullName || '').toLowerCase().trim();
-
-    accountOrders = orders.filter(o => {
-      if (!o) return false;
-      const orderEmail = (o.userEmail || o.email || '').toLowerCase().trim();
-      const orderPhone = (o.phone || '').replace(/\D/g, '');
-      const orderUserId = (o.userId || '').toLowerCase().trim();
-      const orderName = (o.farmerName || '').toLowerCase().trim();
-
-      const matchEmail = Boolean(userEmail && orderEmail && orderEmail === userEmail);
-      const matchUserId = Boolean(userId && orderUserId && orderUserId === userId);
-      const matchPhone = Boolean(userPhone && orderPhone && orderPhone.length >= 10 && orderPhone.endsWith(userPhone.slice(-10)));
-      const matchName = Boolean(userName && orderName && userName.length > 3 && orderName === userName);
-
-      return matchEmail || matchUserId || matchPhone || matchName;
-    });
-  } else {
-    // Guest visitor: only orders placed from this browser device
-    const myOrderIds = JSON.parse(localStorage.getItem('nutriagro_my_order_ids') || '[]');
-    const latestId = localStorage.getItem('nutriagro_my_latest_order_id');
-    if (latestId && !myOrderIds.includes(latestId)) {
-      myOrderIds.push(latestId);
-    }
-    accountOrders = orders.filter(o => o && o.orderId && myOrderIds.includes(o.orderId));
-  }
-
   // Active orders strictly scoped to this user only - Never expose other customers' orders!
   const activeOrders = accountOrders;
 
   // Sync count badges to this user's orders
   const countBadge = document.getElementById('ordersCountBadge');
+  if (countBadge) {
+    countBadge.textContent = accountOrders.length;
+  }
+  updateAllOrderBadges(accountOrders.length);
   if (countBadge) {
     countBadge.textContent = accountOrders.length;
   }
@@ -1398,21 +1408,23 @@ function renderOrdersListView(orders, searchQuery = '') {
 
 function lookupSingleOrderAsGuest() {
   const input = document.getElementById('guestTrackInput');
-  const val = (input ? input.value : '').trim().toLowerCase();
+  const val = (input ? input.value : '').trim();
   if (!val) {
     if (window.cart && window.cart.showToast) window.cart.showToast('Please enter an Order ID or Phone number', 'error');
     return;
   }
   const orders = getStoredOrders();
+  const valLower = val.toLowerCase();
+  const valDigits = val.replace(/\D/g, '');
   const match = orders.find(o => 
-    (o.orderId && o.orderId.toLowerCase() === val) ||
-    (o.phone && o.phone.replace(/\D/g, '') === val.replace(/\D/g, ''))
+    (o.orderId && o.orderId.toLowerCase() === valLower) ||
+    (valDigits.length >= 10 && o.phone && o.phone.replace(/\D/g, '').endsWith(valDigits.slice(-10)))
   );
   if (match) {
     switchTrackerTab('tracking');
     const trackerInput = document.getElementById('orderTrackerInput');
     if (trackerInput) trackerInput.value = match.orderId;
-    renderOrderTrackingCard(match, orders);
+    renderOrderTrackingCard(match, [match]);
   } else {
     if (window.cart && window.cart.showToast) {
       window.cart.showToast(`No order found matching "${val}". Please check your Order ID.`, 'error');
@@ -1442,57 +1454,48 @@ function updateOrderStatus(orderId, newStepVal) {
   renderOrdersListView(orders);
 }
 
-function generateSampleOrder() {
-  const sampleId = 'NUTRI-' + Math.floor(100000 + Math.random() * 900000);
-  const dateStr = new Date().toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' });
-  const sampleOrder = {
-    orderId: sampleId,
-    date: dateStr,
-    timestamp: Date.now(),
-    farmerName: 'Kisan Agro Dairy Farm',
-    phone: '+91 98765 43210',
-    address: 'Sholinganallur, Chennai, Tamil Nadu, PIN: 600119, India',
-    paymentMethod: 'Farmgate Delivery (COD / Cheque on Site)',
-    items: [
-      { name: 'NutriBov LactaMax™ High-Yield Dairy Feed', quantity: 2, price: 1850, bagSize: '50kg' },
-      { name: 'NutriBov CalfGrow™ 20% Starter Pellets', quantity: 1, price: 2050, bagSize: '50kg' }
-    ],
-    totalBags: 3,
-    totalWeightKg: 150,
-    finalTotal: 5750,
-    status: 'Automated Milling & Quality Screened',
-    eta: 'Tomorrow by 4:00 PM (Farmgate Arrival)',
-    driverName: 'Ramesh Singh (Agro Hauler #HR-05-AB-4821)',
-    driverPhone: '+91 98123 45678',
-    currentStep: 2
-  };
-
-  const stored = getStoredOrders();
-  stored.unshift(sampleOrder);
-  localStorage.setItem('nutriagro_orders', JSON.stringify(stored));
-  if (window.cart) window.cart.showToast(`Sample order #${sampleId} added to orders list!`, 'success');
-  renderOrdersListView(stored);
-}
-
 function trackOrderSubmit() {
   const input = document.getElementById('orderTrackerInput');
   const query = input ? input.value.trim() : '';
 
   if (!query) {
-    if (window.cart) window.cart.showToast('Please enter an Order ID or Phone number', 'info');
+    if (window.cart && window.cart.showToast) window.cart.showToast('Please enter an Order ID', 'info');
     return;
   }
 
-  const orders = getStoredOrders();
-  const match = orders.find(o => 
-    (o.orderId && o.orderId.toLowerCase().includes(query.toLowerCase())) || 
-    (o.phone && o.phone.replace(/\D/g, '').includes(query.replace(/\D/g, '')))
+  const allOrders = getStoredOrders();
+  const myOrders = getMyCustomerOrders(allOrders);
+
+  // 1. Check in customer's own orders first
+  const ownMatch = myOrders.find(o => 
+    (o.orderId && o.orderId.toLowerCase() === query.toLowerCase()) || 
+    (o.phone && o.phone.replace(/\D/g, '').endsWith(query.replace(/\D/g, '')))
   );
 
-  if (match) {
-    renderOrderTrackingCard(match, orders);
+  if (ownMatch) {
+    renderOrderTrackingCard(ownMatch, myOrders);
+    return;
+  }
+
+  // 2. Check if this is an exact Order ID in global orders
+  const exactMatch = allOrders.find(o => o.orderId && o.orderId.toLowerCase() === query.toLowerCase());
+  if (exactMatch) {
+    let currentUser = null;
+    try {
+      currentUser = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
+    } catch (e) {}
+
+    // Security check: if signed in, do not allow looking into another user's order
+    if (currentUser && exactMatch.userEmail && currentUser.email && exactMatch.userEmail.toLowerCase() !== currentUser.email.toLowerCase()) {
+      if (window.cart && window.cart.showToast) {
+        window.cart.showToast(`Order #${query} does not belong to your account.`, 'error');
+      }
+      return;
+    }
+
+    renderOrderTrackingCard(exactMatch, myOrders);
   } else {
-    renderSampleTrackingOrder(query, orders);
+    renderOrderNotFoundCard(query);
   }
 }
 
@@ -1627,48 +1630,74 @@ function renderOrderTrackingCard(order, allOrders) {
   `;
 }
 
-function renderSampleTrackingOrder(searchedId, allOrders) {
-  const sampleOrder = {
-    orderId: searchedId.toUpperCase().startsWith('NUTRI-') ? searchedId.toUpperCase() : `NUTRI-${searchedId.toUpperCase()}`,
-    date: 'Today',
-    timestamp: Date.now(),
-    farmerName: 'Valued Farm Customer',
-    phone: '+91 98765 43210',
-    address: 'Farm Gate #1, Regional Agro Corridor, Customer Location',
-    paymentMethod: 'Farmgate Delivery (COD / Cheque on Site)',
-    items: [
-      { name: 'NutriBov LactaMax™ High-Yield Dairy Feed', quantity: 2, price: 1850, bagSize: '50kg' },
-      { name: 'NutriBov CalfGrow™ 20% Starter Pellets', quantity: 1, price: 2050, bagSize: '50kg' }
-    ],
-    totalBags: 3,
-    totalWeightKg: 150,
-    finalTotal: 5750,
-    status: 'Automated Milling & Quality Screened',
-    eta: 'Tomorrow by 4:00 PM (Farmgate Arrival)',
-    driverName: 'Ramesh Singh (Agro Hauler #HR-05-AB-4821)',
-    driverPhone: '+91 98123 45678',
-    currentStep: 2
-  };
-
-  renderOrderTrackingCard(sampleOrder, allOrders);
-}
-
-function renderEmptyOrderTrackerState(allOrders) {
+function renderOrderNotFoundCard(searchedId) {
   const container = document.getElementById('orderTrackerResultContainer');
   if (!container) return;
 
+  const displayId = searchedId || 'your order';
   container.innerHTML = `
-    <div style="text-align: center; padding: 36px 20px; background: var(--color-gray-50); border: 1.5px dashed var(--color-gray-300); border-radius: var(--radius-lg);">
-      <div style="font-size: 2.5rem; margin-bottom: 12px;">🌾</div>
-      <h3 style="font-size: 1.15rem; margin-bottom: 6px; color: var(--color-dark);">No Active Orders to Track</h3>
-      <p style="font-size: 0.85rem; color: var(--color-dark-muted); max-width: 440px; margin: 0 auto 18px auto;">
-        You can search any order ID above or switch to the Orders List tab to view all placed orders.
+    <!-- Top Back to Orders List Button -->
+    <div style="margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+      <button type="button" class="btn btn-sm btn-secondary" onclick="switchTrackerTab('list')" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; padding: 6px 14px;">
+        ← Back to My Orders
+      </button>
+      <span style="font-size: 0.78rem; color: var(--color-dark-muted);">Live Freight Tracking</span>
+    </div>
+
+    <div style="text-align: center; padding: 36px 20px; background: #fff8f8; border: 1.5px dashed #fca5a5; border-radius: var(--radius-lg);">
+      <div style="font-size: 2.8rem; margin-bottom: 10px;">🔍</div>
+      <h3 style="font-size: 1.2rem; margin-bottom: 6px; color: #b91c1c;">Order Not Found</h3>
+      <p style="font-size: 0.88rem; color: var(--color-dark-muted); max-width: 480px; margin: 0 auto 16px auto; line-height: 1.5;">
+        No active feed order was found matching "<strong>${displayId}</strong>". If you recently placed an order, please verify the Order ID or phone number from your receipt.
       </p>
-      <button type="button" class="btn btn-secondary btn-sm" onclick="switchTrackerTab('list')" style="padding: 8px 18px;">
-        📋 View Orders List
+      <button type="button" class="btn btn-primary btn-sm" onclick="switchTrackerTab('list')" style="padding: 8px 20px; font-weight: 700;">
+        📋 View My Orders List
       </button>
     </div>
   `;
+}
+
+function renderEmptyOrderTrackerState(myOrders) {
+  const container = document.getElementById('orderTrackerResultContainer');
+  if (!container) return;
+
+  let currentUser = null;
+  try {
+    currentUser = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
+  } catch (e) {}
+
+  if (currentUser) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 40px 20px; background: var(--color-gray-50); border: 1.5px dashed var(--color-gray-300); border-radius: var(--radius-lg);">
+        <div style="font-size: 2.8rem; margin-bottom: 12px;">🌾</div>
+        <h3 style="font-size: 1.25rem; margin-bottom: 6px; color: var(--color-dark);">No Active Orders to Track</h3>
+        <p style="font-size: 0.88rem; color: var(--color-dark-muted); max-width: 480px; margin: 0 auto 18px auto; line-height: 1.5;">
+          You are signed in as <strong>${currentUser.fullName || currentUser.email}</strong>. Once you checkout an order from the feed catalog, it will automatically appear right here with real-time milling and truck dispatch tracking.
+        </p>
+        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+          <button type="button" class="btn btn-primary" onclick="closeOrderTrackerModal(); window.location.hash = '#feedCatalogSection';" style="padding: 10px 22px; font-weight: 700;">
+            🛒 Place a Feed Order
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="switchTrackerTab('list')" style="padding: 8px 18px; font-weight: 700;">
+            📋 View My Orders (0)
+          </button>
+        </div>
+      </div>
+    `;
+  } else {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 36px 20px; background: var(--color-gray-50); border: 1.5px dashed var(--color-gray-300); border-radius: var(--radius-lg);">
+        <div style="font-size: 2.6rem; margin-bottom: 10px;">📦</div>
+        <h3 style="font-size: 1.2rem; margin-bottom: 6px; color: var(--color-dark);">Track Your Feed Shipment</h3>
+        <p style="font-size: 0.86rem; color: var(--color-dark-muted); max-width: 460px; margin: 0 auto 18px auto; line-height: 1.5;">
+          Enter your specific Order ID in the search box above to track dispatch, or sign in to your farmer account to track orders automatically.
+        </p>
+        <button type="button" class="btn btn-primary btn-sm" onclick="closeOrderTrackerModal(); handleHeaderAccountClick();" style="padding: 8px 20px; font-weight: 700;">
+          🔑 Sign In to View Your Orders
+        </button>
+      </div>
+    `;
+  }
 }
 
 window.autoDetectDeliveryAddress = autoDetectDeliveryAddress;
@@ -1685,6 +1714,8 @@ window.fetchOrdersFromServer = fetchOrdersFromServer;
 window.toggleCustomerNotifDropdown = toggleCustomerNotifDropdown;
 window.clearCustomerNotifs = clearCustomerNotifs;
 window.renderCustomerNotificationsDropdown = renderCustomerNotificationsDropdown;
+window.getMyCustomerOrders = getMyCustomerOrders;
+window.renderOrderNotFoundCard = renderOrderNotFoundCard;
 
 // Start order sync & customer watcher immediately
 if (document.readyState === 'loading') {

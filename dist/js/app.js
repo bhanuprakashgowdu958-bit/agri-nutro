@@ -790,6 +790,10 @@ function updateHeaderUserStatus() {
       if (nameEl) nameEl.textContent = 'Guest Visitor';
       if (emailEl) emailEl.textContent = 'Not signed in';
     }
+
+    if (typeof updateAllOrderBadges === 'function') {
+      updateAllOrderBadges();
+    }
   } catch (e) {}
 }
 
