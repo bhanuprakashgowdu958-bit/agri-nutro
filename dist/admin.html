@@ -1662,9 +1662,9 @@
       const totalRevenue = allOrders.reduce((sum, o) => sum + (o.finalTotal || 0), 0);
       const totalBags = allOrders.reduce((sum, o) => sum + (o.totalBags || 1), 0);
 
-      const isPendingOrder = o => o.adminApproval === 'pending' || o.currentStep === 0;
       const isRejectedOrder = o => o.adminApproval === 'rejected' || o.currentStep === -1;
-      const isAcceptedOrder = o => !isPendingOrder(o) && !isRejectedOrder(o);
+      const isAcceptedOrder = o => o.adminApproval === 'accepted' || (o.currentStep && o.currentStep >= 2);
+      const isPendingOrder = o => !isRejectedOrder(o) && !isAcceptedOrder(o);
 
       const pending = allOrders.filter(isPendingOrder).length;
       const confirmed = allOrders.filter(o => isAcceptedOrder(o) && (o.currentStep || 1) === 1).length;
@@ -1716,15 +1716,19 @@
       deletedOrderIds = getDeletedOrderIds();
       let filtered = allOrders.filter(o => o && o.orderId && !deletedOrderIds.has(String(o.orderId).toLowerCase()));
 
+      const isRej = o => o.adminApproval === 'rejected' || o.currentStep === -1;
+      const isAcc = o => o.adminApproval === 'accepted' || (o.currentStep && o.currentStep >= 2);
+      const isPend = o => !isRej(o) && !isAcc(o);
+
       // Filter by stage / status
       if (currentFilter !== 'all') {
         if (currentFilter === 'pending') {
-          filtered = filtered.filter(o => o.adminApproval === 'pending' || o.currentStep === 0);
+          filtered = filtered.filter(isPend);
         } else if (currentFilter === 'rejected') {
-          filtered = filtered.filter(o => o.adminApproval === 'rejected' || o.currentStep === -1);
+          filtered = filtered.filter(isRej);
         } else {
           const targetStep = parseInt(currentFilter, 10);
-          filtered = filtered.filter(o => o.adminApproval !== 'pending' && o.adminApproval !== 'rejected' && o.currentStep !== 0 && o.currentStep !== -1 && (o.currentStep || 1) === targetStep);
+          filtered = filtered.filter(o => isAcc(o) && (o.currentStep || 1) === targetStep);
         }
       }
 
@@ -1755,14 +1759,14 @@
       }
 
       container.innerHTML = filtered.map(order => {
-        const isPending = order.adminApproval === 'pending' || order.currentStep === 0;
         const isRejected = order.adminApproval === 'rejected' || order.currentStep === -1;
-        const isAccepted = !isPending && !isRejected;
-        const step = order.currentStep || 1;
+        const isAccepted = order.adminApproval === 'accepted' || (order.currentStep && order.currentStep >= 2);
+        const isPending = !isRejected && !isAccepted;
+        const step = isPending ? 0 : (isRejected ? -1 : (order.currentStep || 1));
 
         let statusBadgeHtml = '';
         if (isPending) {
-          statusBadgeHtml = `<span class="status-badge" style="background: rgba(245, 158, 11, 0.15); color: #b45309; border: 1.5px solid rgba(245, 158, 11, 0.35); font-weight: 800;">⏳ Pending Acceptance</span>`;
+          statusBadgeHtml = `<span class="status-badge" style="background: rgba(245, 158, 11, 0.15); color: #b45309; border: 1.5px solid rgba(245, 158, 11, 0.35); font-weight: 800;">⏳ Awaiting Acceptance</span>`;
         } else if (isRejected) {
           statusBadgeHtml = `<span class="status-badge" style="background: rgba(220, 38, 38, 0.12); color: #dc2626; border: 1.5px solid rgba(220, 38, 38, 0.3); font-weight: 800;">✕ Order Rejected</span>`;
         } else {

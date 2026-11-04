@@ -732,8 +732,9 @@ async function saveOrder(orderObj) {
 
     localStorage.setItem('nutriagro_my_latest_order_id', orderObj.orderId);
     localStorage.setItem('nutriagro_tracked_status_' + orderObj.orderId, JSON.stringify({
-      currentStep: orderObj.currentStep || 1,
-      status: orderObj.status || 'Order Confirmed & Logged'
+      currentStep: orderObj.currentStep !== undefined ? orderObj.currentStep : 0,
+      status: orderObj.status || 'Pending Admin Review',
+      adminApproval: orderObj.adminApproval || 'pending'
     }));
 
     updateAllOrderBadges();
