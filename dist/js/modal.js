@@ -680,6 +680,7 @@ async function fetchOrdersFromServer(callback) {
         localStorage.setItem('nutriagro_orders', JSON.stringify(cleanServer));
         updateAllOrderBadges();
         checkCustomerOrderStatusChanges(cleanServer);
+        refreshOpenTrackerModalUI(cleanServer);
         if (typeof callback === 'function') callback(cleanServer);
         return cleanServer;
       }
@@ -705,6 +706,7 @@ async function fetchOrdersFromServer(callback) {
         localStorage.setItem('nutriagro_orders', JSON.stringify(cleanServer));
         updateAllOrderBadges(cleanServer.length);
         checkCustomerOrderStatusChanges(cleanServer);
+        refreshOpenTrackerModalUI(cleanServer);
         if (typeof callback === 'function') callback(cleanServer);
         return cleanServer;
       }
@@ -951,11 +953,31 @@ function renderCustomerNotificationsDropdown() {
 }
 
 function showCustomerStatusNotificationBanner(order) {
+  const isAcceptedNow = order.adminApproval === 'accepted' || (order.currentStep !== undefined && order.currentStep >= 1);
+  const isPendingNow = !isAcceptedNow && (order.adminApproval === 'pending' || order.currentStep === 0);
+  const isRejectedNow = order.adminApproval === 'rejected' || order.currentStep === -1;
+
+  let bannerIcon = '🔔';
+  let bannerTitle = 'Order Status Updated by NutriAgro Mill!';
+  let bannerDetail = `Your Order <strong>#${order.orderId}</strong> is now: <span class="status-badge-inline">${order.status || 'Updated'}</span>`;
+
+  if (isAcceptedNow && (order.currentStep === 1 || !order.currentStep)) {
+    bannerIcon = '🎉';
+    bannerTitle = '🎉 Order Accepted & Confirmed by NutriAgro Mill!';
+    bannerDetail = `Great news! Your Order <strong>#${order.orderId}</strong> has been accepted. Automated batching & milling has begun!`;
+  } else if (isRejectedNow) {
+    bannerIcon = '⚠️';
+    bannerTitle = 'Order Review Notice from NutriAgro Mill';
+    bannerDetail = `Order <strong>#${order.orderId}</strong> was declined: ${order.rejectionReason || 'Please contact dispatch'}`;
+  }
+
   // Add to notification center history
   saveCustomerNotification({
     orderId: order.orderId,
     status: order.status,
-    message: `Stage updated to: "${order.status}". Freight hauler: ${order.driverName || 'Ramesh Singh'}.`,
+    message: isAcceptedNow && (order.currentStep === 1 || !order.currentStep)
+      ? `Order #${order.orderId} accepted by Mill Manager. Automated milling in progress.`
+      : `Stage updated to: "${order.status}". Freight hauler: ${order.driverName || 'Ramesh Singh'}.`,
     time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
   });
 
@@ -969,13 +991,10 @@ function showCustomerStatusNotificationBanner(order) {
 
   banner.innerHTML = `
     <div class="status-alert-left">
-      <span class="status-alert-icon">🔔</span>
+      <span class="status-alert-icon">${bannerIcon}</span>
       <div>
-        <div class="status-alert-title">Order Status Updated by NutriAgro Mill!</div>
-        <div class="status-alert-detail">
-          Your Order <strong>#${order.orderId}</strong> is now: 
-          <span class="status-badge-inline">${order.status}</span>
-        </div>
+        <div class="status-alert-title">${bannerTitle}</div>
+        <div class="status-alert-detail">${bannerDetail}</div>
       </div>
     </div>
     <div class="status-alert-actions">
@@ -989,8 +1008,8 @@ function showCustomerStatusNotificationBanner(order) {
 
   if (window.Notification && Notification.permission === 'granted') {
     try {
-      new Notification('NutriAgro Feeds: Order Status Updated', {
-        body: `Your Order #${order.orderId} has been updated to: ${order.status}`,
+      new Notification(bannerTitle, {
+        body: isAcceptedNow ? `Order #${order.orderId} has been accepted by NutriAgro Mill!` : `Your Order #${order.orderId} status: ${order.status}`,
         icon: 'assets/images/agro-logo.jpg'
       });
     } catch (e) {}
@@ -1000,6 +1019,31 @@ function showCustomerStatusNotificationBanner(order) {
 function dismissCustomerStatusBanner() {
   const banner = document.getElementById('customerStatusNotificationBanner');
   if (banner) banner.style.display = 'none';
+}
+
+function refreshOpenTrackerModalUI(orders) {
+  const trackerModal = document.getElementById('orderTrackerModal');
+  if (!trackerModal || !trackerModal.classList.contains('active')) return;
+
+  const allOrders = Array.isArray(orders) ? orders : getStoredOrders();
+  const myOrders = getMyCustomerOrders(allOrders);
+
+  const listTab = document.getElementById('trackerOrdersListTab');
+  const trackingTab = document.getElementById('trackerLiveTrackingTab');
+
+  if (trackingTab && trackingTab.style.display !== 'none') {
+    const inputEl = document.getElementById('orderTrackerInput');
+    const targetId = (inputEl && inputEl.value.trim()) || localStorage.getItem('nutriagro_my_latest_order_id') || (myOrders[0] && myOrders[0].orderId);
+    if (targetId) {
+      const match = myOrders.find(o => o.orderId && o.orderId.toLowerCase() === targetId.toLowerCase()) ||
+                    allOrders.find(o => o.orderId && o.orderId.toLowerCase() === targetId.toLowerCase());
+      if (match) {
+        renderOrderTrackingCard(match, myOrders);
+      }
+    }
+  } else if (listTab && listTab.style.display !== 'none') {
+    renderOrdersListView(allOrders);
+  }
 }
 
 function checkCustomerOrderStatusChanges(allOrders) {
@@ -1014,31 +1058,42 @@ function checkCustomerOrderStatusChanges(allOrders) {
   if (!match) return;
 
   const key = 'nutriagro_tracked_status_' + match.orderId;
-  let prev = {};
+  let prev = null;
   try {
-    prev = JSON.parse(localStorage.getItem(key) || '{}');
+    const raw = localStorage.getItem(key);
+    if (raw) prev = JSON.parse(raw);
   } catch (e) {}
 
-  if (prev.currentStep && (prev.currentStep !== match.currentStep || prev.status !== match.status)) {
-    localStorage.setItem(key, JSON.stringify({
-      currentStep: match.currentStep,
-      status: match.status
-    }));
+  const currentStep = match.currentStep !== undefined ? match.currentStep : (match.adminApproval === 'accepted' ? 1 : 0);
+  const currentStatus = match.status || (match.adminApproval === 'accepted' ? 'Order Confirmed & Logged' : 'Pending Admin Review');
+  const currentApproval = match.adminApproval || (currentStep >= 1 ? 'accepted' : 'pending');
 
-    playNotificationChime();
-    showCustomerStatusNotificationBanner(match);
+  if (prev) {
+    const prevStep = prev.currentStep !== undefined ? prev.currentStep : null;
+    const prevStatus = prev.status || null;
+    const prevApproval = prev.adminApproval || null;
 
-    const trackerModal = document.getElementById('orderTrackerModal');
-    if (trackerModal && trackerModal.classList.contains('active')) {
-      const trackingTab = document.getElementById('trackerLiveTrackingTab');
-      if (trackingTab && trackingTab.style.display !== 'none') {
-        renderOrderTrackingCard(match, myOrders);
-      }
+    const hasChanged = (prevStep !== null && prevStep !== currentStep) ||
+                       (prevStatus !== null && prevStatus !== currentStatus) ||
+                       (prevApproval !== null && prevApproval !== currentApproval);
+
+    if (hasChanged) {
+      localStorage.setItem(key, JSON.stringify({
+        currentStep: currentStep,
+        status: currentStatus,
+        adminApproval: currentApproval
+      }));
+
+      playNotificationChime();
+      showCustomerStatusNotificationBanner(match);
+      refreshOpenTrackerModalUI(allOrders);
     }
-  } else if (!prev.currentStep) {
+  } else {
+    // Initial tracking record saved
     localStorage.setItem(key, JSON.stringify({
-      currentStep: match.currentStep,
-      status: match.status
+      currentStep: currentStep,
+      status: currentStatus,
+      adminApproval: currentApproval
     }));
   }
 }
@@ -1055,7 +1110,20 @@ function startOrderStatusWatcher() {
     fetchOrdersFromServer();
   }, 2500);
 
-  // Real-time Firebase Server-Sent Events (SSE) Stream for 0ms Instant Push
+  // Cross-tab Instant Sync via BroadcastChannel (Same Device / Browser Tabs)
+  try {
+    if (typeof BroadcastChannel !== 'undefined' && !window._nutriagroOrdersChannel) {
+      window._nutriagroOrdersChannel = new BroadcastChannel('nutriagro_orders_channel');
+      window._nutriagroOrdersChannel.onmessage = (event) => {
+        const data = event.data;
+        if (data && (data.type === 'ORDER_ACCEPTED' || data.type === 'STATUS_UPDATED' || data.type === 'NEW_ORDER' || data.type === 'ORDER_REJECTED')) {
+          fetchOrdersFromServer();
+        }
+      };
+    }
+  } catch (bcErr) {}
+
+  // Real-time Firebase Server-Sent Events (SSE) Stream for 0ms Instant Push across Mobile & PC
   try {
     if (typeof EventSource !== 'undefined' && !firebaseEventSource) {
       firebaseEventSource = new EventSource(`${FIREBASE_RTDB_ORDERS_URL}.json`);
@@ -1305,9 +1373,10 @@ function renderOrdersListView(orders, searchQuery = '') {
     `;
   } else {
     ordersCardsHtml = filteredOrders.map(order => {
-      const isPending = order.adminApproval === 'pending' || order.currentStep === 0;
       const isRejected = order.adminApproval === 'rejected' || order.currentStep === -1;
-      const step = order.currentStep || 1;
+      const isAccepted = !isRejected && (order.adminApproval === 'accepted' || (order.currentStep !== undefined && order.currentStep >= 1));
+      const isPending = !isRejected && !isAccepted;
+      const step = isPending ? 0 : (isRejected ? -1 : (order.currentStep || 1));
       let statusBadge = '';
       if (isPending) {
         statusBadge = '<span style="background:rgba(245,158,11,0.15); color:#d97706; border:1px solid rgba(245,158,11,0.35); padding:4px 10px; border-radius:14px; font-size:0.76rem; font-weight:800;">⏳ Awaiting Mill Acceptance</span>';
@@ -1521,10 +1590,11 @@ function renderOrderTrackingCard(order, allOrders) {
   const container = document.getElementById('orderTrackerResultContainer');
   if (!container) return;
 
-  const isPending = order.adminApproval === 'pending' || order.currentStep === 0;
   const isRejected = order.adminApproval === 'rejected' || order.currentStep === -1;
+  const isAccepted = !isRejected && (order.adminApproval === 'accepted' || (order.currentStep !== undefined && order.currentStep >= 1));
+  const isPending = !isRejected && !isAccepted;
   const currentStep = isPending ? 0 : (isRejected ? -1 : (order.currentStep || 1));
-  const statusColor = isRejected ? '#dc2626' : (isPending ? '#d97706' : (currentStep >= 3 ? '#10b981' : '#f59e0b'));
+  const statusColor = isRejected ? '#dc2626' : (isPending ? '#d97706' : (currentStep >= 3 ? '#10b981' : '#059669'));
   const statusBadgeText = isPending
     ? '⏳ Awaiting Mill Acceptance'
     : (isRejected
@@ -1609,6 +1679,13 @@ function renderOrderTrackingCard(order, allOrders) {
     `;
   } else {
     stepperHtml = `
+      <div style="background: rgba(16, 185, 129, 0.08); border: 1.5px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-md); padding: 12px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 1.3rem;">🎉</span>
+        <div>
+          <div style="font-weight: 800; font-size: 0.92rem; color: #047857;">Order Accepted by Mill & Confirmed</div>
+          <div style="font-size: 0.8rem; color: #065f46;">Your livestock feed batch has been approved and entered the automated milling queue.</div>
+        </div>
+      </div>
       <!-- 4-Stage Visual Progress Stepper -->
       <div class="order-track-stepper-wrap" style="margin-bottom: 22px;">
         <div class="order-track-stepper">

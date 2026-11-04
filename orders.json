@@ -1,39 +1,5 @@
 [
   {
-    "orderId": "NUTRI-239526",
-    "date": "4 Nov 2026",
-    "timestamp": 1793773220158,
-    "farmerName": "Kaveri Green Pastures Dairy Farm",
-    "phone": "+91 98452 77890",
-    "address": "Sy No. 88, Sompura Industrial Agro Hub, Nelamangala, Bengaluru, PIN: 562123",
-    "paymentMethod": "Farmgate Delivery (COD / Cheque on Site)",
-    "items": [
-      {
-        "name": "NutriBov LactaMax™ High-Yield Dairy Feed",
-        "quantity": 5,
-        "price": 1850,
-        "bagSize": "50kg"
-      },
-      {
-        "name": "NutriBov HeiferGrow™ 18% Developer Pellets",
-        "quantity": 2,
-        "price": 1950,
-        "bagSize": "50kg"
-      }
-    ],
-    "totalBags": 7,
-    "totalWeightKg": 350,
-    "finalTotal": 13150,
-    "status": "Pending Admin Review",
-    "adminApproval": "pending",
-    "rejectionReason": "",
-    "eta": "Pending Admin Review",
-    "driverName": "Ramesh Singh (Truck #HR-05-AB-4821)",
-    "driverPhone": "+91 98123 45678",
-    "currentStep": 0,
-    "lastUpdated": "2026-11-04T06:20:20.166Z"
-  },
-  {
     "orderId": "NUTRI-205819",
     "date": "12 Oct 2026",
     "timestamp": 1791749540403,

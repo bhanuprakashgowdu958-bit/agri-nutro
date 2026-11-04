@@ -1090,12 +1090,12 @@
         </div>
 
         <div class="filter-tabs">
-          <button type="button" class="filter-btn active" data-filter="all" onclick="setFilter('all')">All (<span id="countAll">0</span>)</button>
+          <button type="button" class="filter-btn active" data-filter="all" onclick="setFilter('all')">📋 Active Orders (<span id="countAll">0</span>)</button>
           <button type="button" class="filter-btn" data-filter="pending" onclick="setFilter('pending')" style="color: #b45309; font-weight: 700;">⏳ Pending (<span id="countPending">0</span>)</button>
           <button type="button" class="filter-btn" data-filter="1" onclick="setFilter('1')">🌾 Confirmed (<span id="countConfirmed">0</span>)</button>
           <button type="button" class="filter-btn" data-filter="2" onclick="setFilter('2')">⚙️ Milling (<span id="countMilling">0</span>)</button>
           <button type="button" class="filter-btn" data-filter="3" onclick="setFilter('3')">🚚 Dispatched (<span id="countDispatched">0</span>)</button>
-          <button type="button" class="filter-btn" data-filter="4" onclick="setFilter('4')">🏡 Delivered (<span id="countDelivered">0</span>)</button>
+          <button type="button" class="filter-btn" data-filter="4" onclick="setFilter('4')" style="color: #047857; font-weight: 800; background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.4);">🏡 Delivered (<span id="countDelivered">0</span>)</button>
           <button type="button" class="filter-btn" data-filter="rejected" onclick="setFilter('rejected')" style="color: #dc2626;">✕ Rejected (<span id="countRejected">0</span>)</button>
         </div>
 
@@ -1116,7 +1116,7 @@
       <section>
         <div class="section-title-wrap">
           <div class="section-title">
-            <span>📋</span> Received Customer Orders List
+            <span id="ordersSectionIcon">📋</span> <span id="ordersSectionTitleText">Active Customer Orders List</span>
           </div>
           <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">
             Auto-syncing every 4 seconds • Updating status automatically alerts customers
@@ -1663,15 +1663,17 @@
       const totalBags = allOrders.reduce((sum, o) => sum + (o.totalBags || 1), 0);
 
       const isRejectedOrder = o => o.adminApproval === 'rejected' || o.currentStep === -1;
-      const isAcceptedOrder = o => o.adminApproval === 'accepted' || (o.currentStep && o.currentStep >= 2);
+      const isDeliveredOrder = o => (o.currentStep || 1) === 4;
+      const isAcceptedOrder = o => !isRejectedOrder(o) && (o.adminApproval === 'accepted' || (o.currentStep !== undefined && o.currentStep >= 1));
       const isPendingOrder = o => !isRejectedOrder(o) && !isAcceptedOrder(o);
 
       const pending = allOrders.filter(isPendingOrder).length;
-      const confirmed = allOrders.filter(o => isAcceptedOrder(o) && (o.currentStep || 1) === 1).length;
-      const milling = allOrders.filter(o => isAcceptedOrder(o) && (o.currentStep || 1) === 2).length;
-      const dispatched = allOrders.filter(o => isAcceptedOrder(o) && (o.currentStep || 1) === 3).length;
-      const delivered = allOrders.filter(o => isAcceptedOrder(o) && (o.currentStep || 1) === 4).length;
+      const confirmed = allOrders.filter(o => isAcceptedOrder(o) && !isDeliveredOrder(o) && (o.currentStep || 1) === 1).length;
+      const milling = allOrders.filter(o => isAcceptedOrder(o) && !isDeliveredOrder(o) && (o.currentStep || 1) === 2).length;
+      const dispatched = allOrders.filter(o => isAcceptedOrder(o) && !isDeliveredOrder(o) && (o.currentStep || 1) === 3).length;
+      const delivered = allOrders.filter(isDeliveredOrder).length;
       const rejected = allOrders.filter(isRejectedOrder).length;
+      const activeCount = allOrders.filter(o => !isRejectedOrder(o) && !isDeliveredOrder(o)).length;
 
       document.getElementById('kpiTotalOrders').textContent = totalOrders;
       document.getElementById('kpiTotalRevenue').textContent = '₹' + Math.round(totalRevenue).toLocaleString('en-IN');
@@ -1681,7 +1683,7 @@
       document.getElementById('kpiDispatched').textContent = dispatched;
       document.getElementById('kpiDelivered').textContent = delivered;
 
-      document.getElementById('countAll').textContent = totalOrders;
+      document.getElementById('countAll').textContent = activeCount;
       const countPendingEl = document.getElementById('countPending');
       if (countPendingEl) countPendingEl.textContent = pending;
       document.getElementById('countConfirmed').textContent = confirmed;
@@ -1717,19 +1719,52 @@
       let filtered = allOrders.filter(o => o && o.orderId && !deletedOrderIds.has(String(o.orderId).toLowerCase()));
 
       const isRej = o => o.adminApproval === 'rejected' || o.currentStep === -1;
-      const isAcc = o => o.adminApproval === 'accepted' || (o.currentStep && o.currentStep >= 2);
+      const isDelivered = o => (o.currentStep || 1) === 4;
+      const isAcc = o => !isRej(o) && (o.adminApproval === 'accepted' || (o.currentStep !== undefined && o.currentStep >= 1));
       const isPend = o => !isRej(o) && !isAcc(o);
 
-      // Filter by stage / status
-      if (currentFilter !== 'all') {
-        if (currentFilter === 'pending') {
-          filtered = filtered.filter(isPend);
+      // Dynamically update section title based on active filter
+      const titleIcon = document.getElementById('ordersSectionIcon');
+      const titleText = document.getElementById('ordersSectionTitleText');
+      if (titleText) {
+        if (currentFilter === '4') {
+          if (titleIcon) titleIcon.textContent = '🏡';
+          titleText.textContent = 'Delivered Farmgate Orders Archive';
+        } else if (currentFilter === 'pending') {
+          if (titleIcon) titleIcon.textContent = '⏳';
+          titleText.textContent = 'Orders Awaiting Mill Review & Acceptance';
         } else if (currentFilter === 'rejected') {
-          filtered = filtered.filter(isRej);
+          if (titleIcon) titleIcon.textContent = '✕';
+          titleText.textContent = 'Rejected Customer Orders Archive';
+        } else if (currentFilter === '1') {
+          if (titleIcon) titleIcon.textContent = '🌾';
+          titleText.textContent = 'Confirmed & Logged Orders';
+        } else if (currentFilter === '2') {
+          if (titleIcon) titleIcon.textContent = '⚙️';
+          titleText.textContent = 'Milling & Quality Screened Orders';
+        } else if (currentFilter === '3') {
+          if (titleIcon) titleIcon.textContent = '🚚';
+          titleText.textContent = 'Dispatched Freight Truck Orders';
         } else {
-          const targetStep = parseInt(currentFilter, 10);
-          filtered = filtered.filter(o => isAcc(o) && (o.currentStep || 1) === targetStep);
+          if (titleIcon) titleIcon.textContent = '📋';
+          titleText.textContent = 'Active Customer Orders (In Production & Transit)';
         }
+      }
+
+      // Filter by stage / status
+      if (currentFilter === 'all') {
+        // Active orders: pending or accepted (steps 1, 2, 3) - EXCLUDE delivered (step 4) and rejected
+        filtered = filtered.filter(o => !isDelivered(o) && !isRej(o));
+      } else if (currentFilter === 'pending') {
+        filtered = filtered.filter(isPend);
+      } else if (currentFilter === 'rejected') {
+        filtered = filtered.filter(isRej);
+      } else if (currentFilter === '4') {
+        // Dedicated Delivered Section
+        filtered = filtered.filter(isDelivered);
+      } else {
+        const targetStep = parseInt(currentFilter, 10);
+        filtered = filtered.filter(o => isAcc(o) && !isDelivered(o) && (o.currentStep || 1) === targetStep);
       }
 
       // Filter by search query
@@ -1743,6 +1778,22 @@
       }
 
       if (filtered.length === 0) {
+        if (currentFilter === '4') {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div style="font-size: 2.8rem; margin-bottom: 12px;">🏡</div>
+              <h3 style="font-size: 1.2rem; color: var(--text-main); margin-bottom: 6px;">No Delivered Orders Yet</h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 440px; margin: 0 auto 18px auto;">
+                Orders advanced to Step 4 (Delivered to Farm Gate) will automatically be archived here in this Delivered section.
+              </p>
+              <button type="button" class="btn btn-primary" onclick="setFilter('all');">
+                View Active Orders
+              </button>
+            </div>
+          `;
+          return;
+        }
+
         container.innerHTML = `
           <div class="empty-state">
             <div style="font-size: 2.8rem; margin-bottom: 12px;">📋</div>
@@ -1751,7 +1802,7 @@
               No customer orders found under this filter or search query.
             </p>
             <button type="button" class="btn btn-primary" onclick="setFilter('all'); document.getElementById('adminSearchInput').value=''; filterOrders();">
-              View All Orders
+              View Active Orders
             </button>
           </div>
         `;
@@ -1760,7 +1811,8 @@
 
       container.innerHTML = filtered.map(order => {
         const isRejected = order.adminApproval === 'rejected' || order.currentStep === -1;
-        const isAccepted = order.adminApproval === 'accepted' || (order.currentStep && order.currentStep >= 2);
+        const isDeliveredOrder = (order.currentStep || 1) === 4;
+        const isAccepted = !isRejected && (order.adminApproval === 'accepted' || (order.currentStep !== undefined && order.currentStep >= 1));
         const isPending = !isRejected && !isAccepted;
         const step = isPending ? 0 : (isRejected ? -1 : (order.currentStep || 1));
 
@@ -1839,8 +1891,8 @@
                 <button type="button" class="btn btn-sm" onclick="acceptAdminOrder('${order.orderId}')" style="background: #ffffff; color: #059669; border: 1.5px solid #059669; font-weight: 700; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.82rem;" title="Undo rejection and accept into milling queue">
                   <span>↩️</span> Re-open & Accept
                 </button>
-                <button type="button" class="btn btn-sm" onclick="deleteAdminOrder('${order.orderId}')" style="background: #dc2626; color: #ffffff; border: none; font-weight: 700; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.82rem;">
-                  <span>🗑️</span> Remove
+                <button type="button" class="btn btn-sm btn-light" style="color: #0f172a; padding: 6px 12px; font-size: 0.82rem;" onclick="printOrderInvoice('${order.orderId}')">
+                  <span>🖨️</span> Invoice
                 </button>
               </div>
             </div>
@@ -1865,9 +1917,6 @@
                 <button type="button" class="btn btn-sm btn-light" style="color: #0f172a;" onclick="printOrderInvoice('${order.orderId}')">
                   <span>🖨️</span> Print Invoice
                 </button>
-                <button type="button" class="btn btn-sm" onclick="promptRejectAdminOrder('${order.orderId}')" style="background: #fff; color: #dc2626; border: 1px solid #fca5a5; font-size: 0.78rem; padding: 6px 10px; border-radius: 6px; cursor: pointer;" title="Reject this order">
-                  <span>✕</span> Reject
-                </button>
               </div>
             </div>
           `;
@@ -1883,9 +1932,6 @@
               </div>
               <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 ${statusBadgeHtml}
-                <button type="button" class="btn-delete-badge" onclick="deleteAdminOrder('${order.orderId}')" title="Delete this order permanently">
-                  <span>🗑️</span> Delete
-                </button>
               </div>
             </div>
 
@@ -1946,6 +1992,20 @@
 
       localStorage.setItem('nutriagro_orders', JSON.stringify(allOrders));
 
+      // BroadcastChannel for instant cross-tab / cross-window sync
+      try {
+        if (typeof BroadcastChannel !== 'undefined') {
+          const ch = new BroadcastChannel('nutriagro_orders_channel');
+          ch.postMessage({
+            type: 'STATUS_UPDATED',
+            orderId: orderId,
+            currentStep: step,
+            status: match.status,
+            timestamp: Date.now()
+          });
+        }
+      } catch (bcErr) {}
+
       // 1. Direct Cloud Sync to Firebase Realtime Database
       try {
         fetch(`${FIREBASE_RTDB_ORDERS_URL}/${encodeURIComponent(orderId)}.json`, {
@@ -1973,7 +2033,11 @@
         });
       } catch (err) {}
 
-      showToast(`✅ Order #${orderId} status updated to: ${match.status}! Customer notified.`, 'success');
+      if (step === 4) {
+        showToast(`🏡 Order #${orderId} marked Delivered! Moved to Delivered Section.`, 'success');
+      } else {
+        showToast(`✅ Order #${orderId} status updated to: ${match.status}! Customer notified.`, 'success');
+      }
       renderDashboard();
     }
 
@@ -1987,6 +2051,21 @@
       match.lastUpdated = new Date().toISOString();
 
       localStorage.setItem('nutriagro_orders', JSON.stringify(allOrders));
+
+      // BroadcastChannel for instant cross-tab / cross-window sync
+      try {
+        if (typeof BroadcastChannel !== 'undefined') {
+          const ch = new BroadcastChannel('nutriagro_orders_channel');
+          ch.postMessage({
+            type: 'ORDER_ACCEPTED',
+            orderId: orderId,
+            adminApproval: 'accepted',
+            currentStep: 1,
+            status: match.status,
+            timestamp: Date.now()
+          });
+        }
+      } catch (bcErr) {}
 
       // 1. Direct Cloud Sync to Firebase Realtime Database
       try {
