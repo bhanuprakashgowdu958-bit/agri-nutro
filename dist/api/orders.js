@@ -218,13 +218,17 @@ module.exports = async function handler(req, res) {
       if (body.action === 'update_status' && body.orderId) {
         const match = orders.find(o => o.orderId && o.orderId.toLowerCase() === body.orderId.toLowerCase());
         const patch = {
-          currentStep: parseInt(body.currentStep, 10) || (match ? match.currentStep : 1),
+          currentStep: body.currentStep !== undefined ? parseInt(body.currentStep, 10) : (match ? match.currentStep : 1),
           status: body.status || (match ? match.status : 'Order Confirmed & Logged'),
+          adminApproval: body.adminApproval || (match ? match.adminApproval : 'accepted'),
+          rejectionReason: body.rejectionReason !== undefined ? body.rejectionReason : (match ? match.rejectionReason : ''),
           lastUpdated: new Date().toISOString()
         };
         if (match) {
           match.currentStep = patch.currentStep;
           match.status = patch.status;
+          match.adminApproval = patch.adminApproval;
+          match.rejectionReason = patch.rejectionReason;
           match.lastUpdated = patch.lastUpdated;
         }
         await patchFirebaseOrder(body.orderId, patch);

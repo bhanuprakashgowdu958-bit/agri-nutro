@@ -471,11 +471,13 @@ function handleCheckoutSubmit(e) {
       totalBags: window.cart ? window.cart.getTotalBags() : 1,
       totalWeightKg: window.cart ? window.cart.getTotalWeightKg() : 50,
       finalTotal: window.cart ? window.cart.getFinalTotal() : 0,
-      status: 'Order Confirmed & Logged',
-      eta: 'Tomorrow by 4:00 PM (Farmgate Arrival)',
+      status: 'Pending Admin Review',
+      adminApproval: 'pending',
+      rejectionReason: '',
+      eta: 'Pending Admin Review',
       driverName: 'Ramesh Singh (Agro Hauler #HR-05-AB-4821)',
       driverPhone: '+91 98123 45678',
-      currentStep: 1 // 1: Confirmed, 2: Milling, 3: Dispatched, 4: Delivered
+      currentStep: 0 // 0: Pending Review, 1: Confirmed & Logged, 2: Milling, 3: Dispatched, 4: Delivered
     };
 
     // Store in server and local store for permanent cross-device tracking
@@ -1302,16 +1304,25 @@ function renderOrdersListView(orders, searchQuery = '') {
     `;
   } else {
     ordersCardsHtml = filteredOrders.map(order => {
+      const isPending = order.adminApproval === 'pending' || order.currentStep === 0;
+      const isRejected = order.adminApproval === 'rejected' || order.currentStep === -1;
       const step = order.currentStep || 1;
-      const statusBadge = step === 1 
-        ? '<span style="background:rgba(59,130,246,0.15); color:#2563eb; border:1px solid rgba(59,130,246,0.3); padding:4px 10px; border-radius:14px; font-size:0.76rem; font-weight:700;">🌾 1. Order Confirmed</span>'
-        : (step === 2 
-          ? '<span style="background:rgba(245,158,11,0.15); color:#d97706; border:1px solid rgba(245,158,11,0.3); padding:4px 10px; border-radius:14px; font-size:0.76rem; font-weight:700;">⚙️ 2. Automated Milling</span>'
-          : (step === 3 
-            ? '<span style="background:rgba(16,185,129,0.15); color:#059669; border:1px solid rgba(16,185,129,0.3); padding:4px 10px; border-radius:14px; font-size:0.76rem; font-weight:700;">🚚 3. Truck Dispatched</span>'
-            : '<span style="background:rgba(16,185,129,0.25); color:#047857; border:1px solid rgba(16,185,129,0.4); padding:4px 10px; border-radius:14px; font-size:0.76rem; font-weight:800;">🏡 4. Delivered to Farm</span>'
-          )
-        );
+      let statusBadge = '';
+      if (isPending) {
+        statusBadge = '<span style="background:rgba(245,158,11,0.15); color:#d97706; border:1px solid rgba(245,158,11,0.35); padding:4px 10px; border-radius:14px; font-size:0.76rem; font-weight:800;">⏳ Awaiting Mill Acceptance</span>';
+      } else if (isRejected) {
+        statusBadge = '<span style="background:rgba(239,68,68,0.15); color:#dc2626; border:1px solid rgba(239,68,68,0.35); padding:4px 10px; border-radius:14px; font-size:0.76rem; font-weight:800;">✕ Order Rejected</span>';
+      } else {
+        statusBadge = step === 1 
+          ? '<span style="background:rgba(59,130,246,0.15); color:#2563eb; border:1px solid rgba(59,130,246,0.3); padding:4px 10px; border-radius:14px; font-size:0.76rem; font-weight:700;">🌾 1. Order Confirmed</span>'
+          : (step === 2 
+            ? '<span style="background:rgba(245,158,11,0.15); color:#d97706; border:1px solid rgba(245,158,11,0.3); padding:4px 10px; border-radius:14px; font-size:0.76rem; font-weight:700;">⚙️ 2. Automated Milling</span>'
+            : (step === 3 
+              ? '<span style="background:rgba(16,185,129,0.15); color:#059669; border:1px solid rgba(16,185,129,0.3); padding:4px 10px; border-radius:14px; font-size:0.76rem; font-weight:700;">🚚 3. Truck Dispatched</span>'
+              : '<span style="background:rgba(16,185,129,0.25); color:#047857; border:1px solid rgba(16,185,129,0.4); padding:4px 10px; border-radius:14px; font-size:0.76rem; font-weight:800;">🏡 4. Delivered to Farm</span>'
+            )
+          );
+      }
 
       let itemsSummary = '';
       if (order.items && order.items.length > 0) {
@@ -1509,15 +1520,21 @@ function renderOrderTrackingCard(order, allOrders) {
   const container = document.getElementById('orderTrackerResultContainer');
   if (!container) return;
 
-  const currentStep = order.currentStep || 2;
-  const statusColor = currentStep >= 3 ? '#10b981' : '#f59e0b';
-  const statusBadgeText = currentStep === 1 
-    ? '🌾 1. Order Confirmed' 
-    : (currentStep === 2 
-      ? '⚙️ 2. Automated Milling & QA Screen' 
-      : (currentStep === 3 
-        ? '🚚 3. Truck Dispatched' 
-        : '🏡 4. Delivered to Farm'));
+  const isPending = order.adminApproval === 'pending' || order.currentStep === 0;
+  const isRejected = order.adminApproval === 'rejected' || order.currentStep === -1;
+  const currentStep = isPending ? 0 : (isRejected ? -1 : (order.currentStep || 1));
+  const statusColor = isRejected ? '#dc2626' : (isPending ? '#d97706' : (currentStep >= 3 ? '#10b981' : '#f59e0b'));
+  const statusBadgeText = isPending
+    ? '⏳ Awaiting Mill Acceptance'
+    : (isRejected
+      ? '✕ Order Rejected'
+      : (currentStep === 1 
+        ? '🌾 1. Order Confirmed' 
+        : (currentStep === 2 
+          ? '⚙️ 2. Automated Milling & QA Screen' 
+          : (currentStep === 3 
+            ? '🚚 3. Truck Dispatched' 
+            : '🏡 4. Delivered to Farm'))));
 
   let itemsHtml = '';
   if (order.items && order.items.length > 0) {
@@ -1529,6 +1546,102 @@ function renderOrderTrackingCard(order, allOrders) {
     `).join('');
   } else {
     itemsHtml = `<div style="font-size:0.85rem; color:var(--color-dark-muted);">${order.totalBags || 1} Feed Bags (${order.totalWeightKg || 50} kg)</div>`;
+  }
+
+  let stepperHtml = '';
+  if (isRejected) {
+    stepperHtml = `
+      <div style="background: #fef2f2; border: 1.5px solid #fecaca; border-radius: var(--radius-md); padding: 18px; margin-bottom: 22px; color: #991b1b;">
+        <div style="display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 1rem; margin-bottom: 6px;">
+          <span>🚫</span> Order Cancelled / Rejected by Mill
+        </div>
+        <div style="font-size: 0.88rem; color: #b91c1c; margin-bottom: 8px;">
+          <strong>Reason:</strong> ${order.rejectionReason || 'Delivery could not be scheduled for this location or batch.'}
+        </div>
+        <div style="font-size: 0.8rem; color: #7f1d1d;">
+          If you have questions or wish to place a revised order, please contact our toll-free hotline: <a href="tel:18008904567" style="color: #991b1b; font-weight: 700; text-decoration: underline;">1800-890-4567</a>.
+        </div>
+      </div>
+    `;
+  } else if (isPending) {
+    stepperHtml = `
+      <div style="background: #fffbeb; border: 1.5px solid #fef3c7; border-radius: var(--radius-md); padding: 16px 18px; margin-bottom: 22px; color: #92400e;">
+        <div style="display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 0.95rem; margin-bottom: 4px;">
+          <span>⏳</span> Order Under Plant Review
+        </div>
+        <div style="font-size: 0.84rem; color: #b45309;">
+          Your order has been logged and queued for mill plant manager approval. Once verified for inventory and delivery logistics, milling begins immediately.
+        </div>
+      </div>
+      <div class="order-track-stepper-wrap" style="margin-bottom: 22px;">
+        <div class="order-track-stepper">
+          <div class="track-step active">
+            <div class="track-step-circle">⏳</div>
+            <div class="track-step-info">
+              <strong>1. Reviewing Order</strong>
+              <small>Pending Acceptance</small>
+            </div>
+          </div>
+          <div class="track-step">
+            <div class="track-step-circle">⚙️</div>
+            <div class="track-step-info">
+              <strong>2. Milling & Bagging</strong>
+              <small>Pellets in Production</small>
+            </div>
+          </div>
+          <div class="track-step">
+            <div class="track-step-circle">🚚</div>
+            <div class="track-step-info">
+              <strong>3. Truck Dispatched</strong>
+              <small>En Route to Farm</small>
+            </div>
+          </div>
+          <div class="track-step">
+            <div class="track-step-circle">🏡</div>
+            <div class="track-step-info">
+              <strong>4. Farm Arrival</strong>
+              <small>Unloaded at Barn</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  } else {
+    stepperHtml = `
+      <!-- 4-Stage Visual Progress Stepper -->
+      <div class="order-track-stepper-wrap" style="margin-bottom: 22px;">
+        <div class="order-track-stepper">
+          <div class="track-step completed">
+            <div class="track-step-circle">✓</div>
+            <div class="track-step-info">
+              <strong>1. Order Confirmed</strong>
+              <small>Accepted & Logged</small>
+            </div>
+          </div>
+          <div class="track-step ${currentStep >= 2 ? (currentStep === 2 ? 'active' : 'completed') : ''}">
+            <div class="track-step-circle">${currentStep > 2 ? '✓' : '⚙️'}</div>
+            <div class="track-step-info">
+              <strong>2. Milling & Bagging</strong>
+              <small>Pellets in Production</small>
+            </div>
+          </div>
+          <div class="track-step ${currentStep >= 3 ? (currentStep === 3 ? 'active' : 'completed') : ''}">
+            <div class="track-step-circle">${currentStep > 3 ? '✓' : '🚚'}</div>
+            <div class="track-step-info">
+              <strong>3. Truck Dispatched</strong>
+              <small>En Route to Farm</small>
+            </div>
+          </div>
+          <div class="track-step ${currentStep >= 4 ? 'completed' : ''}">
+            <div class="track-step-circle">🏡</div>
+            <div class="track-step-info">
+              <strong>4. Farm Arrival</strong>
+              <small>Unloaded at Barn</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   container.innerHTML = `
@@ -1558,44 +1671,7 @@ function renderOrderTrackingCard(order, allOrders) {
         </div>
       </div>
 
-      <!-- 4-Stage Visual Progress Stepper -->
-      <div class="order-track-stepper-wrap" style="margin-bottom: 22px;">
-        <div class="order-track-stepper">
-          
-          <div class="track-step completed">
-            <div class="track-step-circle">✓</div>
-            <div class="track-step-info">
-              <strong>1. Order Confirmed</strong>
-              <small>Logged & Verified</small>
-            </div>
-          </div>
-
-          <div class="track-step ${currentStep >= 2 ? (currentStep === 2 ? 'active' : 'completed') : ''}">
-            <div class="track-step-circle">${currentStep > 2 ? '✓' : '⚙️'}</div>
-            <div class="track-step-info">
-              <strong>2. Milling & Bagging</strong>
-              <small>Pellets in Production</small>
-            </div>
-          </div>
-
-          <div class="track-step ${currentStep >= 3 ? (currentStep === 3 ? 'active' : 'completed') : ''}">
-            <div class="track-step-circle">${currentStep > 3 ? '✓' : '🚚'}</div>
-            <div class="track-step-info">
-              <strong>3. Truck Dispatched</strong>
-              <small>En Route to Farm</small>
-            </div>
-          </div>
-
-          <div class="track-step ${currentStep >= 4 ? 'completed' : ''}">
-            <div class="track-step-circle">🏡</div>
-            <div class="track-step-info">
-              <strong>4. Farm Arrival</strong>
-              <small>Unloaded at Barn</small>
-            </div>
-          </div>
-
-        </div>
-      </div>
+      ${stepperHtml}
 
       <!-- Logistics Driver & Destination Box -->
       <div style="background: var(--color-gray-50); border: 1px solid var(--color-gray-200); border-radius: var(--radius-md); padding: 14px; margin-bottom: 18px;">
