@@ -784,13 +784,13 @@ async function updateOrderStatus(orderId, newStepVal) {
 
   match.currentStep = step;
   if (step === 1) {
-    match.status = 'Order Confirmed & Logged';
+    match.status = 'Order confirmed';
   } else if (step === 2) {
-    match.status = 'Automated Milling & Quality Screened';
+    match.status = 'Packing';
   } else if (step === 3) {
-    match.status = 'Dispatched on Agro Freight Truck';
+    match.status = 'Dispatch';
   } else if (step === 4) {
-    match.status = 'Delivered to Farm Gate';
+    match.status = 'Delivered';
   }
   match.lastUpdated = new Date().toISOString();
 
@@ -1065,7 +1065,7 @@ function checkCustomerOrderStatusChanges(allOrders) {
   } catch (e) {}
 
   const currentStep = match.currentStep !== undefined ? match.currentStep : (match.adminApproval === 'accepted' ? 1 : 0);
-  const currentStatus = match.status || (match.adminApproval === 'accepted' ? 'Order Confirmed & Logged' : 'Pending Admin Review');
+  const currentStatus = match.status || (match.adminApproval === 'accepted' ? 'Order confirmed' : 'Pending Admin Review');
   const currentApproval = match.adminApproval || (currentStep >= 1 ? 'accepted' : 'pending');
 
   if (prev) {
@@ -1384,12 +1384,12 @@ function renderOrdersListView(orders, searchQuery = '') {
         statusBadge = '<span style="background:rgba(239,68,68,0.15); color:#dc2626; border:1px solid rgba(239,68,68,0.35); padding:4px 10px; border-radius:14px; font-size:0.76rem; font-weight:800;">✕ Order Rejected</span>';
       } else {
         statusBadge = step === 1 
-          ? '<span style="background:rgba(59,130,246,0.15); color:#2563eb; border:1px solid rgba(59,130,246,0.3); padding:4px 10px; border-radius:14px; font-size:0.76rem; font-weight:700;">🌾 1. Order Confirmed</span>'
+          ? '<span style="background:rgba(59,130,246,0.15); color:#2563eb; border:1px solid rgba(59,130,246,0.3); padding:4px 10px; border-radius:14px; font-size:0.76rem; font-weight:700;">🌾 1. Order confirmed</span>'
           : (step === 2 
-            ? '<span style="background:rgba(245,158,11,0.15); color:#d97706; border:1px solid rgba(245,158,11,0.3); padding:4px 10px; border-radius:14px; font-size:0.76rem; font-weight:700;">⚙️ 2. Automated Milling</span>'
+            ? '<span style="background:rgba(245,158,11,0.15); color:#d97706; border:1px solid rgba(245,158,11,0.3); padding:4px 10px; border-radius:14px; font-size:0.76rem; font-weight:700;">📦 2. Packing</span>'
             : (step === 3 
-              ? '<span style="background:rgba(16,185,129,0.15); color:#059669; border:1px solid rgba(16,185,129,0.3); padding:4px 10px; border-radius:14px; font-size:0.76rem; font-weight:700;">🚚 3. Truck Dispatched</span>'
-              : '<span style="background:rgba(16,185,129,0.25); color:#047857; border:1px solid rgba(16,185,129,0.4); padding:4px 10px; border-radius:14px; font-size:0.76rem; font-weight:800;">🏡 4. Delivered to Farm</span>'
+              ? '<span style="background:rgba(16,185,129,0.15); color:#059669; border:1px solid rgba(16,185,129,0.3); padding:4px 10px; border-radius:14px; font-size:0.76rem; font-weight:700;">🚚 3. Dispatch</span>'
+              : '<span style="background:rgba(16,185,129,0.25); color:#047857; border:1px solid rgba(16,185,129,0.4); padding:4px 10px; border-radius:14px; font-size:0.76rem; font-weight:800;">🏡 4. Delivered</span>'
             )
           );
       }
@@ -1527,13 +1527,13 @@ function updateOrderStatus(orderId, newStepVal) {
 
   match.currentStep = step;
   if (step === 1) {
-    match.status = 'Order Confirmed & Logged';
+    match.status = 'Order confirmed';
   } else if (step === 2) {
-    match.status = 'Automated Milling & Quality Screened';
+    match.status = 'Packing';
   } else if (step === 3) {
-    match.status = 'Dispatched on Agro Freight Truck';
+    match.status = 'Dispatch';
   } else if (step === 4) {
-    match.status = 'Delivered to Farm Gate';
+    match.status = 'Delivered';
   }
 
   localStorage.setItem('nutriagro_orders', JSON.stringify(orders));
@@ -1600,12 +1600,12 @@ function renderOrderTrackingCard(order, allOrders) {
     : (isRejected
       ? '✕ Order Rejected'
       : (currentStep === 1 
-        ? '🌾 1. Order Confirmed' 
+        ? '🌾 1. Order confirmed' 
         : (currentStep === 2 
-          ? '⚙️ 2. Automated Milling & QA Screen' 
+          ? '📦 2. Packing' 
           : (currentStep === 3 
-            ? '🚚 3. Truck Dispatched' 
-            : '🏡 4. Delivered to Farm'))));
+            ? '🚚 3. Dispatch' 
+            : '🏡 4. Delivered'))));
 
   let itemsHtml = '';
   if (order.items && order.items.length > 0) {
@@ -1650,28 +1650,24 @@ function renderOrderTrackingCard(order, allOrders) {
             <div class="track-step-circle">⏳</div>
             <div class="track-step-info">
               <strong>1. Reviewing Order</strong>
-              <small>Pending Acceptance</small>
             </div>
           </div>
           <div class="track-step">
-            <div class="track-step-circle">⚙️</div>
+            <div class="track-step-circle">📦</div>
             <div class="track-step-info">
-              <strong>2. Milling & Bagging</strong>
-              <small>Pellets in Production</small>
+              <strong>2. Packing</strong>
             </div>
           </div>
           <div class="track-step">
             <div class="track-step-circle">🚚</div>
             <div class="track-step-info">
-              <strong>3. Truck Dispatched</strong>
-              <small>En Route to Farm</small>
+              <strong>3. Dispatch</strong>
             </div>
           </div>
           <div class="track-step">
             <div class="track-step-circle">🏡</div>
             <div class="track-step-info">
-              <strong>4. Farm Arrival</strong>
-              <small>Unloaded at Barn</small>
+              <strong>4. Delivered</strong>
             </div>
           </div>
         </div>
@@ -1683,7 +1679,7 @@ function renderOrderTrackingCard(order, allOrders) {
         <span style="font-size: 1.3rem;">🎉</span>
         <div>
           <div style="font-weight: 800; font-size: 0.92rem; color: #047857;">Order Accepted by Mill & Confirmed</div>
-          <div style="font-size: 0.8rem; color: #065f46;">Your livestock feed batch has been approved and entered the automated milling queue.</div>
+          <div style="font-size: 0.8rem; color: #065f46;">Your livestock feed batch has been approved and entered the production queue.</div>
         </div>
       </div>
       <!-- 4-Stage Visual Progress Stepper -->
@@ -1692,29 +1688,25 @@ function renderOrderTrackingCard(order, allOrders) {
           <div class="track-step completed">
             <div class="track-step-circle">✓</div>
             <div class="track-step-info">
-              <strong>1. Order Confirmed</strong>
-              <small>Accepted & Logged</small>
+              <strong>1. Order confirmed</strong>
             </div>
           </div>
           <div class="track-step ${currentStep >= 2 ? (currentStep === 2 ? 'active' : 'completed') : ''}">
-            <div class="track-step-circle">${currentStep > 2 ? '✓' : '⚙️'}</div>
+            <div class="track-step-circle">${currentStep > 2 ? '✓' : '📦'}</div>
             <div class="track-step-info">
-              <strong>2. Milling & Bagging</strong>
-              <small>Pellets in Production</small>
+              <strong>2. Packing</strong>
             </div>
           </div>
           <div class="track-step ${currentStep >= 3 ? (currentStep === 3 ? 'active' : 'completed') : ''}">
             <div class="track-step-circle">${currentStep > 3 ? '✓' : '🚚'}</div>
             <div class="track-step-info">
-              <strong>3. Truck Dispatched</strong>
-              <small>En Route to Farm</small>
+              <strong>3. Dispatch</strong>
             </div>
           </div>
           <div class="track-step ${currentStep >= 4 ? 'completed' : ''}">
-            <div class="track-step-circle">🏡</div>
+            <div class="track-step-circle">${currentStep >= 4 ? '✓' : '🏡'}</div>
             <div class="track-step-info">
-              <strong>4. Farm Arrival</strong>
-              <small>Unloaded at Barn</small>
+              <strong>4. Delivered</strong>
             </div>
           </div>
         </div>

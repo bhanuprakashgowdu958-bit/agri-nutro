@@ -139,7 +139,7 @@ function loadLocalOrders() {
       totalBags: 1,
       totalWeightKg: 50,
       finalTotal: 2500,
-      status: "Order Confirmed & Logged",
+      status: "Order confirmed",
       eta: "Tomorrow by 4:00 PM (Farmgate Arrival)",
       driverName: "Ramesh Singh (Agro Hauler #HR-05-AB-4821)",
       driverPhone: "+91 98123 45678",
@@ -165,7 +165,7 @@ function loadLocalOrders() {
       totalBags: 4,
       totalWeightKg: 200,
       finalTotal: 7400,
-      status: "Automated Milling & Quality Screened",
+      status: "Packing",
       eta: "Tomorrow by 4:00 PM (Farmgate Arrival)",
       driverName: "Ramesh Singh (Agro Hauler #HR-05-AB-4821)",
       driverPhone: "+91 98123 45678",
@@ -219,7 +219,7 @@ module.exports = async function handler(req, res) {
         const match = orders.find(o => o.orderId && o.orderId.toLowerCase() === body.orderId.toLowerCase());
         const patch = {
           currentStep: body.currentStep !== undefined ? parseInt(body.currentStep, 10) : (match ? match.currentStep : 1),
-          status: body.status || (match ? match.status : 'Order Confirmed & Logged'),
+          status: body.status || (match ? match.status : 'Order confirmed'),
           adminApproval: body.adminApproval || (match ? match.adminApproval : 'accepted'),
           rejectionReason: body.rejectionReason !== undefined ? body.rejectionReason : (match ? match.rejectionReason : ''),
           lastUpdated: new Date().toISOString()
