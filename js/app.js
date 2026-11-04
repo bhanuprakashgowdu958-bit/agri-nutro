@@ -696,10 +696,42 @@ function signOutUser() {
   openAccountChooserModal();
 }
 
+function openMobileNavDrawer() {
+  const drawer = document.getElementById('mobileNavDrawer');
+  const overlay = document.getElementById('mobileDrawerOverlay');
+  if (drawer && overlay) {
+    drawer.classList.add('active');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeMobileNavDrawer() {
+  const drawer = document.getElementById('mobileNavDrawer');
+  const overlay = document.getElementById('mobileDrawerOverlay');
+  if (drawer && overlay) {
+    drawer.classList.remove('active');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+}
+
+// Close drawer on Escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeMobileNavDrawer();
+  }
+});
+
 function handleHeaderAccountClick(e) {
   if (e) {
     e.preventDefault();
     e.stopPropagation();
+  }
+  // On mobile devices (<= 860px), open the mobile navigation drawer instead of desktop dropdown
+  if (window.innerWidth <= 860) {
+    openMobileNavDrawer();
+    return;
   }
   try {
     const user = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
@@ -753,6 +785,9 @@ function updateHeaderUserStatus() {
   const avatarBadge = document.getElementById('headerUserAvatarBadge');
   const nameEl = document.getElementById('userDropdownName');
   const emailEl = document.getElementById('userDropdownEmail');
+  const drawerUserInfo = document.getElementById('mobileDrawerUserInfo');
+  const drawerAccountSection = document.getElementById('mobileDrawerAccountSection');
+  const drawerAuthSection = document.getElementById('mobileDrawerAuthSection');
 
   if (!accountBtn || !accountLabel) return;
   try {
@@ -779,6 +814,34 @@ function updateHeaderUserStatus() {
       }
       if (nameEl) nameEl.textContent = user.fullName;
       if (emailEl) emailEl.textContent = user.email || 'Google User';
+
+      if (drawerUserInfo) {
+        const avatarHtml = user.picture
+          ? `<img src="${user.picture}" alt="${firstName}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #124d32; flex-shrink: 0;" />`
+          : `<div style="width: 44px; height: 44px; border-radius: 50%; background: #124d32; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem; flex-shrink: 0;">${initial}</div>`;
+
+        drawerUserInfo.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 12px;">
+            ${avatarHtml}
+            <div style="min-width: 0; flex: 1;">
+              <div style="font-weight: 800; font-size: 0.96rem; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${user.fullName}</div>
+              <div style="font-size: 0.78rem; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${user.email || 'Verified Account'}</div>
+              <span style="display: inline-block; font-size: 0.68rem; font-weight: 700; color: #059669; background: rgba(5,150,105,0.1); padding: 1px 6px; border-radius: 4px; margin-top: 3px;">✓ Verified Member (10% Rebate)</span>
+            </div>
+          </div>
+        `;
+      }
+      if (drawerAccountSection) {
+        drawerAccountSection.style.display = 'block';
+      }
+      if (drawerAuthSection) {
+        drawerAuthSection.innerHTML = `
+          <button type="button" class="mobile-drawer-item" style="color: #dc2626;" onclick="signOutUser(); closeMobileNavDrawer();">
+            <span class="drawer-item-icon">🚪</span>
+            <span class="drawer-item-text">Sign Out</span>
+          </button>
+        `;
+      }
     } else {
       accountLabel.textContent = 'Sign In';
       accountBtn.title = 'Sign In with Google';
@@ -789,6 +852,30 @@ function updateHeaderUserStatus() {
       if (avatarBadge) avatarBadge.style.display = 'none';
       if (nameEl) nameEl.textContent = 'Guest Visitor';
       if (emailEl) emailEl.textContent = 'Not signed in';
+
+      if (drawerUserInfo) {
+        drawerUserInfo.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: #f1f5f9; color: #64748b; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; border: 1.5px solid #cbd5e1;">👤</div>
+            <div style="min-width: 0; flex: 1;">
+              <div style="font-weight: 800; font-size: 0.96rem; color: #1e293b;">Guest Farmer</div>
+              <div style="font-size: 0.78rem; color: #64748b;">Sign in for farm discounts & tracking</div>
+            </div>
+          </div>
+        `;
+      }
+      if (drawerAccountSection) {
+        drawerAccountSection.style.display = 'none';
+      }
+      if (drawerAuthSection) {
+        drawerAuthSection.innerHTML = `
+          <button type="button" class="mobile-drawer-item" style="color: var(--color-primary); font-weight: 700;" onclick="closeMobileNavDrawer(); handleHeaderAccountClick();">
+            <span class="drawer-item-icon">🔑</span>
+            <span class="drawer-item-text">Sign In / Register</span>
+            <span class="drawer-item-arrow">›</span>
+          </button>
+        `;
+      }
     }
 
     if (typeof updateAllOrderBadges === 'function') {

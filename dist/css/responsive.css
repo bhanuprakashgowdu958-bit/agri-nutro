@@ -123,18 +123,31 @@ html, body {
     display: none !important;
   }
 
+  /* Suppress desktop floating dropdown on mobile - mobile slide-out drawer used instead */
+  .user-menu-dropdown {
+    display: none !important;
+  }
+
   .mobile-menu-btn {
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
     background: #f1f6f3;
-    border: 1px solid var(--color-gray-300);
-    border-radius: var(--radius-sm);
-    padding: 8px 10px;
+    border: 1.5px solid rgba(18, 77, 50, 0.22);
+    border-radius: 10px;
+    padding: 0;
     cursor: pointer;
     color: var(--color-primary-dark);
     height: 38px;
     width: 38px;
+    min-width: 38px;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-menu-btn:active {
+    background: rgba(18, 77, 50, 0.15);
+    transform: scale(0.95);
   }
 
   /* Compact Mobile Header Actions - Prevents Name & Brand Overlapping */

@@ -646,6 +646,12 @@ function updateAllOrderBadges(count) {
     navBadge.textContent = c;
     navBadge.style.display = c > 0 ? 'inline-block' : 'none';
   }
+
+  const drawerBadge = document.getElementById('mobileDrawerOrdersCountBadge');
+  if (drawerBadge) {
+    drawerBadge.textContent = c;
+    drawerBadge.style.display = c > 0 ? 'inline-block' : 'none';
+  }
 }
 
 const FIREBASE_RTDB_ORDERS_URL = 'https://nutriagro-feeds-default-rtdb.firebaseio.com/orders';
