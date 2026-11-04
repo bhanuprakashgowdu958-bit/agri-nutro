@@ -48,9 +48,8 @@ html, body {
     margin: 0 auto;
   }
 
-  .calculator-wrapper {
-    grid-template-columns: 1fr;
-    padding: 28px 20px;
+  .animal-showcase-wrap {
+    padding: 0 10px;
   }
 
   .quality-grid {
@@ -677,7 +676,7 @@ html, body {
 
   /* Smooth mobile backgrounds */
   #productsSection,
-  .calculator-section,
+  .animal-showcase-section,
   #testimonialsSection {
     background-attachment: scroll !important;
   }

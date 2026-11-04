@@ -264,7 +264,7 @@
       <div class="top-bar-right">
         <span>📞 Farm Advisory Hotline: <a href="tel:18008904567" style="color:#fff; text-decoration:underline;"><strong>1800-890-4567 (Toll-Free India)</strong></a></span>
         <span>•</span>
-        <a href="#calculatorSection">Herd Ration Calculator</a>
+        <a href="#animalShowcaseSection">3D Animals Showcase</a>
       </div>
     </div>
   </aside>
@@ -427,9 +427,9 @@
           <span class="drawer-item-text">Feed Catalog</span>
           <span class="drawer-item-arrow">›</span>
         </a>
-        <a href="#calculatorSection" class="mobile-drawer-item" onclick="navigateMobileDrawer('calculatorSection', event)">
-          <span class="drawer-item-icon">📱</span>
-          <span class="drawer-item-text">Ration Calculator</span>
+        <a href="#animalShowcaseSection" class="mobile-drawer-item" onclick="navigateMobileDrawer('animalShowcaseSection', event)">
+          <span class="drawer-item-icon">🐄</span>
+          <span class="drawer-item-text">3D Animals Showcase</span>
           <span class="drawer-item-arrow">›</span>
         </a>
         <a href="#tonnageSection" class="mobile-drawer-item" onclick="navigateMobileDrawer('tonnageSection', event)">
@@ -511,9 +511,9 @@
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
               <span>Explore Feed Catalog</span>
             </a>
-            <a href="#calculatorSection" class="btn btn-secondary" id="heroCalcBtn">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
-              <span>Calculate Herd Ration</span>
+            <a href="#animalShowcaseSection" class="btn btn-secondary" id="heroAnimalBtn">
+              <span style="font-size: 1.15rem;">🐄</span>
+              <span>3D Animals Showcase</span>
             </a>
           </div>
 
@@ -754,103 +754,339 @@
       </div>
     </section>
 
-    <!-- 6. Interactive Herd Feed Ration Calculator Section -->
-    <section class="section-spacer calculator-section" id="calculatorSection">
+    <!-- 6. 3D Animal Nutrition & Livestock Showcase Carousel -->
+    <section class="section-spacer animal-showcase-section" id="animalShowcaseSection">
       <div class="container">
         
         <header class="section-header">
-          <span class="section-tag">Interactive Agritech Tool</span>
-          <h2 class="section-title">Herd Feed Requirement & Ration Calculator</h2>
+          <span class="section-tag">Species-Specific Nutrition</span>
+          <h2 class="section-title">Formulated for Peak Animal Vitality & Productivity</h2>
           <p class="section-subtitle">
-            Eliminate guesswork. Input your animal species, herd/flock count, and target duration to get exact tonnage, bag counts, estimated cost, and direct ordering.
+            Scientifically balanced diets engineered to accelerate growth, maximize daily milk yield, optimize FCR conversion, and fortify natural immunity across all commercial farm animals.
           </p>
         </header>
 
-        <div class="calculator-wrapper">
-          
-          <!-- Left Inputs Column -->
-          <div class="calc-inputs-column">
-            <h3>Configure Your Herd / Flock Parameters</h3>
-            <p>Our agronomists calibrated these ratios based on NRC (National Research Council) livestock nutrient requirements.</p>
+        <!-- 3D Animal Carousel Wrap -->
+        <div class="animal-showcase-wrap">
 
-            <div class="calc-form-group">
-              <label for="calcSpecies" class="calc-form-label">Livestock Category & Production Goal</label>
-              <select id="calcSpecies" class="calc-select" aria-label="Select Species"></select>
-            </div>
-
-            <div class="calc-form-group">
-              <div class="calc-form-label">
-                <span>Herd / Flock Size</span>
-                <span><strong id="calcAnimalCountVal"></strong> <span id="calcUnitLabel">animals</span></span>
-              </div>
-              <input type="number" id="calcAnimalCount" class="calc-input" value="25" min="1" max="10000" />
-              <input type="range" id="calcSliderCount" class="calc-slider" value="25" min="1" max="200" step="1" />
-            </div>
-
-            <div class="calc-form-group">
-              <label for="calcDuration" class="calc-form-label">Feeding Period Duration</label>
-              <select id="calcDuration" class="calc-select" aria-label="Select Duration">
-                <option value="7">7 Days (Weekly Ration)</option>
-                <option value="14">14 Days (Bi-Weekly Batch)</option>
-                <option value="30" selected>30 Days (Full Month Supply)</option>
-                <option value="60">60 Days (Seasonal Strategic Reserve)</option>
-              </select>
-            </div>
-
-            <div style="background: var(--color-gray-100); border-radius: var(--radius-md); padding: 14px; font-size: 0.85rem; color: var(--color-dark-muted);">
-              💡 <strong>Pro Tip:</strong> Orders of 10+ bags automatically receive a 5% discount, 25+ bags receive 10%, and 50+ bags receive 15% plus free farm delivery!
-            </div>
-          </div>
-
-          <!-- Right Output Column -->
-          <div class="calc-output-column">
-            <div>
-              <div class="calc-output-header">
-                <h4>Calculated Nutrition Requirement</h4>
-                <p style="font-size: 0.82rem; color: #cadbd2; margin: 0;">Calibrated for optimal health & maximum conversion</p>
-              </div>
-
-              <div class="calc-metrics-grid">
-                <div class="calc-metric-card">
-                  <div class="calc-metric-title">Total Feed Volume</div>
-                  <div class="calc-metric-val" id="calcTotalKg">6,375 kg</div>
-                </div>
-                <div class="calc-metric-card">
-                  <div class="calc-metric-title">Standard Bags (50kg)</div>
-                  <div class="calc-metric-val" id="calcTotalBags">128 Bags</div>
-                </div>
-              </div>
-
-              <div style="margin-bottom: 16px; font-size: 0.85rem; color: #d8f5ee;">
-                Daily Allocation: <strong id="calcDailyIntake">8.5 kg/day per cow</strong>
-              </div>
-
-              <!-- Recommended Product Box -->
-              <div class="calc-rec-product-box">
-                <img src="assets/images/cattle-feed.jpg" alt="Recommended Feed" class="calc-rec-img" id="calcRecProductImg" />
-                <div class="calc-rec-info">
-                  <span id="calcRecFcrBadge">Recommended Formulation</span>
-                  <h5 id="calcRecProductName">NutriBov LactaMax™ High-Yield Dairy Feed</h5>
-                  <span id="calcRecProductProtein">22% Crude Protein</span>
-                  <div style="font-weight: 700; color: #fff; margin-top: 4px;" id="calcRecProductPrice">₹1,850 / 50kg bag</div>
-                </div>
-              </div>
-
-              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 20px; padding: 12px; background: rgba(255,255,255,0.08); border-radius: var(--radius-sm);">
-                <span style="font-size: 0.85rem; color: #cadbd2;">Estimated Total Cost:</span>
-                <div id="calcEstimatedCost" style="font-size: 1.35rem; color: #ffcb65; text-align: right;">
-                  <strong>₹0</strong>
-                </div>
-              </div>
-            </div>
-
-            <button type="button" class="btn-calc-add" id="calcAddRationBtn">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
-              <span>Add Calculated Ration to Order Cart</span>
+          <!-- Species Quick Selector Pills -->
+          <div class="animal-nav-pills" id="animalNavPills">
+            <button type="button" class="animal-pill-btn active" data-index="0" onclick="switchAnimalSlide(0)">
+              <span class="pill-emoji">🐄</span>
+              <span>Dairy Cattle</span>
+            </button>
+            <button type="button" class="animal-pill-btn" data-index="1" onclick="switchAnimalSlide(1)">
+              <span class="pill-emoji">🐓</span>
+              <span>Poultry & Broiler</span>
+            </button>
+            <button type="button" class="animal-pill-btn" data-index="2" onclick="switchAnimalSlide(2)">
+              <span class="pill-emoji">🐐</span>
+              <span>Goats & Sheep</span>
+            </button>
+            <button type="button" class="animal-pill-btn" data-index="3" onclick="switchAnimalSlide(3)">
+              <span class="pill-emoji">🐟</span>
+              <span>Aquaculture & Fish</span>
+            </button>
+            <button type="button" class="animal-pill-btn" data-index="4" onclick="switchAnimalSlide(4)">
+              <span class="pill-emoji">🐖</span>
+              <span>Swine & Pigs</span>
             </button>
           </div>
 
-        </div>
+          <!-- Carousel Stage & Viewport -->
+          <div class="animal-carousel-stage" id="animalCarouselStage">
+            
+            <!-- Slide Track -->
+            <div class="animal-carousel-track" id="animalCarouselTrack">
+              
+              <!-- SLIDE 1: Dairy Cattle -->
+              <div class="animal-slide active" data-index="0">
+                <div class="animal-3d-card">
+                  <div class="animal-card-visual">
+                    <img src="assets/images/banner-3d-cattle.jpg" alt="3D Dairy Cattle & Calves" class="animal-banner-img" loading="lazy" />
+                    <div class="animal-visual-gradient"></div>
+                    <div class="floating-stat-badge stat-top-left">
+                      <span class="stat-badge-icon">🥛</span>
+                      <div>
+                        <strong>+2.5 to 3.0 Litres / Day</strong>
+                        <small>Average Milk Yield Surge</small>
+                      </div>
+                    </div>
+                    <div class="floating-stat-badge stat-bottom-right">
+                      <span class="stat-badge-icon">🌾</span>
+                      <div>
+                        <strong>22% Bypass Protein</strong>
+                        <small>Rumen-Protected Nutrition</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="animal-card-info">
+                    <div class="animal-badge-pill">Ruminant & Dairy Nutrition</div>
+                    <h3 class="animal-headline">High-Yield Dairy Cattle & Calves</h3>
+                    <p class="animal-description">
+                      Fortified with rumen-protected bypass fats, chelated zinc, bio-available calcium, and live Saccharomyces yeast cultures. Stimulates peak lactation curves while guarding against milk fever, ketosis, and post-calving energy deficits.
+                    </p>
+                    <div class="animal-kpi-row">
+                      <div class="kpi-mini-box">
+                        <span class="kpi-mini-label">Feed Conversion</span>
+                        <strong class="kpi-mini-val">1.8 : 1 Ratio</strong>
+                      </div>
+                      <div class="kpi-mini-box">
+                        <span class="kpi-mini-label">Digestibility</span>
+                        <strong class="kpi-mini-val">88.4% Screened</strong>
+                      </div>
+                      <div class="kpi-mini-box">
+                        <span class="kpi-mini-label">Target Breeds</span>
+                        <strong class="kpi-mini-val">Holstein & Jersey</strong>
+                      </div>
+                    </div>
+                    <div class="animal-card-footer-btns">
+                      <button type="button" class="btn btn-gold" onclick="filterFromHero('cattle'); document.getElementById('productsSection').scrollIntoView({behavior:'smooth'});">
+                        <span>Shop Dairy Cattle Feeds</span>
+                        <span>→</span>
+                      </button>
+                      <a href="tel:18008904567" class="btn btn-secondary">
+                        <span>📞 Consult Agronomist</span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SLIDE 2: Poultry & Broilers -->
+              <div class="animal-slide" data-index="1">
+                <div class="animal-3d-card">
+                  <div class="animal-card-visual">
+                    <img src="assets/images/banner-3d-poultry.jpg" alt="3D Poultry & Broilers" class="animal-banner-img" loading="lazy" />
+                    <div class="animal-visual-gradient"></div>
+                    <div class="floating-stat-badge stat-top-left">
+                      <span class="stat-badge-icon">⚡</span>
+                      <div>
+                        <strong>1.45 Feed Ratio (FCR)</strong>
+                        <small>High Muscle Deposition</small>
+                      </div>
+                    </div>
+                    <div class="floating-stat-badge stat-bottom-right">
+                      <span class="stat-badge-icon">🍗</span>
+                      <div>
+                        <strong>35-Day Target Weight</strong>
+                        <small>2.2+ kg Broiler Harvest</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="animal-card-info">
+                    <div class="animal-badge-pill" style="color: #f59e0b; background: rgba(245, 158, 11, 0.15);">Poultry & Avian Performance</div>
+                    <h3 class="animal-headline">Commercial Poultry, Broilers & Layers</h3>
+                    <p class="animal-description">
+                      Formulated with digestible amino acids (lysine and methionine), coccidiosis natural barriers, and organic selenium. Maximizes broiler breast meat yield, promotes vibrant yellow shanks, and strengthens layer eggshell calcification.
+                    </p>
+                    <div class="animal-kpi-row">
+                      <div class="kpi-mini-box">
+                        <span class="kpi-mini-label">Feed Conversion</span>
+                        <strong class="kpi-mini-val">1.45 : 1 FCR</strong>
+                      </div>
+                      <div class="kpi-mini-box">
+                        <span class="kpi-mini-label">Crude Protein</span>
+                        <strong class="kpi-mini-val">21% Starter / 19% Finisher</strong>
+                      </div>
+                      <div class="kpi-mini-box">
+                        <span class="kpi-mini-label">Target Flocks</span>
+                        <strong class="kpi-mini-val">Broilers, BV-300 & Layers</strong>
+                      </div>
+                    </div>
+                    <div class="animal-card-footer-btns">
+                      <button type="button" class="btn btn-gold" onclick="filterFromHero('poultry'); document.getElementById('productsSection').scrollIntoView({behavior:'smooth'});">
+                        <span>Shop Poultry Feeds</span>
+                        <span>→</span>
+                      </button>
+                      <a href="tel:18008904567" class="btn btn-secondary">
+                        <span>📞 Consult Agronomist</span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SLIDE 3: Goats & Sheep -->
+              <div class="animal-slide" data-index="2">
+                <div class="animal-3d-card">
+                  <div class="animal-card-visual">
+                    <img src="assets/images/banner-3d-goat.jpg" alt="3D Goats & Sheep" class="animal-banner-img" loading="lazy" />
+                    <div class="animal-visual-gradient"></div>
+                    <div class="floating-stat-badge stat-top-left">
+                      <span class="stat-badge-icon">🐐</span>
+                      <div>
+                        <strong>+32% Daily Weight Gain</strong>
+                        <small>Meat Goat Pellets</small>
+                      </div>
+                    </div>
+                    <div class="floating-stat-badge stat-bottom-right">
+                      <span class="stat-badge-icon">🛡️</span>
+                      <div>
+                        <strong>Zero Acidosis Risk</strong>
+                        <small>Buffered Fiber Complex</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="animal-card-info">
+                    <div class="animal-badge-pill" style="color: #10b981; background: rgba(16, 185, 129, 0.15);">Caprine & Ovine Nutrition</div>
+                    <h3 class="animal-headline">Boer Goats, Dairy Does & Sheep</h3>
+                    <p class="animal-description">
+                      Precision small-ruminant ration combining steam-cracked grains, protected sulfur, and balanced calcium-to-phosphorus ratios to prevent urinary calculi. Promotes strong kid survival rates, healthy fleece quality, and rapid frame development.
+                    </p>
+                    <div class="animal-kpi-row">
+                      <div class="kpi-mini-box">
+                        <span class="kpi-mini-label">Daily Gain</span>
+                        <strong class="kpi-mini-val">180 - 220 g/day</strong>
+                      </div>
+                      <div class="kpi-mini-box">
+                        <span class="kpi-mini-label">Energy Density</span>
+                        <strong class="kpi-mini-val">2.8 Mcal/kg ME</strong>
+                      </div>
+                      <div class="kpi-mini-box">
+                        <span class="kpi-mini-label">Target Breeds</span>
+                        <strong class="kpi-mini-val">Boer, Sirohi, Barbari & Nellore</strong>
+                      </div>
+                    </div>
+                    <div class="animal-card-footer-btns">
+                      <button type="button" class="btn btn-gold" onclick="filterFromHero('goat'); document.getElementById('productsSection').scrollIntoView({behavior:'smooth'});">
+                        <span>Shop Goat & Sheep Feeds</span>
+                        <span>→</span>
+                      </button>
+                      <a href="tel:18008904567" class="btn btn-secondary">
+                        <span>📞 Consult Agronomist</span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SLIDE 4: Aquaculture & Fish -->
+              <div class="animal-slide" data-index="3">
+                <div class="animal-3d-card">
+                  <div class="animal-card-visual">
+                    <img src="assets/images/banner-3d-aqua.jpg" alt="3D Aquaculture & Fish" class="animal-banner-img" loading="lazy" />
+                    <div class="animal-visual-gradient"></div>
+                    <div class="floating-stat-badge stat-top-left">
+                      <span class="stat-badge-icon">🌊</span>
+                      <div>
+                        <strong>98% Water Stability</strong>
+                        <small>Extruded Floating Pellets</small>
+                      </div>
+                    </div>
+                    <div class="floating-stat-badge stat-bottom-right">
+                      <span class="stat-badge-icon">🐟</span>
+                      <div>
+                        <strong>32% Marine Protein</strong>
+                        <small>Omega-3 & Carotenoid Rich</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="animal-card-info">
+                    <div class="animal-badge-pill" style="color: #06b6d4; background: rgba(6, 182, 212, 0.15);">Freshwater & Marine Aquaculture</div>
+                    <h3 class="animal-headline">Aquaculture, Tilapia, Carp & Shrimp</h3>
+                    <p class="animal-description">
+                      High-buoyancy extruded micro-pellets engineered to resist water disintegration for over 2 hours, preserving dissolved oxygen and water clarity. Packed with marine fishmeal, spirulina, and essential phospholipids for robust immunity.
+                    </p>
+                    <div class="animal-kpi-row">
+                      <div class="kpi-mini-box">
+                        <span class="kpi-mini-label">Buoyancy</span>
+                        <strong class="kpi-mini-val">100% Surface Float</strong>
+                      </div>
+                      <div class="kpi-mini-box">
+                        <span class="kpi-mini-label">FCR Ratio</span>
+                        <strong class="kpi-mini-val">1.25 : 1 Biomass</strong>
+                      </div>
+                      <div class="kpi-mini-box">
+                        <span class="kpi-mini-label">Target Species</span>
+                        <strong class="kpi-mini-val">Tilapia, Rohu, Catla & Pangasius</strong>
+                      </div>
+                    </div>
+                    <div class="animal-card-footer-btns">
+                      <button type="button" class="btn btn-gold" onclick="filterFromHero('aqua'); document.getElementById('productsSection').scrollIntoView({behavior:'smooth'});">
+                        <span>Shop Aquaculture Feeds</span>
+                        <span>→</span>
+                      </button>
+                      <a href="tel:18008904567" class="btn btn-secondary">
+                        <span>📞 Consult Agronomist</span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SLIDE 5: Swine & Pigs -->
+              <div class="animal-slide" data-index="4">
+                <div class="animal-3d-card">
+                  <div class="animal-card-visual">
+                    <img src="assets/images/banner-3d-swine.jpg" alt="3D Swine & Pigs" class="animal-banner-img" loading="lazy" />
+                    <div class="animal-visual-gradient"></div>
+                    <div class="floating-stat-badge stat-top-left">
+                      <span class="stat-badge-icon">🐖</span>
+                      <div>
+                        <strong>Accelerated Lean Growth</strong>
+                        <small>Optimal Lysine Profile</small>
+                      </div>
+                    </div>
+                    <div class="floating-stat-badge stat-bottom-right">
+                      <span class="stat-badge-icon">🌱</span>
+                      <div>
+                        <strong>Probiotic Gut Shield</strong>
+                        <small>Zero Post-Weaning Scours</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="animal-card-info">
+                    <div class="animal-badge-pill" style="color: #ec4899; background: rgba(236, 72, 153, 0.15);">Porcine Nutrition & Swine Tech</div>
+                    <h3 class="animal-headline">Swine, Sows & Market Grower Pigs</h3>
+                    <p class="animal-description">
+                      Balanced digestible lysine to net energy formulation supporting maximum lean tissue growth without excess backfat. Enriched with gut acidifiers, phytase enzymes, and zinc oxide for optimal nutrient bioavailability and zero scour outbreaks.
+                    </p>
+                    <div class="animal-kpi-row">
+                      <div class="kpi-mini-box">
+                        <span class="kpi-mini-label">Finishing Weight</span>
+                        <strong class="kpi-mini-val">100 kg in 5.5 Months</strong>
+                      </div>
+                      <div class="kpi-mini-box">
+                        <span class="kpi-mini-label">Feed Conversion</span>
+                        <strong class="kpi-mini-val">2.3 : 1 Feed Efficiency</strong>
+                      </div>
+                      <div class="kpi-mini-box">
+                        <span class="kpi-mini-label">Target Breeds</span>
+                        <strong class="kpi-mini-val">Landrace, Large White & Duroc</strong>
+                      </div>
+                    </div>
+                    <div class="animal-card-footer-btns">
+                      <button type="button" class="btn btn-gold" onclick="filterFromHero('swine'); document.getElementById('productsSection').scrollIntoView({behavior:'smooth'});">
+                        <span>Shop Swine Feeds</span>
+                        <span>→</span>
+                      </button>
+                      <a href="tel:18008904567" class="btn btn-secondary">
+                        <span>📞 Consult Agronomist</span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div> <!-- /animal-carousel-track -->
+
+            <!-- Navigation Controls -->
+            <button type="button" class="animal-nav-arrow arrow-prev" onclick="prevAnimalSlide()" aria-label="Previous Slide">‹</button>
+            <button type="button" class="animal-nav-arrow arrow-next" onclick="nextAnimalSlide()" aria-label="Next Slide">›</button>
+
+            <!-- Slide Dots -->
+            <div class="animal-slider-dots" id="animalSliderDots">
+              <button type="button" class="slider-dot active" onclick="switchAnimalSlide(0)" aria-label="Slide 1"></button>
+              <button type="button" class="slider-dot" onclick="switchAnimalSlide(1)" aria-label="Slide 2"></button>
+              <button type="button" class="slider-dot" onclick="switchAnimalSlide(2)" aria-label="Slide 3"></button>
+              <button type="button" class="slider-dot" onclick="switchAnimalSlide(3)" aria-label="Slide 4"></button>
+              <button type="button" class="slider-dot" onclick="switchAnimalSlide(4)" aria-label="Slide 5"></button>
+            </div>
+
+          </div> <!-- /animal-carousel-stage -->
+
+        </div> <!-- /animal-showcase-wrap -->
 
       </div>
     </section>
@@ -1078,7 +1314,7 @@
         <div class="footer-col">
           <h4>Farmer Resources</h4>
           <ul class="footer-links">
-            <li><a href="#calculatorSection">Herd Ration Calculator</a></li>
+            <li><a href="#animalShowcaseSection">3D Animals Showcase</a></li>
             <li><a href="#qualitySection">Guaranteed Lab Analysis</a></li>
             <li><a href="#testimonialsSection">Farm Case Studies</a></li>
             <li><a href="#faqSection">Feed Transition Guide</a></li>
@@ -1740,11 +1976,11 @@
   <!-- Scripts -->
   <script src="js/data.js?v=2.3"></script>
   <script src="js/cart.js?v=2.3"></script>
-  <script src="js/calculator.js?v=2.3"></script>
   <script src="js/modal.js?v=2.3"></script>
   <script src="js/weather.js?v=2.3"></script>
   <script src="js/gemini.js?v=2.3"></script>
   <script src="js/hero-slider.js?v=2.3"></script>
+  <script src="js/animal-slider.js?v=2.3"></script>
   <script src="js/app.js?v=2.3"></script>
 
 </body>
