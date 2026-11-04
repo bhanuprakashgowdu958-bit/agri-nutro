@@ -696,13 +696,22 @@ function signOutUser() {
   openAccountChooserModal();
 }
 
+let _mobileDrawerScrollY = 0;
+
 function openMobileNavDrawer() {
   const drawer = document.getElementById('mobileNavDrawer');
   const overlay = document.getElementById('mobileDrawerOverlay');
   if (drawer && overlay) {
+    // Record current scroll position before locking
+    _mobileDrawerScrollY = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+
+    // Apply fixed lock to body & html to prevent background page scroll
+    document.documentElement.classList.add('mobile-drawer-open');
+    document.body.classList.add('mobile-drawer-open');
+    document.body.style.top = `-${_mobileDrawerScrollY}px`;
+
     drawer.classList.add('active');
     overlay.classList.add('active');
-    document.body.style.overflow = 'hidden';
   }
 }
 
@@ -712,7 +721,28 @@ function closeMobileNavDrawer() {
   if (drawer && overlay) {
     drawer.classList.remove('active');
     overlay.classList.remove('active');
-    document.body.style.overflow = '';
+
+    // Unlock body and restore scroll position without jumping
+    const scrollY = _mobileDrawerScrollY || Math.abs(parseInt(document.body.style.top || '0', 10)) || 0;
+    document.documentElement.classList.remove('mobile-drawer-open');
+    document.body.classList.remove('mobile-drawer-open');
+    document.body.style.top = '';
+    window.scrollTo(0, scrollY);
+  }
+}
+
+function navigateMobileDrawer(targetId, e) {
+  if (e) {
+    e.preventDefault();
+  }
+  closeMobileNavDrawer();
+  if (targetId) {
+    setTimeout(() => {
+      const el = document.getElementById(targetId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 160);
   }
 }
 
@@ -722,6 +752,32 @@ document.addEventListener('keydown', (e) => {
     closeMobileNavDrawer();
   }
 });
+
+// Setup touch protection to prevent background touch-drag leakage
+function setupMobileDrawerTouchProtection() {
+  const overlay = document.getElementById('mobileDrawerOverlay');
+  if (overlay) {
+    overlay.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+    }, { passive: false });
+  }
+
+  const drawerHeader = document.querySelector('.mobile-drawer-header');
+  const drawerFooter = document.querySelector('.mobile-drawer-footer');
+  [drawerHeader, drawerFooter].forEach((el) => {
+    if (el) {
+      el.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+      }, { passive: false });
+    }
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', setupMobileDrawerTouchProtection);
+} else {
+  setupMobileDrawerTouchProtection();
+}
 
 function handleHeaderAccountClick(e) {
   if (e) {
