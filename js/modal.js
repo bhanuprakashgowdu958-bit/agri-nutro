@@ -266,12 +266,16 @@ async function autoDetectDeliveryAddress() {
   function setConfirmedAddress(fullText, sourceLabel) {
     if (!addressInput) return;
     addressInput.value = fullText;
+    addressInput.readOnly = true;
+    addressInput.style.backgroundColor = '#f8fafc';
+    addressInput.style.color = '#1e293b';
+    addressInput.style.cursor = 'default';
     if (badge) {
-      badge.textContent = `✓ Auto-Detected (${sourceLabel})`;
-      badge.style.color = '#10b981';
+      badge.textContent = `🔒 Auto-Detected (${sourceLabel}) · Locked`;
+      badge.style.color = '#059669';
     }
     if (status) {
-      status.innerHTML = `✓ <strong>Confirmed Delivery Location:</strong> ${fullText} <span style="color:#10b981; font-weight:600;">(Auto-filled via ${sourceLabel})</span>`;
+      status.innerHTML = `🔒 <strong>Confirmed Delivery Hub:</strong> ${fullText} <span style="color:#059669; font-weight:600;">(Auto-filled via ${sourceLabel} · Locked)</span>`;
     }
   }
 
@@ -361,6 +365,8 @@ function handleCheckoutSubmit(e) {
   const farmerName = document.getElementById('checkoutFarmerName').value.trim();
   const phone = document.getElementById('checkoutPhone').value.trim();
   const address = document.getElementById('checkoutAddress').value.trim();
+  const additionalAddress = (document.getElementById('checkoutAdditionalAddress')?.value || '').trim();
+  const fullAddress = additionalAddress ? `${address} | Unloading Point: ${additionalAddress}` : address;
   const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
 
   if (!farmerName || !phone || !address) {
@@ -388,6 +394,58 @@ function handleCheckoutSubmit(e) {
     try {
       loggedUser = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
     } catch (e) {}
+
+    // Immediately sync phone or name update from checkout into user profile and server!
+    if (loggedUser) {
+      let profileUpdated = false;
+      const oldPhone = loggedUser.phone;
+      const oldEmail = loggedUser.email;
+      if (phone && phone !== loggedUser.phone) {
+        loggedUser.phone = phone;
+        profileUpdated = true;
+      }
+      if (farmerName && farmerName !== loggedUser.fullName) {
+        loggedUser.fullName = farmerName;
+        profileUpdated = true;
+      }
+      if (profileUpdated) {
+        loggedUser.updatedAt = new Date().toISOString();
+        localStorage.setItem('nutriagro_user', JSON.stringify(loggedUser));
+
+        let usersList = JSON.parse(localStorage.getItem('nutriagro_users_list') || '[]');
+        const uIdx = usersList.findIndex(u => 
+          (u.userId && loggedUser.userId && u.userId === loggedUser.userId) || 
+          (u.email && loggedUser.email && u.email.toLowerCase() === loggedUser.email.toLowerCase()) ||
+          (oldPhone && u.phone && u.phone === oldPhone)
+        );
+        if (uIdx >= 0) {
+          usersList[uIdx] = { ...usersList[uIdx], ...loggedUser };
+        } else {
+          usersList.unshift(loggedUser);
+        }
+        localStorage.setItem('nutriagro_users_list', JSON.stringify(usersList));
+
+        // Sync to serverless API
+        fetch('/api/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'update_profile', ...loggedUser, oldPhone, oldEmail })
+        }).catch(() => {});
+
+        // Broadcast to admin portal tab
+        try {
+          if (typeof BroadcastChannel !== 'undefined') {
+            const ch = new BroadcastChannel('nutriagro_orders_channel');
+            ch.postMessage({ type: 'PROFILE_UPDATED', user: loggedUser });
+          }
+        } catch (e) {}
+
+        if (typeof updateHeaderUserStatus === 'function') {
+          updateHeaderUserStatus();
+        }
+      }
+    }
+
     const orderUserEmail = (loggedUser && loggedUser.email) ? loggedUser.email : (document.getElementById('checkoutEmail')?.value || '').trim();
     const orderUserId = (loggedUser && loggedUser.userId) ? loggedUser.userId : '';
 
@@ -400,7 +458,9 @@ function handleCheckoutSubmit(e) {
       timestamp: Date.now(),
       farmerName: farmerName,
       phone: phone,
-      address: address,
+      address: fullAddress,
+      gpsAddress: address,
+      additionalAddress: additionalAddress,
       paymentMethod: paymentMethod,
       items: (window.cart && window.cart.items) ? window.cart.items.map(item => ({
         name: item.name,
@@ -430,7 +490,7 @@ function handleCheckoutSubmit(e) {
     document.getElementById('confirmOrderId').textContent = orderId;
     document.getElementById('confirmOrderDate').textContent = dateStr;
     document.getElementById('confirmFarmName').textContent = farmerName;
-    document.getElementById('confirmDeliveryAddress').textContent = address;
+    document.getElementById('confirmDeliveryAddress').textContent = fullAddress;
     document.getElementById('confirmTotalBags').textContent = `${window.cart.getTotalBags()} Bags (${window.cart.getTotalWeightKg()} kg)`;
     document.getElementById('confirmPaymentType').textContent = paymentMethod;
     document.getElementById('confirmAmountPaid').textContent = formatCurrency(window.cart.getFinalTotal());

@@ -935,8 +935,16 @@ async function handleProfileSave(e) {
     fetch('/api/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'update_profile', ...user })
+      body: JSON.stringify({ action: 'update_profile', ...user, oldPhone, oldEmail })
     }).catch(() => {});
+
+    // BroadcastChannel synchronization with open Admin Hub tabs
+    try {
+      if (typeof BroadcastChannel !== 'undefined') {
+        const ch = new BroadcastChannel('nutriagro_orders_channel');
+        ch.postMessage({ type: 'PROFILE_UPDATED', user: user });
+      }
+    } catch (e) {}
 
     // Sync to Firebase if auth current user
     if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {

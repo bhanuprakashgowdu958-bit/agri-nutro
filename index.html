@@ -1203,19 +1203,32 @@
               </div>
             </div>
 
-            <div style="margin-bottom: 20px;">
+            <!-- 1. GPS Auto-Detected Location (Locked) -->
+            <div style="margin-bottom: 12px;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <label style="font-size: 0.82rem; font-weight: 700; margin: 0;">
+                <label style="font-size: 0.82rem; font-weight: 700; margin: 0; color: #1e293b;">
                   Delivery Address *
-                  <span id="autoDetectBadge" style="font-size: 0.74rem; font-weight: 600; color: #10b981; margin-left: 6px;">📍 Auto-Detecting...</span>
+                  <span id="autoDetectBadge" style="font-size: 0.74rem; font-weight: 700; color: #059669; margin-left: 6px;">🔒 GPS Auto-Detected (Locked)</span>
                 </label>
                 <button type="button" id="detectLocationBtn" onclick="autoDetectDeliveryAddress()" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.4); color: #065f46; font-size: 0.74rem; font-weight: 700; padding: 3px 10px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s ease;">
                   <span>🔄</span> Detect Again
                 </button>
               </div>
-              <textarea id="checkoutAddress" required rows="2" class="calc-input" placeholder="Auto-detecting delivery address as per your customer location..."></textarea>
-              <div id="addressDetectStatus" style="font-size: 0.74rem; color: var(--color-dark-muted); margin-top: 4px;">
-                📍 Delivery address is automatically detected from your current location. No manual typing required.
+              <textarea id="checkoutAddress" required rows="2" class="calc-input" readonly tabindex="-1" style="background: #f8fafc; border: 1.5px solid #cbd5e1; color: #1e293b; cursor: default; resize: none;" placeholder="Auto-detecting delivery address as per your customer location..."></textarea>
+              <div id="addressDetectStatus" style="font-size: 0.74rem; color: #059669; margin-top: 4px; font-weight: 600;">
+                🔒 GPS location is auto-locked for accurate delivery distance and freight routing.
+              </div>
+            </div>
+
+            <!-- 2. Additional Farm Address & Specific Landmark -->
+            <div style="margin-bottom: 20px;">
+              <label style="display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 4px; color: #1e293b;">
+                Additional Farm Address & Landmark (Shed / Gate / Plot #)
+                <span style="font-size: 0.74rem; font-weight: normal; color: #64748b;">(Optional)</span>
+              </label>
+              <textarea id="checkoutAdditionalAddress" rows="2" class="calc-input" placeholder="e.g. Shed No. 3, North Gate near water tank, Plot 14, Bhanu Dairy Farm" style="resize: vertical;"></textarea>
+              <div style="font-size: 0.74rem; color: #64748b; margin-top: 4px;">
+                ✍️ Write your specific unloading shed, gate, farm name, or nearby landmark to guide the delivery truck.
               </div>
             </div>
 

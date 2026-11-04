@@ -86,12 +86,17 @@ module.exports = async (req, res) => {
       if (body.action === 'update_profile') {
         const identifier = (body.userId || body.email || body.phone || '').toString().toLowerCase().trim();
         const normIdent = normalizePhone(body.phone || '');
+        const oldPhoneNorm = normalizePhone(body.oldPhone || '');
+        const oldEmailNorm = (body.oldEmail || '').toString().toLowerCase().trim();
+        const uidTarget = (body.userId || '').toString().toLowerCase().trim();
 
         let user = users.find(u => {
           const em = (u.email || '').toLowerCase().trim();
           const ph = normalizePhone(u.phone || '');
           const uid = (u.userId || '').toLowerCase().trim();
-          return (uid && uid === identifier) || (em && em === identifier) || (normIdent && ph && ph === normIdent);
+          return (uidTarget && uid === uidTarget) ||
+                 (em && (em === identifier || em === oldEmailNorm)) ||
+                 (ph && (ph === normIdent || (oldPhoneNorm && ph === oldPhoneNorm)));
         });
 
         if (user) {

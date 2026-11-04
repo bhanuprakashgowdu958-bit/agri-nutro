@@ -1748,7 +1748,12 @@
               <div class="detail-block">
                 <span class="detail-heading">Farmer Contact & Destination</span>
                 <span class="customer-name">${order.farmerName || 'Farm Customer'}</span>
-                <a href="tel:${order.phone || ''}" class="customer-phone">📞 ${order.phone || 'Phone Not Provided'}</a>
+                <div style="display: flex; align-items: center; gap: 8px; margin: 4px 0;">
+                  <a href="tel:${order.phone || ''}" class="customer-phone">📞 ${order.phone || 'Phone Not Provided'}</a>
+                  <button type="button" class="btn btn-sm btn-secondary" onclick="editOrderPhone('${order.orderId}')" style="padding: 2px 7px; font-size: 0.7rem; border-radius: 6px; cursor: pointer;" title="Edit Driver Dispatch Phone">
+                    ✏️ Edit
+                  </button>
+                </div>
                 <div class="customer-addr">
                   <strong>📍 Delivery Address:</strong> ${order.address || 'Detected Location'}
                 </div>
@@ -2225,15 +2230,42 @@
       const mergedMap = new Map();
       [...incoming, ...localList, ...defaultSeed].forEach(item => {
         if (!item) return;
-        const key = (item.phone || item.email || item.userId || '').toString().toLowerCase();
-        const uid = (item.userId || '').toString().toLowerCase();
-        const ph = (item.phone || '').toString().toLowerCase();
-        const em = (item.email || '').toString().toLowerCase();
-        if (deletedFarmerKeys.has(key) || (uid && deletedFarmerKeys.has(uid)) || (ph && deletedFarmerKeys.has(ph)) || (em && deletedFarmerKeys.has(em))) {
+        const uid = (item.userId || '').toString().toLowerCase().trim();
+        const em = (item.email || '').toString().toLowerCase().trim();
+        const ph = (item.phone || '').toString().replace(/\D/g, '');
+
+        if ((uid && deletedFarmerKeys.has(uid)) || (em && deletedFarmerKeys.has(em)) || (ph && deletedFarmerKeys.has(ph))) {
           return;
         }
-        if (key && !mergedMap.has(key)) {
-          mergedMap.set(key, item);
+
+        const primaryKey = uid || em || ph;
+        if (!primaryKey) return;
+
+        // Check if matching farmer exists by userId OR email
+        let existingKey = null;
+        if (mergedMap.has(primaryKey)) {
+          existingKey = primaryKey;
+        } else {
+          for (const [k, existing] of mergedMap.entries()) {
+            const eUid = (existing.userId || '').toString().toLowerCase().trim();
+            const eEm = (existing.email || '').toString().toLowerCase().trim();
+            if ((uid && eUid && uid === eUid) || (em && eEm && em === eEm)) {
+              existingKey = k;
+              break;
+            }
+          }
+        }
+
+        if (existingKey) {
+          const existing = mergedMap.get(existingKey);
+          const isItemNewer = (item.lastUpdated && (!existing.lastUpdated || item.lastUpdated >= existing.lastUpdated));
+          if (isItemNewer) {
+            mergedMap.set(existingKey, { ...existing, ...item });
+          } else {
+            mergedMap.set(existingKey, { ...item, ...existing });
+          }
+        } else {
+          mergedMap.set(primaryKey, item);
         }
       });
 
@@ -2370,9 +2402,14 @@
               <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.83rem; margin-bottom: 16px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #f8fafc; padding: 8px 12px; border-radius: 8px;">
                   <span><strong>📞 Phone:</strong> <a href="tel:${f.phone || ''}" style="color: var(--primary); font-weight: 700; text-decoration: none;">${f.phone || 'N/A'}</a></span>
-                  <a href="https://wa.me/91${cleanPhone}?text=${waMsg}" target="_blank" class="btn btn-sm btn-whatsapp" style="padding: 4px 10px; font-size: 0.74rem;">
-                    💬 WhatsApp
-                  </a>
+                  <div style="display: flex; gap: 6px;">
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="editFarmerPhone('${f.userId || f.phone}')" style="padding: 3px 8px; font-size: 0.72rem; cursor: pointer;" title="Edit mobile number">
+                      ✏️ Edit
+                    </button>
+                    <a href="https://wa.me/91${cleanPhone}?text=${waMsg}" target="_blank" class="btn btn-sm btn-whatsapp" style="padding: 4px 10px; font-size: 0.74rem;">
+                      💬 WhatsApp
+                    </a>
+                  </div>
                 </div>
 
                 ${f.email ? `<div><strong>✉️ Email:</strong> <a href="mailto:${f.email}" style="color: #475569;">${f.email}</a></div>` : ''}
@@ -2527,21 +2564,91 @@
       showToast('Exported Farmers Directory CSV successfully!', 'success');
     }
 
-    // Auto-refresh polling every 3.5 seconds
+    function editFarmerPhone(userIdOrPhone) {
+      const f = allFarmers.find(x => (x.userId && x.userId === userIdOrPhone) || (x.phone && x.phone === userIdOrPhone));
+      if (!f) return;
+      const newPhone = prompt(`Update Mobile Number for ${f.fullName || 'Farmer'}:`, f.phone || '');
+      if (newPhone === null) return;
+      const trimmed = newPhone.trim();
+      if (!trimmed || trimmed.replace(/\D/g, '').length < 10) {
+        showToast('Please enter a valid 10-digit mobile number', 'error');
+        return;
+      }
+      const oldPhone = f.phone;
+      f.phone = trimmed;
+      f.lastUpdated = new Date().toISOString();
+
+      localStorage.setItem('nutriagro_users_list', JSON.stringify(allFarmers));
+
+      try {
+        fetch(getUsersApiEndpoint(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'update_profile', ...f, oldPhone })
+        }).catch(() => {});
+      } catch (e) {}
+
+      renderFarmersCards();
+      updateFarmerCounters();
+      showToast(`Mobile number updated to ${trimmed} for ${f.fullName || 'Farmer'}!`, 'success');
+    }
+
+    function editOrderPhone(orderId) {
+      const order = allOrders.find(o => o.orderId === orderId);
+      if (!order) return;
+      const newPhone = prompt(`Update Driver Dispatch Phone for Order #${orderId} (${order.farmerName || 'Customer'}):`, order.phone || '');
+      if (newPhone === null) return;
+      const trimmed = newPhone.trim();
+      if (!trimmed || trimmed.replace(/\D/g, '').length < 10) {
+        showToast('Please enter a valid 10-digit phone number', 'error');
+        return;
+      }
+      order.phone = trimmed;
+      order.lastUpdated = new Date().toISOString();
+
+      localStorage.setItem('nutriagro_orders', JSON.stringify(allOrders));
+
+      try {
+        fetch(`${FIREBASE_RTDB_ORDERS_URL}/${encodeURIComponent(orderId)}.json`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: trimmed, lastUpdated: order.lastUpdated })
+        }).catch(() => {});
+      } catch (e) {}
+
+      try {
+        fetch(getApiEndpoint(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'update_phone', orderId: orderId, phone: trimmed })
+        }).catch(() => {});
+      } catch (e) {}
+
+      renderDashboard();
+      showToast(`Order #${orderId} dispatch phone updated to ${trimmed}!`, 'success');
+    }
+
+    // Auto-refresh polling: orders every 3.5s, farmers every 7s
     setInterval(() => {
       if (isAuthorized()) {
         loadAdminOrders(false);
       }
     }, 3500);
 
-    // Cross-tab immediate synchronization (0ms latency when order placed in another tab/window)
+    setInterval(() => {
+      if (isAuthorized()) {
+        loadAdminFarmers(false);
+      }
+    }, 7000);
+
+    // Cross-tab immediate synchronization (0ms latency when order/profile updated in another tab/window)
     window.addEventListener('storage', (e) => {
       if (e.key === 'nutriagro_orders' || e.key === 'nutriagro_last_order_timestamp') {
         if (isAuthorized()) {
           loadAdminOrders(false);
         }
       }
-      if (e.key === 'nutriagro_users_list') {
+      if (e.key === 'nutriagro_users_list' || e.key === 'nutriagro_user') {
         if (isAuthorized()) {
           loadAdminFarmers(false);
         }
@@ -2557,6 +2664,12 @@
             playCashChime();
             if (isAuthorized()) {
               loadAdminOrders(false);
+              loadAdminFarmers(false);
+            }
+          }
+          if (ev.data && ev.data.type === 'PROFILE_UPDATED') {
+            if (isAuthorized()) {
+              loadAdminFarmers(false);
             }
           }
         };

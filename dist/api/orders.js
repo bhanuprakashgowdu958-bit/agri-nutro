@@ -228,6 +228,17 @@ module.exports = async function handler(req, res) {
           match.lastUpdated = patch.lastUpdated;
         }
         await patchFirebaseOrder(body.orderId, patch);
+      } else if (body.action === 'update_phone' && body.orderId && body.phone) {
+        const match = orders.find(o => o.orderId && o.orderId.toLowerCase() === body.orderId.toLowerCase());
+        const patch = {
+          phone: body.phone.trim(),
+          lastUpdated: new Date().toISOString()
+        };
+        if (match) {
+          match.phone = patch.phone;
+          match.lastUpdated = patch.lastUpdated;
+        }
+        await patchFirebaseOrder(body.orderId, patch);
       } else if (body.action === 'delete' && body.orderId) {
         orders = orders.filter(o => o && o.orderId && o.orderId.toLowerCase() !== body.orderId.toLowerCase());
         await deleteFirebaseOrder(body.orderId);
