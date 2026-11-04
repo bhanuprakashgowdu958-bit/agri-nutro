@@ -2959,6 +2959,19 @@
   transform: translate(-50%, -50%) scale(1);
 }
 
+/* Responsive Two-Column Helper Grids */
+.checkout-form-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.order-card-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
 /* Order Tracker Modal & Progress Stepper */
 .order-tracker-modal {
   max-width: 780px;

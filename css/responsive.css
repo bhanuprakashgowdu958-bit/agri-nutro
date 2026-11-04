@@ -137,11 +137,28 @@ html, body {
     width: 38px;
   }
 
-  .header-orders-btn {
-    padding: 6px 10px;
-    height: 38px;
-    font-size: 0.8rem;
-    gap: 4px;
+  /* Compact Mobile Header Actions - Prevents Name & Brand Overlapping */
+  .header-orders-label,
+  #headerAccountLabel {
+    display: none !important;
+  }
+
+  .header-orders-btn,
+  .header-account-btn {
+    padding: 0 !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    border-radius: 50% !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+  }
+
+  .header-account-btn .user-avatar-badge {
+    margin: 0 !important;
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 0.95rem !important;
   }
 
   .header-notif-btn {
@@ -150,7 +167,7 @@ html, body {
   }
 
   .header-cart-btn {
-    padding: 6px 12px;
+    padding: 6px 10px;
     height: 38px;
   }
 
@@ -498,6 +515,72 @@ html, body {
 
   .calc-result-box {
     padding: 16px;
+  }
+
+  /* Two-Column Form & Card Grids -> 1 Column Stack on Mobile */
+  .checkout-form-2col,
+  .order-card-2col {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* Cart Button Mobile Compaction */
+  .cart-header-total {
+    display: none !important;
+  }
+
+  .header-cart-btn {
+    padding: 0 !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    border-radius: var(--radius-sm) !important;
+    justify-content: center !important;
+  }
+
+  /* Modals Mobile Sizing & Spacing */
+  .checkout-modal {
+    width: 95% !important;
+    max-height: 94vh !important;
+    border-radius: var(--radius-lg) !important;
+    top: 50% !important;
+    left: 50% !important;
+  }
+
+  .checkout-modal > div:first-of-type,
+  #checkoutFormSection > div:first-of-type {
+    padding: 18px 16px 0 16px !important;
+  }
+
+  #checkoutModalTitle,
+  #orderTrackerTitle,
+  #bulkModalTitle {
+    font-size: 1.3rem !important;
+  }
+
+  .checkout-grid {
+    padding: 14px 16px 20px 16px !important;
+    gap: 16px !important;
+  }
+
+  .order-track-stepper {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .order-track-stepper::before {
+    display: none !important;
+  }
+
+  .order-track-stepper .track-step {
+    padding: 8px 6px !important;
+    background: #ffffff !important;
+    border-radius: 8px !important;
+    border: 1px solid var(--color-gray-200) !important;
+  }
+
+  .order-list-item-card {
+    padding: 14px 14px !important;
   }
 
   /* Mobile Full-Width Cart Drawer */

@@ -1192,7 +1192,7 @@
           <div>
             <h4 style="font-size: 1rem; margin-bottom: 14px; color: var(--color-primary);">1. Contact & Auto-Detected Delivery Address</h4>
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+            <div class="checkout-form-2col" style="margin-bottom: 14px;">
               <div>
                 <label style="display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 4px;">Primary Contact Person *</label>
                 <input type="text" id="checkoutFarmerName" required class="calc-input" placeholder="e.g. Rajesh Sharma" />
@@ -1205,7 +1205,7 @@
 
             <!-- 1. GPS Auto-Detected Location (Locked) -->
             <div style="margin-bottom: 12px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 4px;">
                 <label style="font-size: 0.82rem; font-weight: 700; margin: 0; color: #1e293b;">
                   Delivery Address *
                   <span id="autoDetectBadge" style="font-size: 0.74rem; font-weight: 700; color: #059669; margin-left: 6px;">🔒 GPS Auto-Detected (Locked)</span>
@@ -1462,7 +1462,7 @@
         <input type="text" id="bulkFarmName" required class="calc-input" placeholder="e.g. Balaji Agro Commercial Cattle & Poultry Farms" />
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+      <div class="checkout-form-2col" style="margin-bottom: 14px;">
         <div>
           <label style="display:block; font-size:0.84rem; font-weight:700; margin-bottom:4px;">Target Livestock Species *</label>
           <select id="bulkSpecies" class="calc-select">
@@ -1485,7 +1485,7 @@
         </div>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+      <div class="checkout-form-2col" style="margin-bottom: 14px;">
         <div>
           <label style="display:block; font-size:0.84rem; font-weight:700; margin-bottom:4px;">Dispatch Contact Phone *</label>
           <input type="tel" id="bulkContactPhone" required class="calc-input" placeholder="e.g. +91 98765 43210" />

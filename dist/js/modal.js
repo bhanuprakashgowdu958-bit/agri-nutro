@@ -1333,7 +1333,7 @@ function renderOrdersListView(orders, searchQuery = '') {
           </div>
 
           <!-- Customer & Destination Details -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 0.84rem; margin-bottom: 14px;">
+          <div class="order-card-2col" style="font-size: 0.84rem; margin-bottom: 14px;">
             <div>
               <span style="color: var(--color-dark-muted); font-size: 0.75rem; display: block; font-weight: 700;">CUSTOMER & FARMGATE:</span>
               <strong style="font-size: 0.95rem; color: var(--color-dark);">${order.farmerName || 'Customer'}</strong>
@@ -1593,7 +1593,7 @@ function renderOrderTrackingCard(order, allOrders) {
 
       <!-- Logistics Driver & Destination Box -->
       <div style="background: var(--color-gray-50); border: 1px solid var(--color-gray-200); border-radius: var(--radius-md); padding: 14px; margin-bottom: 18px;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.84rem;">
+        <div class="order-card-2col" style="font-size: 0.84rem;">
           <div>
             <span style="color: var(--color-dark-muted); font-size: 0.75rem; display: block;">Contact & Destination:</span>
             <strong>${order.farmerName || 'Customer'}</strong> (${order.phone || ''})

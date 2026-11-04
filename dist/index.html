@@ -3248,6 +3248,19 @@ button, input, select, textarea {
   transform: translate(-50%, -50%) scale(1);
 }
 
+/* Responsive Two-Column Helper Grids */
+.checkout-form-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.order-card-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
 /* Order Tracker Modal & Progress Stepper */
 .order-tracker-modal {
   max-width: 780px;
@@ -5209,11 +5222,28 @@ html, body {
     width: 38px;
   }
 
-  .header-orders-btn {
-    padding: 6px 10px;
-    height: 38px;
-    font-size: 0.8rem;
-    gap: 4px;
+  /* Compact Mobile Header Actions - Prevents Name & Brand Overlapping */
+  .header-orders-label,
+  #headerAccountLabel {
+    display: none !important;
+  }
+
+  .header-orders-btn,
+  .header-account-btn {
+    padding: 0 !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    border-radius: 50% !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+  }
+
+  .header-account-btn .user-avatar-badge {
+    margin: 0 !important;
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 0.95rem !important;
   }
 
   .header-notif-btn {
@@ -5222,7 +5252,7 @@ html, body {
   }
 
   .header-cart-btn {
-    padding: 6px 12px;
+    padding: 6px 10px;
     height: 38px;
   }
 
@@ -5570,6 +5600,72 @@ html, body {
 
   .calc-result-box {
     padding: 16px;
+  }
+
+  /* Two-Column Form & Card Grids -> 1 Column Stack on Mobile */
+  .checkout-form-2col,
+  .order-card-2col {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* Cart Button Mobile Compaction */
+  .cart-header-total {
+    display: none !important;
+  }
+
+  .header-cart-btn {
+    padding: 0 !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    border-radius: var(--radius-sm) !important;
+    justify-content: center !important;
+  }
+
+  /* Modals Mobile Sizing & Spacing */
+  .checkout-modal {
+    width: 95% !important;
+    max-height: 94vh !important;
+    border-radius: var(--radius-lg) !important;
+    top: 50% !important;
+    left: 50% !important;
+  }
+
+  .checkout-modal > div:first-of-type,
+  #checkoutFormSection > div:first-of-type {
+    padding: 18px 16px 0 16px !important;
+  }
+
+  #checkoutModalTitle,
+  #orderTrackerTitle,
+  #bulkModalTitle {
+    font-size: 1.3rem !important;
+  }
+
+  .checkout-grid {
+    padding: 14px 16px 20px 16px !important;
+    gap: 16px !important;
+  }
+
+  .order-track-stepper {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .order-track-stepper::before {
+    display: none !important;
+  }
+
+  .order-track-stepper .track-step {
+    padding: 8px 6px !important;
+    background: #ffffff !important;
+    border-radius: 8px !important;
+    border: 1px solid var(--color-gray-200) !important;
+  }
+
+  .order-list-item-card {
+    padding: 14px 14px !important;
   }
 
   /* Mobile Full-Width Cart Drawer */
@@ -6852,7 +6948,7 @@ html, body {
           <div>
             <h4 style="font-size: 1rem; margin-bottom: 14px; color: var(--color-primary);">1. Contact & Auto-Detected Delivery Address</h4>
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+            <div class="checkout-form-2col" style="margin-bottom: 14px;">
               <div>
                 <label style="display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 4px;">Primary Contact Person *</label>
                 <input type="text" id="checkoutFarmerName" required class="calc-input" placeholder="e.g. Rajesh Sharma" />
@@ -6865,7 +6961,7 @@ html, body {
 
             <!-- 1. GPS Auto-Detected Location (Locked) -->
             <div style="margin-bottom: 12px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 4px;">
                 <label style="font-size: 0.82rem; font-weight: 700; margin: 0; color: #1e293b;">
                   Delivery Address *
                   <span id="autoDetectBadge" style="font-size: 0.74rem; font-weight: 700; color: #059669; margin-left: 6px;">🔒 GPS Auto-Detected (Locked)</span>
@@ -7122,7 +7218,7 @@ html, body {
         <input type="text" id="bulkFarmName" required class="calc-input" placeholder="e.g. Balaji Agro Commercial Cattle & Poultry Farms" />
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+      <div class="checkout-form-2col" style="margin-bottom: 14px;">
         <div>
           <label style="display:block; font-size:0.84rem; font-weight:700; margin-bottom:4px;">Target Livestock Species *</label>
           <select id="bulkSpecies" class="calc-select">
@@ -7145,7 +7241,7 @@ html, body {
         </div>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+      <div class="checkout-form-2col" style="margin-bottom: 14px;">
         <div>
           <label style="display:block; font-size:0.84rem; font-weight:700; margin-bottom:4px;">Dispatch Contact Phone *</label>
           <input type="tel" id="bulkContactPhone" required class="calc-input" placeholder="e.g. +91 98765 43210" />
