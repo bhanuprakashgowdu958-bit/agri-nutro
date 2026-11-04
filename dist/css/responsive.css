@@ -166,9 +166,31 @@ html, body {
     height: 38px;
   }
 
+  .cart-header-total {
+    display: none !important;
+  }
+
   .header-cart-btn {
-    padding: 6px 10px;
-    height: 38px;
+    padding: 0 !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    border-radius: var(--radius-sm) !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+  }
+
+  .cart-icon-svg {
+    width: 21px !important;
+    height: 21px !important;
+  }
+
+  .cart-count-badge {
+    top: -6px !important;
+    right: -8px !important;
+    min-width: 18px !important;
+    height: 18px !important;
+    font-size: 0.68rem !important;
   }
 
   .main-nav {
@@ -522,20 +544,6 @@ html, body {
   .order-card-2col {
     grid-template-columns: 1fr !important;
     gap: 12px !important;
-  }
-
-  /* Cart Button Mobile Compaction */
-  .cart-header-total {
-    display: none !important;
-  }
-
-  .header-cart-btn {
-    padding: 0 !important;
-    width: 38px !important;
-    height: 38px !important;
-    min-width: 38px !important;
-    border-radius: var(--radius-sm) !important;
-    justify-content: center !important;
   }
 
   /* Modals Mobile Sizing & Spacing */
