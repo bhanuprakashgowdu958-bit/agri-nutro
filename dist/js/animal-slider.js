@@ -1,14 +1,14 @@
 // NutriAgro Feeds — Interactive 3D Animal Showcase & Carousel
 // Seamless infinite forward sliding across 5 livestock species: Dairy Cattle, Poultry, Goats, Aquaculture, Swine.
-// Auto-slides automatically every 0.5 seconds with continuous forward flow.
+// Auto-slides automatically every 4.5 seconds to match the hero background slider.
 
 (function() {
   'use strict';
 
   let currentAnimalSlide = 0;
   const TOTAL_SLIDES = 5;
-  const AUTO_PLAY_DELAY = 500; // 0.5 seconds per slide (500ms)
-  const TRANSITION_DURATION = 450; // 0.45s smooth slide
+  const AUTO_PLAY_DELAY = 4500; // 4.5 seconds per slide (4500ms) - matching hero background slide duration
+  const TRANSITION_DURATION = 650; // 0.65s smooth slide (matching hero background transition)
   let autoPlayTimer = null;
 
   // Touch Swipe State
@@ -30,7 +30,7 @@
     }
 
     // Configure transition style
-    track.style.transition = `transform ${TRANSITION_DURATION}ms ease-in-out`;
+    track.style.transition = `transform ${TRANSITION_DURATION}ms cubic-bezier(0.25, 1, 0.5, 1)`;
 
     // Seamless loop reset listener on transition end
     track.addEventListener('transitionend', (e) => {
@@ -41,12 +41,12 @@
         currentAnimalSlide = 0;
         track.style.transform = 'translateX(0%)';
         void track.offsetHeight; // Force reflow
-        track.style.transition = `transform ${TRANSITION_DURATION}ms ease-in-out`;
+        track.style.transition = `transform ${TRANSITION_DURATION}ms cubic-bezier(0.25, 1, 0.5, 1)`;
         updateActiveSlideClass(0);
       }
     });
 
-    // Start auto-play every 0.5 seconds
+    // Start auto-play every 4.5 seconds
     startAutoPlay();
 
     // Mobile Touch Swipe Handling

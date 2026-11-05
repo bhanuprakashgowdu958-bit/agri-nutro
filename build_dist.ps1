@@ -4,22 +4,21 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 $root = (Get-Location).Path
 $dist = Join-Path $root "dist"
 
-if (Test-Path $dist) {
-    Remove-Item $dist -Recurse -Force
+if (-not (Test-Path $dist)) {
+    New-Item -ItemType Directory -Path $dist | Out-Null
 }
-New-Item -ItemType Directory -Path $dist | Out-Null
 
-# Copy assets, css, js, orders.json, users.json, api, vercel.json
-Copy-Item -Path (Join-Path $root "assets") -Destination $dist -Recurse
-Copy-Item -Path (Join-Path $root "css") -Destination $dist -Recurse
-Copy-Item -Path (Join-Path $root "js") -Destination $dist -Recurse
-if (Test-Path (Join-Path $root "admin.html")) { Copy-Item -Path (Join-Path $root "admin.html") -Destination $dist }
-if (Test-Path (Join-Path $root "signup.html")) { Copy-Item -Path (Join-Path $root "signup.html") -Destination $dist }
-if (Test-Path (Join-Path $root "terms.html")) { Copy-Item -Path (Join-Path $root "terms.html") -Destination $dist }
-if (Test-Path (Join-Path $root "orders.json")) { Copy-Item -Path (Join-Path $root "orders.json") -Destination $dist }
-if (Test-Path (Join-Path $root "users.json")) { Copy-Item -Path (Join-Path $root "users.json") -Destination $dist }
-if (Test-Path (Join-Path $root "api")) { Copy-Item -Path (Join-Path $root "api") -Destination $dist -Recurse }
-if (Test-Path (Join-Path $root "vercel.json")) { Copy-Item -Path (Join-Path $root "vercel.json") -Destination $dist }
+# Copy assets, css, js, orders.json, users.json, api, vercel.json in-place with -Force
+Copy-Item -Path (Join-Path $root "assets") -Destination $dist -Recurse -Force
+Copy-Item -Path (Join-Path $root "css") -Destination $dist -Recurse -Force
+Copy-Item -Path (Join-Path $root "js") -Destination $dist -Recurse -Force
+if (Test-Path (Join-Path $root "admin.html")) { Copy-Item -Path (Join-Path $root "admin.html") -Destination $dist -Force }
+if (Test-Path (Join-Path $root "signup.html")) { Copy-Item -Path (Join-Path $root "signup.html") -Destination $dist -Force }
+if (Test-Path (Join-Path $root "terms.html")) { Copy-Item -Path (Join-Path $root "terms.html") -Destination $dist -Force }
+if (Test-Path (Join-Path $root "orders.json")) { Copy-Item -Path (Join-Path $root "orders.json") -Destination $dist -Force }
+if (Test-Path (Join-Path $root "users.json")) { Copy-Item -Path (Join-Path $root "users.json") -Destination $dist -Force }
+if (Test-Path (Join-Path $root "api")) { Copy-Item -Path (Join-Path $root "api") -Destination $dist -Recurse -Force }
+if (Test-Path (Join-Path $root "vercel.json")) { Copy-Item -Path (Join-Path $root "vercel.json") -Destination $dist -Force }
 
 # Read CSS files
 $cssMain = [System.IO.File]::ReadAllText((Join-Path $root "css\main.css"))
