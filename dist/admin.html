@@ -2034,6 +2034,13 @@
                   </button>
                   ` : ''}
                 </div>
+                ${order.altPhone ? `
+                <div style="display: flex; align-items: center; gap: 8px; margin: 2px 0 5px 0; font-size: 0.78rem;">
+                  <span style="color: #64748b; font-weight: 600;">📱 Alt Phone:</span>
+                  <a href="tel:${order.altPhone}" style="color: #047857; font-weight: 700; text-decoration: none;">${order.altPhone}</a>
+                  <a href="https://wa.me/91${order.altPhone.replace(/\D/g,'')}?text=${encodeURIComponent(`Hello ${order.farmerName || 'Customer'}, regarding your NutriAgro Order #${order.orderId}...`)}" target="_blank" class="btn btn-sm btn-whatsapp" style="padding: 1px 6px; font-size: 0.68rem;">WhatsApp</a>
+                </div>
+                ` : ''}
                 <div class="customer-addr">
                   <strong>📍 Delivery Address:</strong> ${order.address || 'Detected Location'}
                 </div>
@@ -2569,7 +2576,7 @@
               <div>
                 <strong style="color: #064e3b;">DELIVERY DESTINATION:</strong><br>
                 <strong>${order.farmerName || 'Customer'}</strong><br>
-                Phone: ${order.phone || 'N/A'}<br>
+                Phone: ${order.phone || 'N/A'}${order.altPhone ? ' / Alt: ' + order.altPhone : ''}<br>
                 Address: ${order.address || 'Farm Delivery'}
               </div>
               <div style="text-align: right;">

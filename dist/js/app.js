@@ -253,12 +253,16 @@ function onUserSessionChange(newUser, options = { mergeGuestCart: false }) {
   // 2. Isolate Checkout Form: Auto-fill active account profile or wipe clean
   const checkoutName = document.getElementById('checkoutFarmerName');
   const checkoutPhone = document.getElementById('checkoutPhone');
+  const checkoutPhoneBadge = document.getElementById('checkoutPhoneBadge');
   const checkoutAddress = document.getElementById('checkoutAddress');
   const checkoutAdditional = document.getElementById('checkoutAdditionalAddress');
 
   if (newUser) {
     if (checkoutName) checkoutName.value = newUser.fullName || '';
-    if (checkoutPhone) checkoutPhone.value = (newUser.phone && newUser.phone !== '9876543210') ? newUser.phone : '';
+    if (checkoutPhone) {
+      checkoutPhone.value = newUser.phone || '';
+      if (checkoutPhoneBadge) checkoutPhoneBadge.style.display = newUser.phone ? 'inline-block' : 'none';
+    }
     if (checkoutAddress && newUser.address) {
       checkoutAddress.value = `${newUser.address}, ${newUser.state || ''} ${newUser.pincode ? '(PIN: ' + newUser.pincode + ')' : ''}`.trim();
     }
@@ -266,6 +270,7 @@ function onUserSessionChange(newUser, options = { mergeGuestCart: false }) {
     // Guest / Signed Out: Reset all checkout inputs to prevent leaking previous user PII
     if (checkoutName) checkoutName.value = '';
     if (checkoutPhone) checkoutPhone.value = '';
+    if (checkoutPhoneBadge) checkoutPhoneBadge.style.display = 'none';
     if (checkoutAddress) checkoutAddress.value = '';
     if (checkoutAdditional) checkoutAdditional.value = '';
   }
@@ -1272,8 +1277,12 @@ async function handleProfileSave(e) {
     // Pre-fill checkout form if open/rendered
     const checkoutName = document.getElementById('checkoutFarmerName');
     const checkoutPhone = document.getElementById('checkoutPhone');
+    const checkoutPhoneBadge = document.getElementById('checkoutPhoneBadge');
     if (checkoutName) checkoutName.value = name;
-    if (checkoutPhone) checkoutPhone.value = phone;
+    if (checkoutPhone) {
+      checkoutPhone.value = phone;
+      if (checkoutPhoneBadge) checkoutPhoneBadge.style.display = phone ? 'inline-block' : 'none';
+    }
 
     updateHeaderUserStatus();
     showProfileAlert('success', 'Profile updated successfully!');

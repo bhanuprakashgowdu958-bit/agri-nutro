@@ -1299,14 +1299,29 @@
           <div>
             <h4 style="font-size: 1rem; margin-bottom: 14px; color: var(--color-primary);">1. Contact & Auto-Detected Delivery Address</h4>
             
-            <div class="checkout-form-2col" style="margin-bottom: 14px;">
+            <div class="checkout-form-2col" style="margin-bottom: 12px;">
               <div>
                 <label style="display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 4px;">Primary Contact Person *</label>
                 <input type="text" id="checkoutFarmerName" required class="calc-input" placeholder="e.g. Rajesh Sharma" />
               </div>
               <div>
-                <label style="display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 4px;">Driver Dispatch Phone *</label>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <label style="font-size: 0.82rem; font-weight: 700; margin: 0;">Driver Dispatch Phone *</label>
+                  <span id="checkoutPhoneBadge" style="font-size: 0.70rem; font-weight: 700; color: #059669; display: none;">✓ Auto-fetched from Profile</span>
+                </div>
                 <input type="tel" id="checkoutPhone" required class="calc-input" placeholder="e.g. +91 98765 43210" />
+              </div>
+            </div>
+
+            <!-- Optional Alternative Mobile Number -->
+            <div style="margin-bottom: 14px;">
+              <label style="display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 4px; color: #1e293b;">
+                Alternative Mobile Number
+                <span style="font-size: 0.74rem; font-weight: normal; color: #64748b;">(Optional)</span>
+              </label>
+              <input type="tel" id="checkoutAltPhone" class="calc-input" placeholder="e.g. Farm supervisor, manager or tractor driver mobile" />
+              <div style="font-size: 0.72rem; color: #64748b; margin-top: 3px;">
+                📞 Optional backup phone for the freight delivery driver in case your primary mobile is unreachable at farm gate.
               </div>
             </div>
 
@@ -1744,14 +1759,14 @@
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- Scripts -->
-  <script src="js/data.js?v=4.4"></script>
-  <script src="js/cart.js?v=4.4"></script>
-  <script src="js/modal.js?v=4.4"></script>
-  <script src="js/weather.js?v=4.4"></script>
-  <script src="js/gemini.js?v=4.4"></script>
-  <script src="js/hero-slider.js?v=4.4"></script>
-  <script src="js/animal-slider.js?v=4.4"></script>
-  <script src="js/app.js?v=4.4"></script>
+  <script src="js/data.js?v=4.5"></script>
+  <script src="js/cart.js?v=4.5"></script>
+  <script src="js/modal.js?v=4.5"></script>
+  <script src="js/weather.js?v=4.5"></script>
+  <script src="js/gemini.js?v=4.5"></script>
+  <script src="js/hero-slider.js?v=4.5"></script>
+  <script src="js/animal-slider.js?v=4.5"></script>
+  <script src="js/app.js?v=4.5"></script>
 
 </body>
 </html>

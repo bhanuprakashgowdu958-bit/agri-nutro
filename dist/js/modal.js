@@ -213,6 +213,8 @@ function openCheckoutModal() {
     const loggedUser = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
     const nameInput = document.getElementById('checkoutFarmerName');
     const phoneInput = document.getElementById('checkoutPhone');
+    const phoneBadge = document.getElementById('checkoutPhoneBadge');
+    const altPhoneInput = document.getElementById('checkoutAltPhone');
     const addrInput = document.getElementById('checkoutAddress');
 
     if (loggedUser) {
@@ -220,8 +222,11 @@ function openCheckoutModal() {
         nameInput.value = loggedUser.fullName || '';
       }
       if (phoneInput) {
-        const ph = loggedUser.phone || '';
-        phoneInput.value = (ph && ph !== '9876543210') ? ph : '';
+        const ph = (loggedUser.phone || '').trim();
+        phoneInput.value = ph;
+        if (phoneBadge) {
+          phoneBadge.style.display = ph ? 'inline-block' : 'none';
+        }
       }
       if (addrInput && loggedUser.address) {
         addrInput.value = `${loggedUser.address}, ${loggedUser.state || ''} ${loggedUser.pincode ? '(PIN: ' + loggedUser.pincode + ')' : ''}`.trim();
@@ -239,6 +244,13 @@ function openCheckoutModal() {
       if (phoneInput) {
         phoneInput.value = '';
       }
+      if (phoneBadge) {
+        phoneBadge.style.display = 'none';
+      }
+    }
+
+    if (altPhoneInput) {
+      altPhoneInput.value = '';
     }
 
     // Toggle guest warning banner
@@ -380,6 +392,7 @@ function handleCheckoutSubmit(e) {
 
   const farmerName = document.getElementById('checkoutFarmerName').value.trim();
   const phone = document.getElementById('checkoutPhone').value.trim();
+  const altPhone = (document.getElementById('checkoutAltPhone')?.value || '').trim();
   const address = document.getElementById('checkoutAddress').value.trim();
   const additionalAddress = (document.getElementById('checkoutAdditionalAddress')?.value || '').trim();
   const fullAddress = additionalAddress ? `${address} | Unloading Point: ${additionalAddress}` : address;
@@ -399,6 +412,19 @@ function handleCheckoutSubmit(e) {
     const phoneInput = document.getElementById('checkoutPhone');
     if (phoneInput) phoneInput.focus();
     return;
+  }
+
+  // Validate optional alternative mobile number if provided
+  if (altPhone) {
+    const cleanAlt = altPhone.replace(/\D/g, '');
+    if (cleanAlt.length < 10) {
+      if (window.cart && window.cart.showToast) {
+        window.cart.showToast('Please enter a valid 10-digit alternative mobile number, or leave it blank', 'error');
+      }
+      const altInput = document.getElementById('checkoutAltPhone');
+      if (altInput) altInput.focus();
+      return;
+    }
   }
 
   // 2. Mandatory Account Verification: Block Guest Order Placement
@@ -506,6 +532,7 @@ function handleCheckoutSubmit(e) {
       timestamp: Date.now(),
       farmerName: farmerName,
       phone: phone,
+      altPhone: altPhone || '',
       address: fullAddress,
       gpsAddress: address,
       additionalAddress: additionalAddress,
