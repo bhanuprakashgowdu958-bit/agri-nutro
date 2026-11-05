@@ -224,8 +224,28 @@ function openCheckoutModal() {
       if (phoneInput) {
         const ph = (loggedUser.phone || '').trim();
         phoneInput.value = ph;
-        if (phoneBadge) {
-          phoneBadge.style.display = ph ? 'inline-block' : 'none';
+        if (ph) {
+          phoneInput.readOnly = true;
+          phoneInput.setAttribute('tabindex', '-1');
+          phoneInput.style.background = '#f8fafc';
+          phoneInput.style.border = '1.5px solid #cbd5e1';
+          phoneInput.style.color = '#1e293b';
+          phoneInput.style.cursor = 'default';
+          if (phoneBadge) {
+            phoneBadge.innerHTML = '🔒 Auto-fetched from Profile (Locked)';
+            phoneBadge.style.color = '#059669';
+            phoneBadge.style.display = 'inline-block';
+          }
+        } else {
+          phoneInput.readOnly = false;
+          phoneInput.removeAttribute('tabindex');
+          phoneInput.style.background = '';
+          phoneInput.style.border = '';
+          phoneInput.style.color = '';
+          phoneInput.style.cursor = '';
+          if (phoneBadge) {
+            phoneBadge.style.display = 'none';
+          }
         }
       }
       if (addrInput && loggedUser.address) {
@@ -243,6 +263,12 @@ function openCheckoutModal() {
       }
       if (phoneInput) {
         phoneInput.value = '';
+        phoneInput.readOnly = false;
+        phoneInput.removeAttribute('tabindex');
+        phoneInput.style.background = '';
+        phoneInput.style.border = '';
+        phoneInput.style.color = '';
+        phoneInput.style.cursor = '';
       }
       if (phoneBadge) {
         phoneBadge.style.display = 'none';

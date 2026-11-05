@@ -261,7 +261,27 @@ function onUserSessionChange(newUser, options = { mergeGuestCart: false }) {
     if (checkoutName) checkoutName.value = newUser.fullName || '';
     if (checkoutPhone) {
       checkoutPhone.value = newUser.phone || '';
-      if (checkoutPhoneBadge) checkoutPhoneBadge.style.display = newUser.phone ? 'inline-block' : 'none';
+      if (newUser.phone) {
+        checkoutPhone.readOnly = true;
+        checkoutPhone.setAttribute('tabindex', '-1');
+        checkoutPhone.style.background = '#f8fafc';
+        checkoutPhone.style.border = '1.5px solid #cbd5e1';
+        checkoutPhone.style.color = '#1e293b';
+        checkoutPhone.style.cursor = 'default';
+        if (checkoutPhoneBadge) {
+          checkoutPhoneBadge.innerHTML = '🔒 Auto-fetched from Profile (Locked)';
+          checkoutPhoneBadge.style.color = '#059669';
+          checkoutPhoneBadge.style.display = 'inline-block';
+        }
+      } else {
+        checkoutPhone.readOnly = false;
+        checkoutPhone.removeAttribute('tabindex');
+        checkoutPhone.style.background = '';
+        checkoutPhone.style.border = '';
+        checkoutPhone.style.color = '';
+        checkoutPhone.style.cursor = '';
+        if (checkoutPhoneBadge) checkoutPhoneBadge.style.display = 'none';
+      }
     }
     if (checkoutAddress && newUser.address) {
       checkoutAddress.value = `${newUser.address}, ${newUser.state || ''} ${newUser.pincode ? '(PIN: ' + newUser.pincode + ')' : ''}`.trim();
@@ -269,7 +289,15 @@ function onUserSessionChange(newUser, options = { mergeGuestCart: false }) {
   } else {
     // Guest / Signed Out: Reset all checkout inputs to prevent leaking previous user PII
     if (checkoutName) checkoutName.value = '';
-    if (checkoutPhone) checkoutPhone.value = '';
+    if (checkoutPhone) {
+      checkoutPhone.value = '';
+      checkoutPhone.readOnly = false;
+      checkoutPhone.removeAttribute('tabindex');
+      checkoutPhone.style.background = '';
+      checkoutPhone.style.border = '';
+      checkoutPhone.style.color = '';
+      checkoutPhone.style.cursor = '';
+    }
     if (checkoutPhoneBadge) checkoutPhoneBadge.style.display = 'none';
     if (checkoutAddress) checkoutAddress.value = '';
     if (checkoutAdditional) checkoutAdditional.value = '';
@@ -1281,7 +1309,19 @@ async function handleProfileSave(e) {
     if (checkoutName) checkoutName.value = name;
     if (checkoutPhone) {
       checkoutPhone.value = phone;
-      if (checkoutPhoneBadge) checkoutPhoneBadge.style.display = phone ? 'inline-block' : 'none';
+      if (phone) {
+        checkoutPhone.readOnly = true;
+        checkoutPhone.setAttribute('tabindex', '-1');
+        checkoutPhone.style.background = '#f8fafc';
+        checkoutPhone.style.border = '1.5px solid #cbd5e1';
+        checkoutPhone.style.color = '#1e293b';
+        checkoutPhone.style.cursor = 'default';
+        if (checkoutPhoneBadge) {
+          checkoutPhoneBadge.innerHTML = '🔒 Auto-fetched from Profile (Locked)';
+          checkoutPhoneBadge.style.color = '#059669';
+          checkoutPhoneBadge.style.display = 'inline-block';
+        }
+      }
     }
 
     updateHeaderUserStatus();
