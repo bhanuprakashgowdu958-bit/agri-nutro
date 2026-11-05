@@ -83,6 +83,28 @@ module.exports = async (req, res) => {
         return res.status(200).json({ success: true, users });
       }
 
+      if (body.action === 'save_cart') {
+        const identifier = (body.userId || body.email || body.phone || '').toString().toLowerCase().trim();
+        const normIdent = normalizePhone(body.phone || '');
+        const uidTarget = (body.userId || '').toString().toLowerCase().trim();
+        let user = users.find(u => {
+          const em = (u.email || '').toLowerCase().trim();
+          const ph = normalizePhone(u.phone || '');
+          const uid = (u.userId || '').toLowerCase().trim();
+          return (uidTarget && uid === uidTarget) ||
+                 (em && em === identifier) ||
+                 (normIdent && ph && ph === normIdent);
+        });
+        if (user) {
+          user.cart = Array.isArray(body.cart) ? body.cart : [];
+          user.lastUpdated = new Date().toISOString();
+          memoryUsers = users;
+          saveLocalUsers(users);
+          return res.status(200).json({ success: true, cart: user.cart });
+        }
+        return res.status(200).json({ success: false, message: 'User not found in memory' });
+      }
+
       if (body.action === 'update_profile') {
         const identifier = (body.userId || body.email || body.phone || '').toString().toLowerCase().trim();
         const normIdent = normalizePhone(body.phone || '');

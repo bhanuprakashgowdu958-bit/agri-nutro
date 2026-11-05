@@ -207,10 +207,14 @@ function removeSavedGoogleAccount(email, event) {
 }
 
 // Central Session Lifecycle & Account Isolation Hook
-function onUserSessionChange(newUser, options = { mergeGuestCart: true }) {
+function onUserSessionChange(newUser, options = { mergeGuestCart: false }) {
+  // Only merge guest items if the user was actively confirming a checkout dispatch
+  const isPendingCheckout = typeof sessionStorage !== 'undefined' && sessionStorage.getItem('nutriagro_pending_checkout_order') === '1';
+  const shouldMerge = (options && options.mergeGuestCart) || isPendingCheckout;
+
   // 1. Switch cart storage and memory state to the target account (or guest)
   if (window.cart && typeof window.cart.switchUser === 'function') {
-    window.cart.switchUser(newUser, options);
+    window.cart.switchUser(newUser, { mergeGuestCart: shouldMerge });
   }
 
   // 2. Isolate Checkout Form: Auto-fill active account profile or wipe clean
@@ -642,7 +646,7 @@ async function handleModalLogin(e) {
     gateway.style.display = 'none';
     gateway.classList.add('hidden');
   }
-  onUserSessionChange(loggedUser, { mergeGuestCart: true });
+  onUserSessionChange(loggedUser, { mergeGuestCart: false });
   if (window.cart && typeof window.cart.showToast === 'function') {
     if (!window.cart.items || window.cart.items.length === 0) {
       window.cart.showToast(`🌾 Welcome back, ${loggedUser.fullName || 'Farmer'}!`, 'success');
@@ -673,6 +677,9 @@ function openAccountChooserModal(isCheckoutContext = false) {
     const heading = document.getElementById('googlePickerHeading');
 
     if (isCheckoutContext) {
+      try {
+        sessionStorage.setItem('nutriagro_pending_checkout_order', '1');
+      } catch (e) {}
       if (title) title.textContent = '🔒 Sign In to Confirm Dispatch';
       if (subtitle) subtitle.textContent = 'Commercial farmgate delivery requires an authenticated account to guarantee genuine truck freight & unlock 10% OFF.';
       if (heading) heading.textContent = '1-Click Fast Google Sign-In to Confirm Order:';
@@ -755,7 +762,7 @@ async function chooseGoogleAccount(name, email, picture, phone = '', farmName = 
     gateway.classList.add('hidden');
     gateway.style.display = 'none';
   }
-  onUserSessionChange(googleUser, { mergeGuestCart: true });
+  onUserSessionChange(googleUser, { mergeGuestCart: false });
   if (window.cart && typeof window.cart.showToast === 'function') {
     if (!window.cart.items || window.cart.items.length === 0) {
       window.cart.showToast(`🌾 Signed in as ${cleanName} (${email})! 10% wholesale discount (FARM10) unlocked.`, 'success');

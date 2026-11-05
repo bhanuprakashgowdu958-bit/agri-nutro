@@ -6977,7 +6977,12 @@ html, body {
         <span>Order Cart</span>
         <span class="badge badge-brand cart-count-badge" style="display: none;">0</span>
       </h3>
-      <button type="button" class="close-btn" id="closeCartBtn" aria-label="Close cart">✕</button>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button type="button" id="clearCartBtn" onclick="cart.clearCart()" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 4px 10px; border-radius: 6px; font-size: 0.74rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;" title="Clear all items from your cart">
+          🗑 Clear All
+        </button>
+        <button type="button" class="close-btn" id="closeCartBtn" aria-label="Close cart">✕</button>
+      </div>
     </div>
 
     <!-- Free Freight Progress Bar -->
@@ -7612,14 +7617,14 @@ html, body {
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- Scripts -->
-  <script src="js/data.js?v=3.1"></script>
-  <script src="js/cart.js?v=3.1"></script>
-  <script src="js/modal.js?v=3.1"></script>
-  <script src="js/weather.js?v=3.1"></script>
-  <script src="js/gemini.js?v=3.1"></script>
-  <script src="js/hero-slider.js?v=3.1"></script>
-  <script src="js/animal-slider.js?v=3.1"></script>
-  <script src="js/app.js?v=3.1"></script>
+  <script src="js/data.js?v=4.0"></script>
+  <script src="js/cart.js?v=4.0"></script>
+  <script src="js/modal.js?v=4.0"></script>
+  <script src="js/weather.js?v=4.0"></script>
+  <script src="js/gemini.js?v=4.0"></script>
+  <script src="js/hero-slider.js?v=4.0"></script>
+  <script src="js/animal-slider.js?v=4.0"></script>
+  <script src="js/app.js?v=4.0"></script>
 
 </body>
 </html>
