@@ -240,6 +240,12 @@ function openCheckoutModal() {
         phoneInput.value = '';
       }
     }
+
+    // Toggle guest warning banner
+    const guestNotice = document.getElementById('checkoutGuestNotice');
+    if (guestNotice) {
+      guestNotice.style.display = (loggedUser && (loggedUser.email || loggedUser.userId)) ? 'none' : 'flex';
+    }
   } catch (e) {}
 
   // Automatically detect customer delivery address upon opening if still empty
@@ -381,6 +387,38 @@ function handleCheckoutSubmit(e) {
 
   if (!farmerName || !phone || !address) {
     if (window.cart) window.cart.showToast('Please provide your Contact Person, Phone, and Delivery Address', 'error');
+    return;
+  }
+
+  // 1. Validate 10-digit mobile phone number for freight driver dispatch
+  const cleanPhone = phone.replace(/\D/g, '');
+  if (cleanPhone.length < 10) {
+    if (window.cart && window.cart.showToast) {
+      window.cart.showToast('Please enter a valid 10-digit phone number for truck driver dispatch', 'error');
+    }
+    const phoneInput = document.getElementById('checkoutPhone');
+    if (phoneInput) phoneInput.focus();
+    return;
+  }
+
+  // 2. Mandatory Account Verification: Block Guest Order Placement
+  let loggedUser = null;
+  try {
+    loggedUser = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
+  } catch (e) {}
+
+  if (!loggedUser || (!loggedUser.email && !loggedUser.userId)) {
+    try {
+      sessionStorage.setItem('nutriagro_pending_checkout_order', '1');
+    } catch (e) {}
+
+    if (window.cart && window.cart.showToast) {
+      window.cart.showToast('🔒 Sign-in required before freight dispatch to confirm your farm destination & unlock 10% OFF.', 'info');
+    }
+
+    if (typeof openAccountChooserModal === 'function') {
+      openAccountChooserModal(true);
+    }
     return;
   }
 

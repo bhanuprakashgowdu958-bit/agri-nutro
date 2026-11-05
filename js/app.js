@@ -238,6 +238,24 @@ function onUserSessionChange(newUser, options = { mergeGuestCart: true }) {
   if (typeof updateAllOrderBadges === 'function') {
     updateAllOrderBadges();
   }
+
+  // 4. Auto-resume checkout if order was blocked pending sign-in
+  if (newUser && typeof sessionStorage !== 'undefined' && sessionStorage.getItem('nutriagro_pending_checkout_order') === '1') {
+    sessionStorage.removeItem('nutriagro_pending_checkout_order');
+    const gateway = document.getElementById('googleAuthGateway');
+    if (gateway) {
+      gateway.classList.add('hidden');
+      gateway.style.display = 'none';
+    }
+    setTimeout(() => {
+      if (typeof openCheckoutModal === 'function') {
+        openCheckoutModal();
+        if (window.cart && typeof window.cart.showToast === 'function') {
+          window.cart.showToast(`🌾 Account verified as ${newUser.fullName || newUser.email}! Click Confirm Order to dispatch.`, 'success');
+        }
+      }
+    }, 250);
+  }
 }
 
 function renderGoogleAccountsPicker() {
@@ -637,7 +655,7 @@ function selectSavedGoogleAccount(encodedAcc) {
   } catch (e) {}
 }
 
-function openAccountChooserModal() {
+function openAccountChooserModal(isCheckoutContext = false) {
   const gateway = document.getElementById('googleAuthGateway');
   if (gateway) {
     gateway.style.display = 'flex';
@@ -646,6 +664,20 @@ function openAccountChooserModal() {
     if (picker) {
       picker.style.display = 'flex';
       renderGoogleAccountsPicker();
+    }
+
+    const title = document.getElementById('modalAuthTitle');
+    const subtitle = document.getElementById('modalAuthSubtitle');
+    const heading = document.getElementById('googlePickerHeading');
+
+    if (isCheckoutContext) {
+      if (title) title.textContent = '🔒 Sign In to Confirm Dispatch';
+      if (subtitle) subtitle.textContent = 'Commercial farmgate delivery requires an authenticated account to guarantee genuine truck freight & unlock 10% OFF.';
+      if (heading) heading.textContent = '1-Click Fast Google Sign-In to Confirm Order:';
+    } else {
+      if (title) title.textContent = 'Create Your Account';
+      if (subtitle) subtitle.textContent = 'Join us to access certified millgate pricing & direct delivery';
+      if (heading) heading.textContent = 'Choose an account:';
     }
   }
 }

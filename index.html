@@ -1131,6 +1131,9 @@
         <span>Proceed to Farm Checkout</span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </button>
+      <div style="font-size: 0.74rem; color: var(--color-gray-500); text-align: center; margin-top: 8px;">
+        🔒 Direct Millgate Logistics • Sign-in required before dispatch confirmation
+      </div>
     </div>
   </aside>
 
@@ -1235,6 +1238,20 @@
       <div style="padding: 24px 36px 0 36px;">
         <h2 id="checkoutModalTitle" style="font-size: 1.55rem; margin-bottom: 6px;">Direct Farm Delivery Checkout</h2>
         <p style="font-size: 0.9rem; color: var(--color-dark-muted);">Enter your commercial farm destination and preferred delivery unloading.</p>
+      </div>
+
+      <!-- Guest Account Warning & 10% Discount Prompt -->
+      <div id="checkoutGuestNotice" style="display: none; background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 12px; padding: 12px 18px; margin: 14px 36px 0 36px; font-size: 0.84rem; color: #92400e; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.35rem;">🔒</span>
+          <div>
+            <strong style="color: #78350f; font-size: 0.86rem; display: block;">Farmer Sign-In Required Before Dispatch</strong>
+            <span style="color: #92400e; font-size: 0.78rem;">To verify farm destination & unlock your 10% wholesale rebate (FARM10).</span>
+          </div>
+        </div>
+        <button type="button" onclick="openAccountChooserModal(true)" style="background: var(--color-primary); color: #fff; border: none; padding: 6px 14px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; cursor: pointer; white-space: nowrap;">
+          Sign In with Google
+        </button>
       </div>
 
       <form id="checkoutForm">
@@ -1689,14 +1706,14 @@
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- Scripts -->
-  <script src="js/data.js?v=2.7"></script>
-  <script src="js/cart.js?v=2.7"></script>
-  <script src="js/modal.js?v=2.7"></script>
-  <script src="js/weather.js?v=2.7"></script>
-  <script src="js/gemini.js?v=2.7"></script>
-  <script src="js/hero-slider.js?v=2.7"></script>
-  <script src="js/animal-slider.js?v=2.7"></script>
-  <script src="js/app.js?v=2.7"></script>
+  <script src="js/data.js?v=2.9"></script>
+  <script src="js/cart.js?v=2.9"></script>
+  <script src="js/modal.js?v=2.9"></script>
+  <script src="js/weather.js?v=2.9"></script>
+  <script src="js/gemini.js?v=2.9"></script>
+  <script src="js/hero-slider.js?v=2.9"></script>
+  <script src="js/animal-slider.js?v=2.9"></script>
+  <script src="js/app.js?v=2.9"></script>
 
 </body>
 </html>
