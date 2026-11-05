@@ -657,21 +657,40 @@ async function chooseGoogleAccount(name, email, picture, phone = '', farmName = 
     btn.innerHTML = '<span style="display:inline-block; animation: spin 1s linear infinite;">⏳</span> <span>Connecting ' + email + '...</span>';
   }
 
+  const cleanEmail = email.toLowerCase().trim();
   const cleanName = name || email.split('@')[0];
-  // Do not assign dummy phone numbers (like 9876543210) to new Google accounts
   const userPhone = (phone && phone !== '9876543210') ? phone : '';
-  const userFarm = farmName || (cleanName ? `${cleanName.split(' ')[0]}'s Commercial Farm` : 'My Commercial Farm');
+
+  // Look up existing user in localStorage or users.json to preserve their stable identity
+  let existingUser = null;
+  try {
+    const usersList = JSON.parse(localStorage.getItem('nutriagro_users_list') || '[]');
+    existingUser = usersList.find(u => (u.email && u.email.toLowerCase().trim() === cleanEmail) || (u.phone && userPhone && u.phone === userPhone));
+  } catch (e) {}
+
+  // Stable, permanent userId: Never randomize if user already has an ID!
+  let stableUserId = existingUser?.userId;
+  if (!stableUserId) {
+    let hash = 0;
+    for (let i = 0; i < cleanEmail.length; i++) {
+      hash = ((hash << 5) - hash) + cleanEmail.charCodeAt(i);
+      hash |= 0;
+    }
+    stableUserId = 'GOOGLE-' + Math.abs((hash % 900000) + 100000);
+  }
+
+  const userFarm = farmName || existingUser?.farmName || (cleanName ? `${cleanName.split(' ')[0]}'s Commercial Farm` : 'My Commercial Farm');
 
   const googleUser = {
-    userId: 'GOOGLE-' + Math.floor(100000 + Math.random() * 900000),
-    fullName: cleanName,
-    email: email,
-    picture: picture || '',
-    phone: userPhone,
+    userId: stableUserId,
+    fullName: cleanName || existingUser?.fullName,
+    email: cleanEmail,
+    picture: picture || existingUser?.picture || '',
+    phone: userPhone || existingUser?.phone || '',
     authProvider: 'google',
     farmName: userFarm,
-    farmType: 'Dairy Cattle & Livestock',
-    tier: 'Verified Google Member (10% Rebate)',
+    farmType: existingUser?.farmType || 'Dairy Cattle & Livestock',
+    tier: existingUser?.tier || 'Verified Google Member (10% Rebate)',
     signedInAt: new Date().toISOString()
   };
 
@@ -680,7 +699,7 @@ async function chooseGoogleAccount(name, email, picture, phone = '', farmName = 
     saveGoogleAccountToDevice(googleUser);
 
     let usersList = JSON.parse(localStorage.getItem('nutriagro_users_list') || '[]');
-    const existingIdx = usersList.findIndex(u => (u.email && u.email.toLowerCase() === email.toLowerCase()) || (u.phone && u.phone === userPhone));
+    const existingIdx = usersList.findIndex(u => (u.email && u.email.toLowerCase() === cleanEmail) || (u.phone && u.phone === userPhone));
     if (existingIdx >= 0) {
       usersList[existingIdx] = { ...usersList[existingIdx], ...googleUser };
     } else {
@@ -724,6 +743,10 @@ function bypassAsGuest() {
 }
 
 function signOutUser() {
+  // First notify cart while active key is still known
+  if (window.cart && typeof window.cart.switchUser === 'function') {
+    window.cart.switchUser(null);
+  }
   try {
     localStorage.removeItem('nutriagro_user');
     sessionStorage.removeItem('nutriagro_guest');
