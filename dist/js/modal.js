@@ -241,11 +241,6 @@ function openCheckoutModal() {
       }
       if (addrInput && loggedUser.address) {
         addrInput.value = `${loggedUser.address}, ${loggedUser.state || ''} ${loggedUser.pincode ? '(PIN: ' + loggedUser.pincode + ')' : ''}`.trim();
-        const badge = document.getElementById('autoDetectBadge');
-        if (badge) {
-          badge.textContent = '✓ Saved Farm Profile';
-          badge.style.color = '#10b981';
-        }
       }
     } else {
       // Guest / Not logged in: Unconditionally clear contact inputs to guarantee complete privacy and zero leakage
@@ -292,32 +287,26 @@ function closeCheckoutModal() {
 // Automatically detect Customer Delivery Address via GPS & Reverse Geocoding
 async function autoDetectDeliveryAddress() {
   const addressInput = document.getElementById('checkoutAddress');
-  const badge = document.getElementById('autoDetectBadge');
-  const status = document.getElementById('addressDetectStatus');
+  const detectBtn = document.getElementById('detectLocationBtn');
 
   if (!addressInput) return;
 
-  if (badge) {
-    badge.textContent = '📍 Detecting location...';
-    badge.style.color = '#f59e0b';
+  if (detectBtn) {
+    detectBtn.innerHTML = '<span>⏳</span> Detecting...';
+    detectBtn.disabled = true;
   }
-  if (status) {
-    status.innerHTML = '🛰️ Auto-detecting customer delivery location via GPS & network...';
-  }
+  addressInput.placeholder = 'Detecting delivery address via GPS...';
 
-  function setConfirmedAddress(fullText, sourceLabel) {
+  function setConfirmedAddress(fullText) {
     if (!addressInput) return;
     addressInput.value = fullText;
     addressInput.readOnly = true;
     addressInput.style.backgroundColor = '#f8fafc';
     addressInput.style.color = '#1e293b';
     addressInput.style.cursor = 'default';
-    if (badge) {
-      badge.textContent = `🔒 Auto-Detected (${sourceLabel}) · Locked`;
-      badge.style.color = '#059669';
-    }
-    if (status) {
-      status.innerHTML = `🔒 <strong>Confirmed Delivery Hub:</strong> ${fullText} <span style="color:#059669; font-weight:600;">(Auto-filled via ${sourceLabel} · Locked)</span>`;
+    if (detectBtn) {
+      detectBtn.innerHTML = '<span>🔄</span> Detect Again';
+      detectBtn.disabled = false;
     }
   }
 
