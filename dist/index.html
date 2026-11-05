@@ -2347,378 +2347,190 @@ button, input, select, textarea {
   font-size: 0.88rem;
 }
 
-/* 7. 3D ANIMAL SHOWCASE & LIVESTOCK CAROUSEL */
-.animal-showcase-section {
-  background: 
-    linear-gradient(135deg, rgba(5, 26, 17, 0.95) 0%, rgba(10, 42, 27, 0.92) 50%, rgba(6, 25, 38, 0.96) 100%),
-    url('../assets/images/hero-farm.jpg') center/cover no-repeat fixed;
-  background-attachment: fixed;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  position: relative;
-  overflow: hidden;
-  padding: 24px 0 36px 0;
-}
-
-.animal-showcase-section .section-title {
-  color: #ffffff;
-}
-
-.animal-showcase-section .section-subtitle {
-  color: #c5ded2;
-}
-
-.animal-showcase-section .section-tag {
-  background: rgba(245, 158, 11, 0.22);
-  color: #fcd34d;
-  border: 1px solid rgba(245, 158, 11, 0.45);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-}
-
-.animal-showcase-wrap {
-  max-width: 1200px;
-  margin: 0 auto;
-  perspective: 1200px;
-}
-
-/* Quick Selector Pills */
-.animal-nav-pills {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 32px;
-}
-
-.animal-pill-btn {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1.5px solid rgba(255, 255, 255, 0.18);
-  color: #d1fae5;
-  padding: 10px 20px;
-  border-radius: 30px;
-  font-size: 0.92rem;
-  font-weight: 700;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
-}
-
-.animal-pill-btn .pill-emoji {
-  font-size: 1.15rem;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-}
-
-.animal-pill-btn:hover {
-  background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(245, 158, 11, 0.5);
-  color: #ffffff;
-  transform: translateY(-2px);
-}
-
-.animal-pill-btn.active {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  border-color: #fcd34d;
-  color: #111827;
-  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.45);
-  transform: translateY(-2px) scale(1.03);
-}
-
-/* Carousel Stage */
-.animal-carousel-stage {
-  position: relative;
-  overflow: hidden;
-  border-radius: 24px;
-  background: rgba(15, 23, 42, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1.5px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(245, 158, 11, 0.15) inset;
-}
-
-.animal-carousel-track {
-  display: flex;
-  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+/* 7. 3D ANIMAL SHOWCASE & LIVESTOCK CAROUSEL (Full-Screen Edge-to-Edge Panoramic Slider) */
+.animal-showcase-section.full-screen-slider {
   width: 100%;
+  max-width: 100vw;
+  margin: 0;
+  padding: 0;
+  background: #0b2216;
+  position: relative;
+  overflow: hidden;
+  border-top: none;
+  border-bottom: none;
 }
 
-.animal-slide {
+.full-screen-slider .animal-carousel-stage {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: clamp(340px, 48vw, 620px);
+  background: #0b2216;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.full-screen-slider .animal-carousel-track {
+  display: flex;
+  transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+  width: 100%;
+  height: 100%;
+}
+
+.full-screen-slider .animal-slide {
   min-width: 100%;
+  width: 100%;
+  height: 100%;
+  flex-shrink: 0;
   box-sizing: border-box;
-  opacity: 0.65;
-  transition: opacity 0.5s ease;
+  opacity: 0.75;
+  transition: opacity 0.6s ease;
+  position: relative;
 }
 
-.animal-slide.active {
+.full-screen-slider .animal-slide.active {
   opacity: 1;
 }
 
-/* 3D Card Structure */
-.animal-3d-card {
-  display: grid;
-  grid-template-columns: 1.25fr 1fr;
-  min-height: 520px;
-  transform-style: preserve-3d;
-  transition: transform 0.4s ease-out;
-}
-
-/* Visual Column */
-.animal-card-visual {
+.full-screen-slider .animal-full-visual {
   position: relative;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
-  background: #020617;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 380px;
+  background: #0b2216;
 }
 
-.animal-banner-img {
+.full-screen-slider .animal-full-banner-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-  filter: contrast(1.05) saturate(1.08);
+  object-position: center 38%;
+  display: block;
+  filter: contrast(1.05) saturate(1.1);
+  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
 }
 
-.animal-3d-card:hover .animal-banner-img {
-  transform: scale(1.04);
+.full-screen-slider .animal-slide.active .animal-full-banner-img {
+  transform: scale(1.02);
 }
 
-.animal-visual-gradient {
+/* Seamless multi-directional blend overlay with site dark emerald theme */
+.full-screen-slider .animal-blend-gradient {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.05) 50%, rgba(0,0,0,0.65) 100%);
   pointer-events: none;
+  background: 
+    linear-gradient(to bottom, rgba(11, 34, 22, 0.7) 0%, rgba(11, 34, 22, 0.15) 15%, transparent 35%),
+    linear-gradient(to top, #0b2216 0%, rgba(11, 34, 22, 0.8) 12%, rgba(11, 34, 22, 0.25) 28%, transparent 55%),
+    linear-gradient(to right, rgba(11, 34, 22, 0.45) 0%, transparent 10%, transparent 90%, rgba(11, 34, 22, 0.45) 100%);
 }
 
-/* Floating 3D Stat Badges */
-.floating-stat-badge {
-  position: absolute;
-  background: rgba(15, 23, 42, 0.82);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 16px;
-  padding: 10px 16px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
-  z-index: 4;
-  animation: floatBadge 4s ease-in-out infinite alternate;
-}
-
-.floating-stat-badge.stat-top-left {
-  top: 20px;
-  left: 20px;
-  border-left: 3.5px solid #10b981;
-}
-
-.floating-stat-badge.stat-bottom-right {
-  bottom: 24px;
-  right: 24px;
-  border-left: 3.5px solid #f59e0b;
-  animation-delay: 2s;
-}
-
-@keyframes floatBadge {
-  0% { transform: translateY(0px); }
-  100% { transform: translateY(-6px); }
-}
-
-.stat-badge-icon {
-  font-size: 1.5rem;
-}
-
-.floating-stat-badge strong {
-  display: block;
-  font-size: 0.88rem;
-  color: #ffffff;
-  font-weight: 800;
-  line-height: 1.2;
-}
-
-.floating-stat-badge small {
-  display: block;
-  font-size: 0.72rem;
-  color: #94a3b8;
-  font-weight: 600;
-  margin-top: 1px;
-}
-
-/* Info Column */
-.animal-card-info {
-  padding: 38px 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  background: linear-gradient(145deg, rgba(8, 30, 20, 0.95) 0%, rgba(15, 45, 30, 0.92) 100%);
-  color: #ffffff;
-  position: relative;
-}
-
-.animal-badge-pill {
-  display: inline-block;
-  align-self: flex-start;
-  padding: 4px 12px;
-  border-radius: 20px;
-  background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
-  font-size: 0.78rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 12px;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-}
-
-.animal-headline {
-  font-size: 1.65rem;
-  font-weight: 800;
-  color: #ffffff;
-  margin-bottom: 12px;
-  line-height: 1.25;
-}
-
-.animal-description {
-  font-size: 0.92rem;
-  color: #cbd5e1;
-  line-height: 1.6;
-  margin-bottom: 22px;
-}
-
-/* KPI Mini Grid */
-.animal-kpi-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 26px;
-}
-
-.kpi-mini-box {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 12px 10px;
-  text-align: center;
-}
-
-.kpi-mini-label {
-  display: block;
-  font-size: 0.7rem;
-  color: #94a3b8;
-  text-transform: uppercase;
-  font-weight: 700;
-  margin-bottom: 4px;
-}
-
-.kpi-mini-val {
-  display: block;
-  font-size: 0.92rem;
-  color: #fcd34d;
-  font-weight: 800;
-}
-
-/* Action Buttons */
-.animal-card-footer-btns {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-/* Arrow Controls */
-.animal-nav-arrow {
+/* Glassmorphic Navigation Arrows */
+.full-screen-slider .animal-nav-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  background: rgba(11, 34, 22, 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
   color: #ffffff;
-  font-size: 1.8rem;
+  font-size: 2rem;
   line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 10;
-  transition: all 0.25s ease;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
-.animal-nav-arrow:hover {
+.full-screen-slider .animal-nav-arrow:hover {
   background: #f59e0b;
   color: #111827;
   border-color: #fcd34d;
   transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 12px 30px rgba(245, 158, 11, 0.45);
 }
 
-.animal-nav-arrow.arrow-prev {
-  left: 18px;
+.full-screen-slider .animal-nav-arrow.arrow-prev {
+  left: 28px;
 }
 
-.animal-nav-arrow.arrow-next {
-  right: 18px;
+.full-screen-slider .animal-nav-arrow.arrow-next {
+  right: 28px;
 }
 
-/* Indicator Dots */
-.animal-slider-dots {
+/* Slide Indicator Dots */
+.full-screen-slider .animal-slider-dots {
   position: absolute;
-  bottom: 18px;
+  bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 8px;
+  gap: 10px;
   z-index: 10;
+  padding: 6px 14px;
+  background: rgba(11, 34, 22, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.slider-dot {
+.full-screen-slider .slider-dot {
   width: 10px;
   height: 10px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.4);
   border: none;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.slider-dot.active {
-  width: 32px;
+.full-screen-slider .slider-dot:hover {
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.full-screen-slider .slider-dot.active {
+  width: 34px;
   background: #f59e0b;
-  box-shadow: 0 0 12px rgba(245, 158, 11, 0.6);
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.7);
 }
 
 /* Responsive */
-@media (max-width: 992px) {
-  .animal-3d-card {
-    grid-template-columns: 1fr;
+@media (max-width: 768px) {
+  .full-screen-slider .animal-carousel-stage {
+    height: clamp(260px, 60vw, 400px);
   }
-  .animal-card-visual {
-    min-height: 280px;
-    max-height: 360px;
+  .full-screen-slider .animal-nav-arrow {
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
   }
-  .animal-card-info {
-    padding: 24px 20px;
+  .full-screen-slider .animal-nav-arrow.arrow-prev {
+    left: 12px;
   }
-  .animal-headline {
-    font-size: 1.35rem;
+  .full-screen-slider .animal-nav-arrow.arrow-next {
+    right: 12px;
   }
-  .animal-kpi-row {
-    grid-template-columns: 1fr 1fr;
+  .full-screen-slider .animal-slider-dots {
+    bottom: 14px;
+    gap: 8px;
+    padding: 4px 10px;
   }
-  .animal-nav-arrow {
-    display: none;
+  .full-screen-slider .slider-dot {
+    width: 8px;
+    height: 8px;
+  }
+  .full-screen-slider .slider-dot.active {
+    width: 24px;
   }
 }
 
@@ -6664,309 +6476,70 @@ html, body {
 
   <main id="mainContent">
 
-    <!-- 1. 3D Animal Nutrition & Livestock Showcase Carousel (Top Opening Presentation) -->
-    <section class="section-spacer animal-showcase-section" id="animalShowcaseSection">
-      <div class="container">
+    <!-- 1. Full-Screen 3D Animal Showcase Slider (Edge-to-Edge Panoramic Presentation) -->
+    <section class="animal-showcase-section full-screen-slider" id="animalShowcaseSection">
+      <!-- Carousel Stage & Viewport -->
+      <div class="animal-carousel-stage" id="animalCarouselStage">
         
-        <!-- 3D Animal Carousel Wrap -->
-        <div class="animal-showcase-wrap">
-
-          <!-- Carousel Stage & Viewport -->
-          <div class="animal-carousel-stage" id="animalCarouselStage">
-            
-            <!-- Slide Track -->
-            <div class="animal-carousel-track" id="animalCarouselTrack">
-              
-              <!-- SLIDE 1: Dairy Cattle -->
-              <div class="animal-slide active" data-index="0">
-                <div class="animal-3d-card">
-                  <div class="animal-card-visual">
-                    <img src="assets/images/banner-3d-cattle.jpg" alt="3D Dairy Cattle & Calves" class="animal-banner-img" loading="lazy" />
-                    <div class="animal-visual-gradient"></div>
-                    <div class="floating-stat-badge stat-top-left">
-                      <span class="stat-badge-icon">🥛</span>
-                      <div>
-                        <strong>+2.5 to 3.0 Litres / Day</strong>
-                        <small>Average Milk Yield Surge</small>
-                      </div>
-                    </div>
-                    <div class="floating-stat-badge stat-bottom-right">
-                      <span class="stat-badge-icon">🌾</span>
-                      <div>
-                        <strong>22% Bypass Protein</strong>
-                        <small>Rumen-Protected Nutrition</small>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="animal-card-info">
-                    <div class="animal-badge-pill">Ruminant & Dairy Nutrition</div>
-                    <h3 class="animal-headline">High-Yield Dairy Cattle & Calves</h3>
-                    <p class="animal-description">
-                      Fortified with rumen-protected bypass fats, chelated zinc, bio-available calcium, and live Saccharomyces yeast cultures. Stimulates peak lactation curves while guarding against milk fever, ketosis, and post-calving energy deficits.
-                    </p>
-                    <div class="animal-kpi-row">
-                      <div class="kpi-mini-box">
-                        <span class="kpi-mini-label">Feed Conversion</span>
-                        <strong class="kpi-mini-val">1.8 : 1 Ratio</strong>
-                      </div>
-                      <div class="kpi-mini-box">
-                        <span class="kpi-mini-label">Digestibility</span>
-                        <strong class="kpi-mini-val">88.4% Screened</strong>
-                      </div>
-                      <div class="kpi-mini-box">
-                        <span class="kpi-mini-label">Target Breeds</span>
-                        <strong class="kpi-mini-val">Holstein & Jersey</strong>
-                      </div>
-                    </div>
-                    <div class="animal-card-footer-btns">
-                      <button type="button" class="btn btn-gold" onclick="filterFromHero('cattle'); document.getElementById('productsSection').scrollIntoView({behavior:'smooth'});">
-                        <span>Shop Dairy Cattle Feeds</span>
-                        <span>→</span>
-                      </button>
-                      <a href="tel:18008904567" class="btn btn-secondary">
-                        <span>📞 Consult Agronomist</span>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- SLIDE 2: Poultry & Broilers -->
-              <div class="animal-slide" data-index="1">
-                <div class="animal-3d-card">
-                  <div class="animal-card-visual">
-                    <img src="assets/images/banner-3d-poultry.jpg" alt="3D Poultry & Broilers" class="animal-banner-img" loading="lazy" />
-                    <div class="animal-visual-gradient"></div>
-                    <div class="floating-stat-badge stat-top-left">
-                      <span class="stat-badge-icon">⚡</span>
-                      <div>
-                        <strong>1.45 Feed Ratio (FCR)</strong>
-                        <small>High Muscle Deposition</small>
-                      </div>
-                    </div>
-                    <div class="floating-stat-badge stat-bottom-right">
-                      <span class="stat-badge-icon">🍗</span>
-                      <div>
-                        <strong>35-Day Target Weight</strong>
-                        <small>2.2+ kg Broiler Harvest</small>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="animal-card-info">
-                    <div class="animal-badge-pill" style="color: #f59e0b; background: rgba(245, 158, 11, 0.15);">Poultry & Avian Performance</div>
-                    <h3 class="animal-headline">Commercial Poultry, Broilers & Layers</h3>
-                    <p class="animal-description">
-                      Formulated with digestible amino acids (lysine and methionine), coccidiosis natural barriers, and organic selenium. Maximizes broiler breast meat yield, promotes vibrant yellow shanks, and strengthens layer eggshell calcification.
-                    </p>
-                    <div class="animal-kpi-row">
-                      <div class="kpi-mini-box">
-                        <span class="kpi-mini-label">Feed Conversion</span>
-                        <strong class="kpi-mini-val">1.45 : 1 FCR</strong>
-                      </div>
-                      <div class="kpi-mini-box">
-                        <span class="kpi-mini-label">Crude Protein</span>
-                        <strong class="kpi-mini-val">21% Starter / 19% Finisher</strong>
-                      </div>
-                      <div class="kpi-mini-box">
-                        <span class="kpi-mini-label">Target Flocks</span>
-                        <strong class="kpi-mini-val">Broilers, BV-300 & Layers</strong>
-                      </div>
-                    </div>
-                    <div class="animal-card-footer-btns">
-                      <button type="button" class="btn btn-gold" onclick="filterFromHero('poultry'); document.getElementById('productsSection').scrollIntoView({behavior:'smooth'});">
-                        <span>Shop Poultry Feeds</span>
-                        <span>→</span>
-                      </button>
-                      <a href="tel:18008904567" class="btn btn-secondary">
-                        <span>📞 Consult Agronomist</span>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- SLIDE 3: Goats & Sheep -->
-              <div class="animal-slide" data-index="2">
-                <div class="animal-3d-card">
-                  <div class="animal-card-visual">
-                    <img src="assets/images/banner-3d-goat.jpg" alt="3D Goats & Sheep" class="animal-banner-img" loading="lazy" />
-                    <div class="animal-visual-gradient"></div>
-                    <div class="floating-stat-badge stat-top-left">
-                      <span class="stat-badge-icon">🐐</span>
-                      <div>
-                        <strong>+32% Daily Weight Gain</strong>
-                        <small>Meat Goat Pellets</small>
-                      </div>
-                    </div>
-                    <div class="floating-stat-badge stat-bottom-right">
-                      <span class="stat-badge-icon">🛡️</span>
-                      <div>
-                        <strong>Zero Acidosis Risk</strong>
-                        <small>Buffered Fiber Complex</small>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="animal-card-info">
-                    <div class="animal-badge-pill" style="color: #10b981; background: rgba(16, 185, 129, 0.15);">Caprine & Ovine Nutrition</div>
-                    <h3 class="animal-headline">Boer Goats, Dairy Does & Sheep</h3>
-                    <p class="animal-description">
-                      Precision small-ruminant ration combining steam-cracked grains, protected sulfur, and balanced calcium-to-phosphorus ratios to prevent urinary calculi. Promotes strong kid survival rates, healthy fleece quality, and rapid frame development.
-                    </p>
-                    <div class="animal-kpi-row">
-                      <div class="kpi-mini-box">
-                        <span class="kpi-mini-label">Daily Gain</span>
-                        <strong class="kpi-mini-val">180 - 220 g/day</strong>
-                      </div>
-                      <div class="kpi-mini-box">
-                        <span class="kpi-mini-label">Energy Density</span>
-                        <strong class="kpi-mini-val">2.8 Mcal/kg ME</strong>
-                      </div>
-                      <div class="kpi-mini-box">
-                        <span class="kpi-mini-label">Target Breeds</span>
-                        <strong class="kpi-mini-val">Boer, Sirohi, Barbari & Nellore</strong>
-                      </div>
-                    </div>
-                    <div class="animal-card-footer-btns">
-                      <button type="button" class="btn btn-gold" onclick="filterFromHero('goat'); document.getElementById('productsSection').scrollIntoView({behavior:'smooth'});">
-                        <span>Shop Goat & Sheep Feeds</span>
-                        <span>→</span>
-                      </button>
-                      <a href="tel:18008904567" class="btn btn-secondary">
-                        <span>📞 Consult Agronomist</span>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- SLIDE 4: Aquaculture & Fish -->
-              <div class="animal-slide" data-index="3">
-                <div class="animal-3d-card">
-                  <div class="animal-card-visual">
-                    <img src="assets/images/banner-3d-aqua.jpg" alt="3D Aquaculture & Fish" class="animal-banner-img" loading="lazy" />
-                    <div class="animal-visual-gradient"></div>
-                    <div class="floating-stat-badge stat-top-left">
-                      <span class="stat-badge-icon">🌊</span>
-                      <div>
-                        <strong>98% Water Stability</strong>
-                        <small>Extruded Floating Pellets</small>
-                      </div>
-                    </div>
-                    <div class="floating-stat-badge stat-bottom-right">
-                      <span class="stat-badge-icon">🐟</span>
-                      <div>
-                        <strong>32% Marine Protein</strong>
-                        <small>Omega-3 & Carotenoid Rich</small>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="animal-card-info">
-                    <div class="animal-badge-pill" style="color: #06b6d4; background: rgba(6, 182, 212, 0.15);">Freshwater & Marine Aquaculture</div>
-                    <h3 class="animal-headline">Aquaculture, Tilapia, Carp & Shrimp</h3>
-                    <p class="animal-description">
-                      High-buoyancy extruded micro-pellets engineered to resist water disintegration for over 2 hours, preserving dissolved oxygen and water clarity. Packed with marine fishmeal, spirulina, and essential phospholipids for robust immunity.
-                    </p>
-                    <div class="animal-kpi-row">
-                      <div class="kpi-mini-box">
-                        <span class="kpi-mini-label">Buoyancy</span>
-                        <strong class="kpi-mini-val">100% Surface Float</strong>
-                      </div>
-                      <div class="kpi-mini-box">
-                        <span class="kpi-mini-label">FCR Ratio</span>
-                        <strong class="kpi-mini-val">1.25 : 1 Biomass</strong>
-                      </div>
-                      <div class="kpi-mini-box">
-                        <span class="kpi-mini-label">Target Species</span>
-                        <strong class="kpi-mini-val">Tilapia, Rohu, Catla & Pangasius</strong>
-                      </div>
-                    </div>
-                    <div class="animal-card-footer-btns">
-                      <button type="button" class="btn btn-gold" onclick="filterFromHero('aqua'); document.getElementById('productsSection').scrollIntoView({behavior:'smooth'});">
-                        <span>Shop Aquaculture Feeds</span>
-                        <span>→</span>
-                      </button>
-                      <a href="tel:18008904567" class="btn btn-secondary">
-                        <span>📞 Consult Agronomist</span>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- SLIDE 5: Swine & Pigs -->
-              <div class="animal-slide" data-index="4">
-                <div class="animal-3d-card">
-                  <div class="animal-card-visual">
-                    <img src="assets/images/banner-3d-swine.jpg" alt="3D Swine & Pigs" class="animal-banner-img" loading="lazy" />
-                    <div class="animal-visual-gradient"></div>
-                    <div class="floating-stat-badge stat-top-left">
-                      <span class="stat-badge-icon">🐖</span>
-                      <div>
-                        <strong>Accelerated Lean Growth</strong>
-                        <small>Optimal Lysine Profile</small>
-                      </div>
-                    </div>
-                    <div class="floating-stat-badge stat-bottom-right">
-                      <span class="stat-badge-icon">🌱</span>
-                      <div>
-                        <strong>Probiotic Gut Shield</strong>
-                        <small>Zero Post-Weaning Scours</small>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="animal-card-info">
-                    <div class="animal-badge-pill" style="color: #ec4899; background: rgba(236, 72, 153, 0.15);">Porcine Nutrition & Swine Tech</div>
-                    <h3 class="animal-headline">Swine, Sows & Market Grower Pigs</h3>
-                    <p class="animal-description">
-                      Balanced digestible lysine to net energy formulation supporting maximum lean tissue growth without excess backfat. Enriched with gut acidifiers, phytase enzymes, and zinc oxide for optimal nutrient bioavailability and zero scour outbreaks.
-                    </p>
-                    <div class="animal-kpi-row">
-                      <div class="kpi-mini-box">
-                        <span class="kpi-mini-label">Finishing Weight</span>
-                        <strong class="kpi-mini-val">100 kg in 5.5 Months</strong>
-                      </div>
-                      <div class="kpi-mini-box">
-                        <span class="kpi-mini-label">Feed Conversion</span>
-                        <strong class="kpi-mini-val">2.3 : 1 Feed Efficiency</strong>
-                      </div>
-                      <div class="kpi-mini-box">
-                        <span class="kpi-mini-label">Target Breeds</span>
-                        <strong class="kpi-mini-val">Landrace, Large White & Duroc</strong>
-                      </div>
-                    </div>
-                    <div class="animal-card-footer-btns">
-                      <button type="button" class="btn btn-gold" onclick="filterFromHero('swine'); document.getElementById('productsSection').scrollIntoView({behavior:'smooth'});">
-                        <span>Shop Swine Feeds</span>
-                        <span>→</span>
-                      </button>
-                      <a href="tel:18008904567" class="btn btn-secondary">
-                        <span>📞 Consult Agronomist</span>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-            </div> <!-- /animal-carousel-track -->
-
-            <!-- Navigation Controls -->
-            <button type="button" class="animal-nav-arrow arrow-prev" onclick="prevAnimalSlide()" aria-label="Previous Slide">‹</button>
-            <button type="button" class="animal-nav-arrow arrow-next" onclick="nextAnimalSlide()" aria-label="Next Slide">›</button>
-
-            <!-- Slide Dots -->
-            <div class="animal-slider-dots" id="animalSliderDots">
-              <button type="button" class="slider-dot active" onclick="switchAnimalSlide(0)" aria-label="Slide 1"></button>
-              <button type="button" class="slider-dot" onclick="switchAnimalSlide(1)" aria-label="Slide 2"></button>
-              <button type="button" class="slider-dot" onclick="switchAnimalSlide(2)" aria-label="Slide 3"></button>
-              <button type="button" class="slider-dot" onclick="switchAnimalSlide(3)" aria-label="Slide 4"></button>
-              <button type="button" class="slider-dot" onclick="switchAnimalSlide(4)" aria-label="Slide 5"></button>
+        <!-- Slide Track -->
+        <div class="animal-carousel-track" id="animalCarouselTrack">
+          
+          <!-- SLIDE 1: Dairy Cattle -->
+          <div class="animal-slide active" data-index="0">
+            <div class="animal-full-visual">
+              <img src="assets/images/banner-3d-cattle.jpg" alt="3D Dairy Cattle & Calves" class="animal-full-banner-img" />
+              <div class="animal-blend-gradient"></div>
             </div>
+          </div>
 
-          </div> <!-- /animal-carousel-stage -->
+          <!-- SLIDE 2: Poultry & Broilers -->
+          <div class="animal-slide" data-index="1">
+            <div class="animal-full-visual">
+              <img src="assets/images/banner-3d-poultry.jpg" alt="3D Poultry & Broilers" class="animal-full-banner-img" loading="lazy" />
+              <div class="animal-blend-gradient"></div>
+            </div>
+          </div>
 
-        </div> <!-- /animal-showcase-wrap -->
+          <!-- SLIDE 3: Goats & Sheep -->
+          <div class="animal-slide" data-index="2">
+            <div class="animal-full-visual">
+              <img src="assets/images/banner-3d-goat.jpg" alt="3D Goats & Sheep" class="animal-full-banner-img" loading="lazy" />
+              <div class="animal-blend-gradient"></div>
+            </div>
+          </div>
 
-      </div>
+          <!-- SLIDE 4: Aquaculture & Fish -->
+          <div class="animal-slide" data-index="3">
+            <div class="animal-full-visual">
+              <img src="assets/images/banner-3d-aqua.jpg" alt="3D Aquaculture & Fish" class="animal-full-banner-img" loading="lazy" />
+              <div class="animal-blend-gradient"></div>
+            </div>
+          </div>
+
+          <!-- SLIDE 5: Swine & Pigs -->
+          <div class="animal-slide" data-index="4">
+            <div class="animal-full-visual">
+              <img src="assets/images/banner-3d-swine.jpg" alt="3D Swine & Pigs" class="animal-full-banner-img" loading="lazy" />
+              <div class="animal-blend-gradient"></div>
+            </div>
+          </div>
+
+        </div> <!-- /animal-carousel-track -->
+
+        <!-- Navigation Controls -->
+        <button type="button" class="animal-nav-arrow arrow-prev" onclick="prevAnimalSlide()" aria-label="Previous Slide">‹</button>
+        <button type="button" class="animal-nav-arrow arrow-next" onclick="nextAnimalSlide()" aria-label="Next Slide">›</button>
+
+        <!-- Slide Dots -->
+        <div class="animal-slider-dots" id="animalSliderDots">
+          <button type="button" class="slider-dot active" onclick="switchAnimalSlide(0)" aria-label="Slide 1"></button>
+          <button type="button" class="slider-dot" onclick="switchAnimalSlide(1)" aria-label="Slide 2"></button>
+          <button type="button" class="slider-dot" onclick="switchAnimalSlide(2)" aria-label="Slide 3"></button>
+          <button type="button" class="slider-dot" onclick="switchAnimalSlide(3)" aria-label="Slide 4"></button>
+          <button type="button" class="slider-dot" onclick="switchAnimalSlide(4)" aria-label="Slide 5"></button>
+        </div>
+
+      </div> <!-- /animal-carousel-stage -->
     </section>
 
     <!-- 2. Hero Section with Dynamic Sliding Cattle Backgrounds -->

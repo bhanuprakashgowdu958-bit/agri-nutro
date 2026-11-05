@@ -122,9 +122,9 @@
     }
   }
 
-  // Interactive 3D Perspective Tilt on Mouse Movement
+  // Subtle interactive parallax depth on mouse movement
   function handleCardTilt(e) {
-    if (window.innerWidth < 992) return; // Disable tilt on tablet/mobile
+    if (window.innerWidth < 992) return; // Disable on tablet/mobile
 
     const stage = document.getElementById('animalCarouselStage');
     if (!stage) return;
@@ -137,20 +137,19 @@
     const normalizedX = (mouseX / rect.width) - 0.5;
     const normalizedY = (mouseY / rect.height) - 0.5;
 
-    // Moderate tilt angles for subtle 3D realism
-    const tiltX = -(normalizedY * 6).toFixed(2);
-    const tiltY = (normalizedX * 8).toFixed(2);
+    const moveX = (normalizedX * -12).toFixed(1);
+    const moveY = (normalizedY * -8).toFixed(1);
 
-    const activeSlide = stage.querySelector('.animal-slide.active .animal-3d-card');
-    if (activeSlide) {
-      activeSlide.style.transform = `perspective(1200px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale3d(1.008, 1.008, 1.008)`;
+    const activeImg = stage.querySelector('.animal-slide.active .animal-full-banner-img');
+    if (activeImg) {
+      activeImg.style.transform = `scale(1.03) translate(${moveX}px, ${moveY}px)`;
     }
   }
 
   function resetTilt() {
-    const cards = document.querySelectorAll('.animal-3d-card');
-    cards.forEach(card => {
-      card.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+    const images = document.querySelectorAll('.animal-full-banner-img');
+    images.forEach(img => {
+      img.style.transform = 'scale(1) translate(0px, 0px)';
     });
   }
 
