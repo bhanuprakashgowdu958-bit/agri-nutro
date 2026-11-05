@@ -461,9 +461,10 @@
 
       <!-- Section: Dynamic Auth Section (Sign In or Sign Out) -->
       <div class="mobile-drawer-section" id="mobileDrawerAuthSection">
-        <button type="button" class="mobile-drawer-item" style="color: #dc2626;" onclick="signOutUser(); closeMobileNavDrawer();">
-          <span class="drawer-item-icon">🚪</span>
-          <span class="drawer-item-text">Sign Out</span>
+        <button type="button" class="mobile-drawer-item" style="color: var(--color-primary); font-weight: 700;" onclick="closeMobileNavDrawer(); openAccountChooserModal();">
+          <span class="drawer-item-icon">🔑</span>
+          <span class="drawer-item-text">Sign In / Register</span>
+          <span class="drawer-item-arrow">›</span>
         </button>
       </div>
     </div>
@@ -1711,14 +1712,14 @@
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- Scripts -->
-  <script src="js/data.js?v=4.0"></script>
-  <script src="js/cart.js?v=4.0"></script>
-  <script src="js/modal.js?v=4.0"></script>
-  <script src="js/weather.js?v=4.0"></script>
-  <script src="js/gemini.js?v=4.0"></script>
-  <script src="js/hero-slider.js?v=4.0"></script>
-  <script src="js/animal-slider.js?v=4.0"></script>
-  <script src="js/app.js?v=4.0"></script>
+  <script src="js/data.js?v=4.1"></script>
+  <script src="js/cart.js?v=4.1"></script>
+  <script src="js/modal.js?v=4.1"></script>
+  <script src="js/weather.js?v=4.1"></script>
+  <script src="js/gemini.js?v=4.1"></script>
+  <script src="js/hero-slider.js?v=4.1"></script>
+  <script src="js/animal-slider.js?v=4.1"></script>
+  <script src="js/app.js?v=4.1"></script>
 
 </body>
 </html>

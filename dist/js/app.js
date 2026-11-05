@@ -798,6 +798,33 @@ function signOutUser() {
   openAccountChooserModal();
 }
 
+function signOutGuest() {
+  try {
+    sessionStorage.removeItem('nutriagro_guest');
+    sessionStorage.removeItem('nutriagro_pending_checkout_order');
+    sessionStorage.removeItem('nutriagro_guest_explicit_cart');
+    localStorage.removeItem('nutriagro_cart_guest');
+  } catch (e) {}
+
+  if (window.cart && typeof window.cart.switchUser === 'function') {
+    window.cart.switchUser(null);
+  }
+
+  onUserSessionChange(null);
+  closeMobileNavDrawer();
+  closeUserMenu();
+
+  if (window.cart && typeof window.cart.showToast === 'function') {
+    window.cart.showToast('Exited Guest Mode. Please sign in to your farm account.', 'info');
+  }
+
+  // Automatically pop up Google / Account Sign-In modal
+  setTimeout(() => {
+    openAccountChooserModal();
+  }, 250);
+}
+window.signOutGuest = signOutGuest;
+
 let _mobileDrawerScrollY = 0;
 
 function openMobileNavDrawer() {
@@ -886,40 +913,22 @@ function handleHeaderAccountClick(e) {
     e.preventDefault();
     e.stopPropagation();
   }
-  // On mobile devices (<= 860px), open the mobile navigation drawer instead of desktop dropdown
-  if (window.innerWidth <= 860) {
-    openMobileNavDrawer();
-    return;
-  }
   try {
     const user = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
     if (user && user.fullName) {
-      const dropdown = document.getElementById('userMenuDropdown');
-      if (dropdown) dropdown.classList.toggle('show');
-    } else {
-      const gateway = document.getElementById('googleAuthGateway');
-      if (gateway) {
-        gateway.style.display = 'flex';
-        gateway.classList.remove('hidden');
-        if (typeof switchModalAuthMode === 'function') {
-          switchModalAuthMode('login');
-        }
-        const card = gateway.querySelector('.gateway-card');
-        if (card) {
-          card.style.animation = 'none';
-          card.offsetHeight; // force reflow
-          card.style.animation = 'gatewayPop 0.35s cubic-bezier(0.16, 1, 0.3, 1)';
-        }
-        setTimeout(() => {
-          const emailInput = document.getElementById('mLoginEmail');
-          if (emailInput) emailInput.focus();
-        }, 100);
+      // Authenticated user: open drawer on mobile or toggle dropdown on desktop
+      if (window.innerWidth <= 860) {
+        openMobileNavDrawer();
       } else {
-        window.location.href = 'signup.html?tab=login';
+        const dropdown = document.getElementById('userMenuDropdown');
+        if (dropdown) dropdown.classList.toggle('show');
       }
+    } else {
+      // Unauthenticated / Guest: ALWAYS open Sign In modal directly on both Mobile & Desktop!
+      openAccountChooserModal();
     }
   } catch (err) {
-    window.location.href = 'signup.html?tab=login';
+    openAccountChooserModal();
   }
 }
 
@@ -1012,11 +1021,20 @@ function updateHeaderUserStatus() {
       if (emailEl) emailEl.textContent = 'Not signed in';
 
       if (drawerUserInfo) {
+        drawerUserInfo.onclick = () => {
+          closeMobileNavDrawer();
+          openAccountChooserModal();
+        };
+        drawerUserInfo.style.cursor = 'pointer';
+        drawerUserInfo.title = 'Click to Sign In with Google';
         drawerUserInfo.innerHTML = `
           <div style="display: flex; align-items: center; gap: 12px;">
             <div style="width: 44px; height: 44px; border-radius: 50%; background: #f1f5f9; color: #64748b; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; border: 1.5px solid #cbd5e1;">👤</div>
             <div style="min-width: 0; flex: 1;">
-              <div style="font-weight: 800; font-size: 0.96rem; color: #1e293b;">Guest Farmer</div>
+              <div style="font-weight: 800; font-size: 0.96rem; color: #1e293b; display: flex; align-items: center; gap: 6px;">
+                <span>Guest Farmer</span>
+                <span style="font-size: 0.68rem; background: #e0f2fe; color: #0284c7; padding: 1px 6px; border-radius: 4px; font-weight: 700;">Tap to Sign In</span>
+              </div>
               <div style="font-size: 0.78rem; color: #64748b;">Sign in for farm discounts & tracking</div>
             </div>
           </div>
@@ -1027,11 +1045,17 @@ function updateHeaderUserStatus() {
       }
       if (drawerAuthSection) {
         drawerAuthSection.innerHTML = `
-          <button type="button" class="mobile-drawer-item" style="color: var(--color-primary); font-weight: 700;" onclick="closeMobileNavDrawer(); handleHeaderAccountClick();">
-            <span class="drawer-item-icon">🔑</span>
-            <span class="drawer-item-text">Sign In / Register</span>
-            <span class="drawer-item-arrow">›</span>
-          </button>
+          <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+            <button type="button" class="mobile-drawer-item" style="color: var(--color-primary); font-weight: 700; background: #ecfdf5; border: 1.5px solid #10b981; border-radius: 8px; padding: 12px 14px;" onclick="closeMobileNavDrawer(); openAccountChooserModal();">
+              <span class="drawer-item-icon">🔑</span>
+              <span class="drawer-item-text" style="font-size: 0.92rem;">Sign In / Choose Account</span>
+              <span class="drawer-item-arrow">›</span>
+            </button>
+            <button type="button" class="mobile-drawer-item" style="color: #dc2626; font-weight: 600; padding: 10px 14px; border-radius: 8px;" onclick="signOutGuest();">
+              <span class="drawer-item-icon">🚪</span>
+              <span class="drawer-item-text">Exit Guest Mode / Sign Out</span>
+            </button>
+          </div>
         `;
       }
     }
