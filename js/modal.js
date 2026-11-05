@@ -213,7 +213,6 @@ function openCheckoutModal() {
     const loggedUser = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
     const nameInput = document.getElementById('checkoutFarmerName');
     const phoneInput = document.getElementById('checkoutPhone');
-    const phoneBadge = document.getElementById('checkoutPhoneBadge');
     const altPhoneInput = document.getElementById('checkoutAltPhone');
     const addrInput = document.getElementById('checkoutAddress');
 
@@ -231,11 +230,6 @@ function openCheckoutModal() {
           phoneInput.style.border = '1.5px solid #cbd5e1';
           phoneInput.style.color = '#1e293b';
           phoneInput.style.cursor = 'default';
-          if (phoneBadge) {
-            phoneBadge.innerHTML = '🔒 Auto-fetched from Profile (Locked)';
-            phoneBadge.style.color = '#059669';
-            phoneBadge.style.display = 'inline-block';
-          }
         } else {
           phoneInput.readOnly = false;
           phoneInput.removeAttribute('tabindex');
@@ -243,9 +237,6 @@ function openCheckoutModal() {
           phoneInput.style.border = '';
           phoneInput.style.color = '';
           phoneInput.style.cursor = '';
-          if (phoneBadge) {
-            phoneBadge.style.display = 'none';
-          }
         }
       }
       if (addrInput && loggedUser.address) {
@@ -269,9 +260,6 @@ function openCheckoutModal() {
         phoneInput.style.border = '';
         phoneInput.style.color = '';
         phoneInput.style.cursor = '';
-      }
-      if (phoneBadge) {
-        phoneBadge.style.display = 'none';
       }
     }
 

@@ -253,7 +253,6 @@ function onUserSessionChange(newUser, options = { mergeGuestCart: false }) {
   // 2. Isolate Checkout Form: Auto-fill active account profile or wipe clean
   const checkoutName = document.getElementById('checkoutFarmerName');
   const checkoutPhone = document.getElementById('checkoutPhone');
-  const checkoutPhoneBadge = document.getElementById('checkoutPhoneBadge');
   const checkoutAddress = document.getElementById('checkoutAddress');
   const checkoutAdditional = document.getElementById('checkoutAdditionalAddress');
 
@@ -268,11 +267,6 @@ function onUserSessionChange(newUser, options = { mergeGuestCart: false }) {
         checkoutPhone.style.border = '1.5px solid #cbd5e1';
         checkoutPhone.style.color = '#1e293b';
         checkoutPhone.style.cursor = 'default';
-        if (checkoutPhoneBadge) {
-          checkoutPhoneBadge.innerHTML = '🔒 Auto-fetched from Profile (Locked)';
-          checkoutPhoneBadge.style.color = '#059669';
-          checkoutPhoneBadge.style.display = 'inline-block';
-        }
       } else {
         checkoutPhone.readOnly = false;
         checkoutPhone.removeAttribute('tabindex');
@@ -280,7 +274,6 @@ function onUserSessionChange(newUser, options = { mergeGuestCart: false }) {
         checkoutPhone.style.border = '';
         checkoutPhone.style.color = '';
         checkoutPhone.style.cursor = '';
-        if (checkoutPhoneBadge) checkoutPhoneBadge.style.display = 'none';
       }
     }
     if (checkoutAddress && newUser.address) {
@@ -298,7 +291,6 @@ function onUserSessionChange(newUser, options = { mergeGuestCart: false }) {
       checkoutPhone.style.color = '';
       checkoutPhone.style.cursor = '';
     }
-    if (checkoutPhoneBadge) checkoutPhoneBadge.style.display = 'none';
     if (checkoutAddress) checkoutAddress.value = '';
     if (checkoutAdditional) checkoutAdditional.value = '';
   }
@@ -1305,7 +1297,6 @@ async function handleProfileSave(e) {
     // Pre-fill checkout form if open/rendered
     const checkoutName = document.getElementById('checkoutFarmerName');
     const checkoutPhone = document.getElementById('checkoutPhone');
-    const checkoutPhoneBadge = document.getElementById('checkoutPhoneBadge');
     if (checkoutName) checkoutName.value = name;
     if (checkoutPhone) {
       checkoutPhone.value = phone;
@@ -1316,11 +1307,6 @@ async function handleProfileSave(e) {
         checkoutPhone.style.border = '1.5px solid #cbd5e1';
         checkoutPhone.style.color = '#1e293b';
         checkoutPhone.style.cursor = 'default';
-        if (checkoutPhoneBadge) {
-          checkoutPhoneBadge.innerHTML = '🔒 Auto-fetched from Profile (Locked)';
-          checkoutPhoneBadge.style.color = '#059669';
-          checkoutPhoneBadge.style.display = 'inline-block';
-        }
       }
     }
 
