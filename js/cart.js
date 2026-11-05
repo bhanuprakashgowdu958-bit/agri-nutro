@@ -16,6 +16,8 @@ class CartManager {
       localStorage.removeItem('nutriagro_currency');
     } catch (e) {}
 
+    this.cleanContaminatedGuestCartIfNeeded();
+
     this.currency = '₹';
     this.activeStorageKey = this.getUserStorageKey();
     this.recoverOrphanedItems(this.activeStorageKey);
@@ -23,6 +25,18 @@ class CartManager {
     this.initEventListeners();
     this.updateUI();
     this.checkAndNotifyRestoredCart();
+  }
+
+  // Purge any cross-contaminated guest cart left behind by previous versions
+  cleanContaminatedGuestCartIfNeeded() {
+    try {
+      const cleanedKey = 'nutriagro_cart_guest_cleaned_v2';
+      if (!localStorage.getItem(cleanedKey)) {
+        localStorage.removeItem('nutriagro_cart_guest');
+        localStorage.removeItem(this.legacyStorageKey);
+        localStorage.setItem(cleanedKey, '1');
+      }
+    } catch (e) {}
   }
 
   // Subtle Cart Expiration & Restoration Notification
@@ -83,9 +97,11 @@ class CartManager {
     return 'nutriagro_cart_guest';
   }
 
-  // Seamlessly recovers cart items from legacy or previous random-UID keys
+  // Strictly recovers items belonging ONLY to this specific authenticated user
   recoverOrphanedItems(targetKey, user = undefined) {
-    if (!targetKey) return;
+    // Under NO circumstances should user items ever be copied to guest or another user!
+    if (!targetKey || targetKey === 'nutriagro_cart_guest') return;
+
     try {
       const existing = localStorage.getItem(targetKey);
       if (existing) {
@@ -96,43 +112,31 @@ class CartManager {
 
     try {
       const u = user !== undefined ? user : this.getCurrentUser();
+      if (!u) return; // No logged in user, nothing to recover
+
       const candidates = [];
 
-      // Check legacy global key
-      if (localStorage.getItem(this.legacyStorageKey)) {
-        candidates.push(this.legacyStorageKey);
+      // ONLY check keys that explicitly belong to this specific user's email or userId:
+      if (u.email && typeof u.email === 'string') {
+        const cleanEmail = u.email.toLowerCase().trim().replace(/[^a-z0-9]/g, '_');
+        candidates.push(`nutriagro_cart_user_${cleanEmail}`);
+        candidates.push(`nutriagro_cart_user_email_${cleanEmail}`);
       }
-
-      // Check old randomized user keys
-      if (u) {
-        if (u.userId) {
-          candidates.push(`nutriagro_cart_user_${u.userId.toString().replace(/[^a-zA-Z0-9_-]/g, '_')}`);
-          candidates.push(`nutriagro_cart_uid_${u.userId.toString().replace(/[^a-zA-Z0-9_-]/g, '_')}`);
-        }
-        if (u.email) {
-          const cleanEmail = u.email.toLowerCase().trim().replace(/[^a-z0-9]/g, '_');
-          candidates.push(`nutriagro_cart_user_${cleanEmail}`);
-          candidates.push(`nutriagro_cart_user_email_${cleanEmail}`);
-        }
-      }
-
-      // Search all keys in localStorage for any orphaned cart
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (k && (k.startsWith('nutriagro_cart_user_') || k.startsWith('nutriagro_cart_uid_') || k.startsWith('nutriagro_cart_email_'))) {
-          if (!candidates.includes(k) && k !== targetKey) {
-            candidates.push(k);
-          }
-        }
+      if (u.userId) {
+        const cleanUid = u.userId.toString().replace(/[^a-zA-Z0-9_-]/g, '_');
+        candidates.push(`nutriagro_cart_user_${cleanUid}`);
+        candidates.push(`nutriagro_cart_uid_${cleanUid}`);
       }
 
       for (const k of candidates) {
+        if (k === targetKey) continue;
         const val = localStorage.getItem(k);
         if (val) {
           try {
             const items = JSON.parse(val);
             if (Array.isArray(items) && items.length > 0) {
               localStorage.setItem(targetKey, JSON.stringify(items));
+              localStorage.removeItem(k); // Clean up obsolete key
               break; // Restored successfully!
             }
           } catch (e) {}

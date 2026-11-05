@@ -232,11 +232,11 @@ function openCheckoutModal() {
         }
       }
     } else {
-      // Guest: clear inputs if they hold previous account values
-      if (nameInput && (nameInput.value === 'Come Learn SAP' || nameInput.value === 'Bhanu Prakash')) {
+      // Guest / Not logged in: Unconditionally clear contact inputs to guarantee complete privacy and zero leakage
+      if (nameInput) {
         nameInput.value = '';
       }
-      if (phoneInput && phoneInput.value === '9876543210') {
+      if (phoneInput) {
         phoneInput.value = '';
       }
     }
