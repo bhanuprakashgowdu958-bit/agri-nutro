@@ -2357,7 +2357,7 @@ button, input, select, textarea {
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   position: relative;
   overflow: hidden;
-  padding: 80px 0;
+  padding: 36px 0 54px 0;
 }
 
 .animal-showcase-section .section-title {
@@ -6664,289 +6664,11 @@ html, body {
 
   <main id="mainContent">
 
-    <!-- 3. Hero Section with Dynamic Sliding Cattle Backgrounds -->
-    <section class="hero-section" id="heroSection">
-      <!-- Background Slider Track (0.85s smooth slide transition) -->
-      <div class="hero-bg-slider" id="heroBgSlider" aria-hidden="true">
-        <div class="hero-bg-track" id="heroBgTrack">
-          <div class="hero-bg-slide active" style="background-image: url('assets/images/cattle-slide-1.jpg');"></div>
-          <div class="hero-bg-slide" style="background-image: url('assets/images/cattle-slide-2.jpg');"></div>
-          <div class="hero-bg-slide" style="background-image: url('assets/images/cattle-slide-3.jpg');"></div>
-          <div class="hero-bg-slide" style="background-image: url('assets/images/cattle-slide-4.jpg');"></div>
-          <div class="hero-bg-slide" style="background-image: url('assets/images/hero-farm.jpg');"></div>
-        </div>
-      </div>
-      <div class="hero-bg-overlay"></div>
-      <div class="container hero-container">
-        
-        <!-- Left Hero Content -->
-        <div class="hero-content">
-          <div class="hero-pill-badge">
-            <span class="hero-pill-dot"></span>
-            <span>Fresh Mill Batches • 100% Non-Hormonal Formulations</span>
-          </div>
-          
-          <h1 class="hero-heading">
-            Next-Gen Animal Feeds Engineered for <span>Maximum Yield & Optimal FCR</span>
-          </h1>
-          
-          <p class="hero-lead-text">
-            Scientifically balanced complete diets for dairy cattle, poultry broilers, laying hens, aquaculture, swine, and ruminants. High-density proteins and bio-active minerals that maximize farm profitability.
-          </p>
-
-          <div class="hero-cta-group">
-            <a href="#productsSection" class="btn btn-gold" id="heroShopBtn">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
-              <span>Explore Feed Catalog</span>
-            </a>
-            <a href="#animalShowcaseSection" class="btn btn-secondary" id="heroAnimalBtn">
-              <span style="font-size: 1.15rem;">🐄</span>
-              <span>3D Animals Showcase</span>
-            </a>
-          </div>
-
-          <div class="hero-value-props">
-            <div class="hero-prop-card">
-              <div class="hero-prop-icon">📈</div>
-              <div class="hero-prop-text">
-                <h5>+18% to 24%</h5>
-                <p>Average Yield Boost</p>
-              </div>
-            </div>
-            <div class="hero-prop-card">
-              <div class="hero-prop-icon">🔬</div>
-              <div class="hero-prop-text">
-                <h5>GMP+ & ISO 9001</h5>
-                <p>Certified Processing</p>
-              </div>
-            </div>
-            <div class="hero-prop-card">
-              <div class="hero-prop-icon">🚚</div>
-              <div class="hero-prop-text">
-                <h5>Direct Farmgate</h5>
-                <p>Palletized Freight</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right Hero Live Farm Weather Widget (Exact Google Weather Layout) -->
-        <div class="google-weather-card" id="googleWeatherCard">
-          <!-- Google Header: Blue dot, Location, Choose area, 3-dots -->
-          <div class="gw-header">
-            <div class="gw-header-left">
-              <span class="gw-blue-dot" title="Location automatically detected with 100% precision"></span>
-              <span id="gwLocationTitle" class="gw-loc-title">TNHB, Sholinganallur, Chennai</span>
-              <span class="gw-header-dot">•</span>
-              <button type="button" class="gw-choose-area-btn" onclick="openChooseAreaModal()">Choose area</button>
-            </div>
-            <div class="gw-header-right">
-              <button type="button" class="gw-menu-btn" onclick="openChooseAreaModal()" title="Options">⋮</button>
-            </div>
-          </div>
-
-          <!-- Google Main Condition Row -->
-          <div class="gw-main-condition">
-            <div class="gw-main-left">
-              <div class="gw-condition-icon-wrap" id="gwConditionIcon">
-                <!-- SVG Weather Icon -->
-                <svg viewBox="0 0 64 64" width="56" height="56"><path d="M36 12a16 16 0 1014 22 18 18 0 01-14-22z" fill="#4285f4"/><path d="M22 46h24a10 10 0 000-20 12 12 0 00-23-4 9 9 0 00-1 24z" fill="#dadce0"/></svg>
-              </div>
-              <div class="gw-temp-block">
-                <span class="gw-temp-val" id="gwCurrentTemp">28</span>
-                <span class="gw-temp-units">
-                  <button type="button" class="gw-unit-btn gw-unit-c active" onclick="setWeatherUnit('C')">°C</button>
-                  <span class="gw-unit-sep">|</span>
-                  <button type="button" class="gw-unit-btn gw-unit-f" onclick="setWeatherUnit('F')">°F</button>
-                </span>
-                <div class="gw-temp-range-tag" id="gwTempRangeTag" style="display: none;">High: 33° • Low: 27°</div>
-              </div>
-              <div class="gw-details-list">
-                <div class="gw-detail-item">Precipitation: <span id="gwPrecipVal">4%</span></div>
-                <div class="gw-detail-item">Humidity: <span id="gwHumidityVal">80%</span></div>
-                <div class="gw-detail-item">Wind: <span id="gwWindVal">11 km/h</span></div>
-              </div>
-            </div>
-
-            <div class="gw-main-right">
-              <div class="gw-weather-label">Weather</div>
-              <div class="gw-time-str" id="gwDateTimeStr">Sunday, 5:00 am</div>
-              <div class="gw-condition-desc" id="gwConditionDesc">Partly cloudy</div>
-            </div>
-          </div>
-
-          <!-- Forecast Metric Tabs: Temperature | Precipitation | Wind -->
-          <div class="gw-tabs-bar">
-            <button type="button" class="gw-tab active" id="gwTabTemp" onclick="switchGwForecastTab('temp')">Temperature</button>
-            <button type="button" class="gw-tab" id="gwTabPrecip" onclick="switchGwForecastTab('precip')">Precipitation</button>
-            <button type="button" class="gw-tab" id="gwTabWind" onclick="switchGwForecastTab('wind')">Wind</button>
-          </div>
-
-          <!-- Hourly Forecast Graph with Yellow Curve -->
-          <div class="gw-graph-wrap">
-            <svg id="gwHourlySvg" viewBox="0 0 540 96" preserveAspectRatio="none" class="gw-hourly-svg"></svg>
-          </div>
-
-          <!-- 7-Day Weekly Forecast Strip (Sun, Mon, Tue, Wed, Thu, Fri, Sat) -->
-          <div class="gw-daily-strip" id="gwDailyStrip">
-            <!-- Dynamically populated via js/weather.js -->
-          </div>
-
-          <!-- Google Weather Footer with THI Agro Note -->
-          <div class="gw-footer">
-            <div class="gw-footer-left">
-              <span class="gw-thi-status" id="gwThiIndicator">
-                <span class="gw-thi-dot">●</span>
-                <span id="gwThiText">Livestock THI: 70 • Comfort Zone</span>
-              </span>
-            </div>
-            <div class="gw-footer-right">
-              <a href="javascript:void(0)" onclick="detectUserLocationDirect()" class="gw-footer-link">Google Weather</a>
-              <span class="gw-footer-dot">•</span>
-              <a href="javascript:void(0)" onclick="openChooseAreaModal()" class="gw-footer-link">Feedback</a>
-            </div>
-          </div>
-
-          <!-- Choose Area Modal Popup (Google Style) -->
-          <div class="gw-area-modal" id="chooseAreaModal" style="display: none;">
-            <div class="gw-area-modal-content">
-              <div class="gw-area-modal-header">
-                <h4>Choose Weather Location</h4>
-                <button type="button" class="gw-modal-close-btn" onclick="closeChooseAreaModal()">✕</button>
-              </div>
-              <form onsubmit="event.preventDefault(); searchCustomArea();" class="gw-area-search-form">
-                <div class="gw-area-input-wrap">
-                  <span class="gw-search-icon">🔍</span>
-                  <input type="text" id="chooseAreaInput" placeholder="Search city or district (e.g. Sholinganallur, Chennai, Karnal)..." autocomplete="off" />
-                  <button type="submit" class="gw-area-search-submit">Search</button>
-                </div>
-              </form>
-              <div class="gw-quick-locs">
-                <span class="gw-quick-label">Popular Areas:</span>
-                <button type="button" class="gw-loc-chip" onclick="searchCustomArea('Sholinganallur, Chennai')">Sholinganallur, Chennai</button>
-                <button type="button" class="gw-loc-chip" onclick="searchCustomArea('Chennai')">Chennai</button>
-                <button type="button" class="gw-loc-chip" onclick="searchCustomArea('Namakkal')">Namakkal</button>
-                <button type="button" class="gw-loc-chip" onclick="searchCustomArea('Karnal')">Karnal</button>
-                <button type="button" class="gw-loc-chip" onclick="searchCustomArea('Anand')">Anand</button>
-                <button type="button" class="gw-loc-chip" onclick="searchCustomArea('Pune')">Pune</button>
-              </div>
-              <div class="gw-detect-action">
-                <button type="button" class="gw-gps-detect-btn" onclick="autoDetectCustomerLocation(); closeChooseAreaModal();">
-                  🎯 Auto-Detect My Current GPS Location
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-    </section>
-
-    <!-- 4. Species Quick Jump Bar -->
-    <section class="species-bar-section" aria-label="Livestock Species Categories">
-      <div class="container">
-        <div class="species-carousel">
-          <div class="species-quick-card" onclick="filterFromHero('all')">
-            <span class="species-quick-icon">🌿</span>
-            <div class="species-quick-info">
-              <h4>All Species</h4>
-              <span>Complete Catalog</span>
-            </div>
-          </div>
-          <div class="species-quick-card" onclick="filterFromHero('cattle')">
-            <span class="species-quick-icon">🐄</span>
-            <div class="species-quick-info">
-              <h4>Dairy & Beef Cattle</h4>
-              <span>LactaMax & Calf Starters</span>
-            </div>
-          </div>
-          <div class="species-quick-card" onclick="filterFromHero('poultry')">
-            <span class="species-quick-icon">🐔</span>
-            <div class="species-quick-info">
-              <h4>Poultry Flock</h4>
-              <span>Broiler & Layer Feeds</span>
-            </div>
-          </div>
-          <div class="species-quick-card" onclick="filterFromHero('aqua')">
-            <span class="species-quick-icon">🐟</span>
-            <div class="species-quick-info">
-              <h4>Aquaculture</h4>
-              <span>Floating Fish Pellets</span>
-            </div>
-          </div>
-          <div class="species-quick-card" onclick="filterFromHero('swine')">
-            <span class="species-quick-icon">🐖</span>
-            <div class="species-quick-info">
-              <h4>Swine & Pigs</h4>
-              <span>High ADG Grower Rations</span>
-            </div>
-          </div>
-          <div class="species-quick-card" onclick="filterFromHero('goat')">
-            <span class="species-quick-icon">🐐</span>
-            <div class="species-quick-info">
-              <h4>Goats & Sheep</h4>
-              <span>Copper-Safe Rations</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 5. Product Catalog Section -->
-    <section class="section-spacer" id="productsSection">
-      <div class="container">
-        
-        <header class="section-header">
-          <span class="section-tag">Guaranteed Farm Formulations</span>
-          <h2 class="section-title">Commercial Livestock Feed Catalog</h2>
-          <p class="section-subtitle">
-            Order standard 25 kg or 50 kg farm bags directly online. Enjoy automatic multi-bag discounts, free farmgate freight on 15+ bags, and certified batch analysis.
-          </p>
-        </header>
-
-        <!-- Catalog Filter Toolbar -->
-        <div class="catalog-toolbar">
-          <div class="category-tabs-group" role="tablist">
-            <button type="button" class="category-tab-btn active" data-category="all">All Feeds</button>
-            <button type="button" class="category-tab-btn" data-category="cattle">🐄 Cattle</button>
-            <button type="button" class="category-tab-btn" data-category="poultry">🐔 Poultry</button>
-            <button type="button" class="category-tab-btn" data-category="aqua">🐟 Aquaculture</button>
-            <button type="button" class="category-tab-btn" data-category="swine">🐖 Swine</button>
-            <button type="button" class="category-tab-btn" data-category="goat">🐐 Goat & Sheep</button>
-          </div>
-
-          <div class="catalog-search-sort-group">
-            <div class="search-input-wrap">
-              <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-              <input type="text" id="catalogSearchInput" class="search-input" placeholder="Search feed by formula, protein %, or stage..." aria-label="Search feed catalog" />
-            </div>
-
-            <select id="catalogSortSelect" class="sort-select" aria-label="Sort products">
-              <option value="featured">Sort: Featured</option>
-              <option value="protein-desc">Protein %: High to Low</option>
-              <option value="rating-desc">Farmer Rating: Highest</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-            </select>
-          </div>
-        </div>
-
-        <div style="margin-bottom: 20px; font-size: 0.88rem; color: var(--color-gray-500);" id="catalogResultsCount">
-          Showing 8 commercial feed formulas
-        </div>
-
-        <!-- Dynamic Products Grid -->
-        <div class="products-grid" id="productsGrid">
-          <!-- Rendered dynamically by app.js -->
-        </div>
-
-      </div>
-    </section>
-
-    <!-- 6. 3D Animal Nutrition & Livestock Showcase Carousel -->
+    <!-- 1. 3D Animal Nutrition & Livestock Showcase Carousel (Top Opening Presentation) -->
     <section class="section-spacer animal-showcase-section" id="animalShowcaseSection">
       <div class="container">
         
-        <header class="section-header">
+        <header class="section-header" style="margin-bottom: 24px;">
           <span class="section-tag">Species-Specific Nutrition</span>
           <h2 class="section-title">Formulated for Peak Animal Vitality & Productivity</h2>
           <p class="section-subtitle">
@@ -7275,6 +6997,283 @@ html, body {
           </div> <!-- /animal-carousel-stage -->
 
         </div> <!-- /animal-showcase-wrap -->
+
+      </div>
+    </section>
+
+    <!-- 2. Hero Section with Dynamic Sliding Cattle Backgrounds -->
+    <section class="hero-section" id="heroSection">
+      <!-- Background Slider Track (0.85s smooth slide transition) -->
+      <div class="hero-bg-slider" id="heroBgSlider" aria-hidden="true">
+        <div class="hero-bg-track" id="heroBgTrack">
+          <div class="hero-bg-slide active" style="background-image: url('assets/images/cattle-slide-1.jpg');"></div>
+          <div class="hero-bg-slide" style="background-image: url('assets/images/cattle-slide-2.jpg');"></div>
+          <div class="hero-bg-slide" style="background-image: url('assets/images/cattle-slide-3.jpg');"></div>
+          <div class="hero-bg-slide" style="background-image: url('assets/images/cattle-slide-4.jpg');"></div>
+          <div class="hero-bg-slide" style="background-image: url('assets/images/hero-farm.jpg');"></div>
+        </div>
+      </div>
+      <div class="hero-bg-overlay"></div>
+      <div class="container hero-container">
+        
+        <!-- Left Hero Content -->
+        <div class="hero-content">
+          <div class="hero-pill-badge">
+            <span class="hero-pill-dot"></span>
+            <span>Fresh Mill Batches • 100% Non-Hormonal Formulations</span>
+          </div>
+          
+          <h1 class="hero-heading">
+            Next-Gen Animal Feeds Engineered for <span>Maximum Yield & Optimal FCR</span>
+          </h1>
+          
+          <p class="hero-lead-text">
+            Scientifically balanced complete diets for dairy cattle, poultry broilers, laying hens, aquaculture, swine, and ruminants. High-density proteins and bio-active minerals that maximize farm profitability.
+          </p>
+
+          <div class="hero-cta-group">
+            <a href="#productsSection" class="btn btn-gold" id="heroShopBtn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
+              <span>Explore Feed Catalog</span>
+            </a>
+            <a href="#qualitySection" class="btn btn-secondary" id="heroQualityBtn">
+              <span>🔬 Guaranteed Lab Purity</span>
+            </a>
+          </div>
+
+          <div class="hero-value-props">
+            <div class="hero-prop-card">
+              <div class="hero-prop-icon">📈</div>
+              <div class="hero-prop-text">
+                <h5>+18% to 24%</h5>
+                <p>Average Yield Boost</p>
+              </div>
+            </div>
+            <div class="hero-prop-card">
+              <div class="hero-prop-icon">🔬</div>
+              <div class="hero-prop-text">
+                <h5>GMP+ & ISO 9001</h5>
+                <p>Certified Processing</p>
+              </div>
+            </div>
+            <div class="hero-prop-card">
+              <div class="hero-prop-icon">🚚</div>
+              <div class="hero-prop-text">
+                <h5>Direct Farmgate</h5>
+                <p>Palletized Freight</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Hero Live Farm Weather Widget (Exact Google Weather Layout) -->
+        <div class="google-weather-card" id="googleWeatherCard">
+          <!-- Google Header: Blue dot, Location, Choose area, 3-dots -->
+          <div class="gw-header">
+            <div class="gw-header-left">
+              <span class="gw-blue-dot" title="Location automatically detected with 100% precision"></span>
+              <span id="gwLocationTitle" class="gw-loc-title">TNHB, Sholinganallur, Chennai</span>
+              <span class="gw-header-dot">•</span>
+              <button type="button" class="gw-choose-area-btn" onclick="openChooseAreaModal()">Choose area</button>
+            </div>
+            <div class="gw-header-right">
+              <button type="button" class="gw-menu-btn" onclick="openChooseAreaModal()" title="Options">⋮</button>
+            </div>
+          </div>
+
+          <!-- Google Main Condition Row -->
+          <div class="gw-main-condition">
+            <div class="gw-main-left">
+              <div class="gw-condition-icon-wrap" id="gwConditionIcon">
+                <!-- SVG Weather Icon -->
+                <svg viewBox="0 0 64 64" width="56" height="56"><path d="M36 12a16 16 0 1014 22 18 18 0 01-14-22z" fill="#4285f4"/><path d="M22 46h24a10 10 0 000-20 12 12 0 00-23-4 9 9 0 00-1 24z" fill="#dadce0"/></svg>
+              </div>
+              <div class="gw-temp-block">
+                <span class="gw-temp-val" id="gwCurrentTemp">28</span>
+                <span class="gw-temp-units">
+                  <button type="button" class="gw-unit-btn gw-unit-c active" onclick="setWeatherUnit('C')">°C</button>
+                  <span class="gw-unit-sep">|</span>
+                  <button type="button" class="gw-unit-btn gw-unit-f" onclick="setWeatherUnit('F')">°F</button>
+                </span>
+                <div class="gw-temp-range-tag" id="gwTempRangeTag" style="display: none;">High: 33° • Low: 27°</div>
+              </div>
+              <div class="gw-details-list">
+                <div class="gw-detail-item">Precipitation: <span id="gwPrecipVal">4%</span></div>
+                <div class="gw-detail-item">Humidity: <span id="gwHumidityVal">80%</span></div>
+                <div class="gw-detail-item">Wind: <span id="gwWindVal">11 km/h</span></div>
+              </div>
+            </div>
+
+            <div class="gw-main-right">
+              <div class="gw-weather-label">Weather</div>
+              <div class="gw-time-str" id="gwDateTimeStr">Sunday, 5:00 am</div>
+              <div class="gw-condition-desc" id="gwConditionDesc">Partly cloudy</div>
+            </div>
+          </div>
+
+          <!-- Forecast Metric Tabs: Temperature | Precipitation | Wind -->
+          <div class="gw-tabs-bar">
+            <button type="button" class="gw-tab active" id="gwTabTemp" onclick="switchGwForecastTab('temp')">Temperature</button>
+            <button type="button" class="gw-tab" id="gwTabPrecip" onclick="switchGwForecastTab('precip')">Precipitation</button>
+            <button type="button" class="gw-tab" id="gwTabWind" onclick="switchGwForecastTab('wind')">Wind</button>
+          </div>
+
+          <!-- Hourly Forecast Graph with Yellow Curve -->
+          <div class="gw-graph-wrap">
+            <svg id="gwHourlySvg" viewBox="0 0 540 96" preserveAspectRatio="none" class="gw-hourly-svg"></svg>
+          </div>
+
+          <!-- 7-Day Weekly Forecast Strip (Sun, Mon, Tue, Wed, Thu, Fri, Sat) -->
+          <div class="gw-daily-strip" id="gwDailyStrip">
+            <!-- Dynamically populated via js/weather.js -->
+          </div>
+
+          <!-- Google Weather Footer with THI Agro Note -->
+          <div class="gw-footer">
+            <div class="gw-footer-left">
+              <span class="gw-thi-status" id="gwThiIndicator">
+                <span class="gw-thi-dot">●</span>
+                <span id="gwThiText">Livestock THI: 70 • Comfort Zone</span>
+              </span>
+            </div>
+            <div class="gw-footer-right">
+              <a href="javascript:void(0)" onclick="detectUserLocationDirect()" class="gw-footer-link">Google Weather</a>
+              <span class="gw-footer-dot">•</span>
+              <a href="javascript:void(0)" onclick="openChooseAreaModal()" class="gw-footer-link">Feedback</a>
+            </div>
+          </div>
+
+          <!-- Choose Area Modal Popup (Google Style) -->
+          <div class="gw-area-modal" id="chooseAreaModal" style="display: none;">
+            <div class="gw-area-modal-content">
+              <div class="gw-area-modal-header">
+                <h4>Choose Weather Location</h4>
+                <button type="button" class="gw-modal-close-btn" onclick="closeChooseAreaModal()">✕</button>
+              </div>
+              <form onsubmit="event.preventDefault(); searchCustomArea();" class="gw-area-search-form">
+                <div class="gw-area-input-wrap">
+                  <span class="gw-search-icon">🔍</span>
+                  <input type="text" id="chooseAreaInput" placeholder="Search city or district (e.g. Sholinganallur, Chennai, Karnal)..." autocomplete="off" />
+                  <button type="submit" class="gw-area-search-submit">Search</button>
+                </div>
+              </form>
+              <div class="gw-quick-locs">
+                <span class="gw-quick-label">Popular Areas:</span>
+                <button type="button" class="gw-loc-chip" onclick="searchCustomArea('Sholinganallur, Chennai')">Sholinganallur, Chennai</button>
+                <button type="button" class="gw-loc-chip" onclick="searchCustomArea('Chennai')">Chennai</button>
+                <button type="button" class="gw-loc-chip" onclick="searchCustomArea('Namakkal')">Namakkal</button>
+                <button type="button" class="gw-loc-chip" onclick="searchCustomArea('Karnal')">Karnal</button>
+                <button type="button" class="gw-loc-chip" onclick="searchCustomArea('Anand')">Anand</button>
+                <button type="button" class="gw-loc-chip" onclick="searchCustomArea('Pune')">Pune</button>
+              </div>
+              <div class="gw-detect-action">
+                <button type="button" class="gw-gps-detect-btn" onclick="autoDetectCustomerLocation(); closeChooseAreaModal();">
+                  🎯 Auto-Detect My Current GPS Location
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+    </section>
+
+    <!-- 4. Species Quick Jump Bar -->
+    <section class="species-bar-section" aria-label="Livestock Species Categories">
+      <div class="container">
+        <div class="species-carousel">
+          <div class="species-quick-card" onclick="filterFromHero('all')">
+            <span class="species-quick-icon">🌿</span>
+            <div class="species-quick-info">
+              <h4>All Species</h4>
+              <span>Complete Catalog</span>
+            </div>
+          </div>
+          <div class="species-quick-card" onclick="filterFromHero('cattle')">
+            <span class="species-quick-icon">🐄</span>
+            <div class="species-quick-info">
+              <h4>Dairy & Beef Cattle</h4>
+              <span>LactaMax & Calf Starters</span>
+            </div>
+          </div>
+          <div class="species-quick-card" onclick="filterFromHero('poultry')">
+            <span class="species-quick-icon">🐔</span>
+            <div class="species-quick-info">
+              <h4>Poultry Flock</h4>
+              <span>Broiler & Layer Feeds</span>
+            </div>
+          </div>
+          <div class="species-quick-card" onclick="filterFromHero('aqua')">
+            <span class="species-quick-icon">🐟</span>
+            <div class="species-quick-info">
+              <h4>Aquaculture</h4>
+              <span>Floating Fish Pellets</span>
+            </div>
+          </div>
+          <div class="species-quick-card" onclick="filterFromHero('swine')">
+            <span class="species-quick-icon">🐖</span>
+            <div class="species-quick-info">
+              <h4>Swine & Pigs</h4>
+              <span>High ADG Grower Rations</span>
+            </div>
+          </div>
+          <div class="species-quick-card" onclick="filterFromHero('goat')">
+            <span class="species-quick-icon">🐐</span>
+            <div class="species-quick-info">
+              <h4>Goats & Sheep</h4>
+              <span>Copper-Safe Rations</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Product Catalog Section -->
+    <section class="section-spacer" id="productsSection">
+      <div class="container">
+        
+        <header class="section-header">
+          <span class="section-tag">Guaranteed Farm Formulations</span>
+          <h2 class="section-title">Commercial Livestock Feed Catalog</h2>
+          <p class="section-subtitle">
+            Order standard 25 kg or 50 kg farm bags directly online. Enjoy automatic multi-bag discounts, free farmgate freight on 15+ bags, and certified batch analysis.
+          </p>
+        </header>
+
+        <!-- Catalog Filter Toolbar -->
+        <div class="catalog-toolbar">
+          <div class="category-tabs-group" role="tablist">
+            <button type="button" class="category-tab-btn active" data-category="all">All Feeds</button>
+            <button type="button" class="category-tab-btn" data-category="cattle">🐄 Cattle</button>
+            <button type="button" class="category-tab-btn" data-category="poultry">🐔 Poultry</button>
+            <button type="button" class="category-tab-btn" data-category="aqua">🐟 Aquaculture</button>
+            <button type="button" class="category-tab-btn" data-category="swine">🐖 Swine</button>
+            <button type="button" class="category-tab-btn" data-category="goat">🐐 Goat & Sheep</button>
+          </div>
+
+          <div class="catalog-search-sort-group">
+            <div class="search-input-wrap">
+              <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              <input type="text" id="catalogSearchInput" class="search-input" placeholder="Search feed by formula, protein %, or stage..." aria-label="Search feed catalog" />
+            </div>
+
+            <select id="catalogSortSelect" class="sort-select" aria-label="Sort products">
+              <option value="featured">Sort: Featured</option>
+              <option value="protein-desc">Protein %: High to Low</option>
+              <option value="rating-desc">Farmer Rating: Highest</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px; font-size: 0.88rem; color: var(--color-gray-500);" id="catalogResultsCount">
+          Showing 8 commercial feed formulas
+        </div>
+
+        <!-- Dynamic Products Grid -->
+        <div class="products-grid" id="productsGrid">
+          <!-- Rendered dynamically by app.js -->
+        </div>
 
       </div>
     </section>
