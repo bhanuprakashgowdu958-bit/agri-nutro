@@ -173,9 +173,9 @@ html, body {
     font-size: 0.95rem !important;
   }
 
-  .header-notif-btn {
-    width: 38px;
-    height: 38px;
+  /* Mobile View: Hide standalone header notification bell to prevent awkward middle-of-screen popup. Order updates are cleanly integrated in the mobile menu drawer! */
+  .header-notif-wrapper {
+    display: none !important;
   }
 
   .cart-header-total {

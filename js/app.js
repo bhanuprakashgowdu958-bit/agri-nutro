@@ -874,6 +874,11 @@ function openMobileNavDrawer() {
 
     drawer.classList.add('active');
     overlay.classList.add('active');
+
+    // Freshly render live order updates in mobile drawer
+    if (typeof renderCustomerNotificationsDropdown === 'function') {
+      try { renderCustomerNotificationsDropdown(); } catch (e) {}
+    }
   }
 }
 

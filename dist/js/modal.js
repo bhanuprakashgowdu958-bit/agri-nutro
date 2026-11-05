@@ -1033,9 +1033,28 @@ function saveCustomerNotification(notif) {
 }
 
 function updateNotifDot(hasUnread) {
+  // Desktop header bell dot
   const dot = document.getElementById('headerNotifGlowDot');
   if (dot) {
     dot.style.display = hasUnread ? 'block' : 'none';
+  }
+
+  // Mobile hamburger menu button red notification indicator
+  const mobileDot = document.getElementById('mobileMenuNotifDot');
+  if (mobileDot) {
+    mobileDot.style.display = hasUnread ? 'block' : 'none';
+  }
+
+  // Mobile drawer order updates badge
+  const drawerBadge = document.getElementById('mobileDrawerNotifCountBadge');
+  if (drawerBadge) {
+    const notifs = getCustomerNotifications();
+    if (notifs.length > 0 && hasUnread) {
+      drawerBadge.textContent = notifs.length;
+      drawerBadge.style.display = 'inline-flex';
+    } else {
+      drawerBadge.style.display = 'none';
+    }
   }
 }
 
@@ -1056,7 +1075,22 @@ function toggleCustomerNotifDropdown() {
   }
 }
 
-// Close dropdown on outside click
+function toggleMobileDrawerOrderUpdates() {
+  const content = document.getElementById('mobileDrawerNotifContent');
+  const arrow = document.getElementById('drawerNotifExpandArrow');
+  if (!content) return;
+  const isOpening = (content.style.display === 'none' || !content.style.display);
+  content.style.display = isOpening ? 'block' : 'none';
+  if (arrow) {
+    arrow.textContent = isOpening ? '▴' : '▾';
+  }
+  if (isOpening) {
+    renderCustomerNotificationsDropdown();
+    updateNotifDot(false);
+  }
+}
+
+// Close dropdown on outside click (Desktop)
 document.addEventListener('click', (e) => {
   const wrapper = document.getElementById('headerNotifWrapper');
   const dd = document.getElementById('customerNotifDropdown');
@@ -1066,31 +1100,57 @@ document.addEventListener('click', (e) => {
 });
 
 function renderCustomerNotificationsDropdown() {
-  const listEl = document.getElementById('customerNotifList');
-  if (!listEl) return;
   const notifs = getCustomerNotifications();
 
-  if (notifs.length === 0) {
-    listEl.innerHTML = `
-      <div class="notif-empty-state">
-        <span>🌾</span>
-        <p>No new order updates right now. When the mill updates your stage, you'll be alerted here!</p>
-      </div>
-    `;
-    return;
+  // 1. Render Desktop Notification Popover List
+  const listEl = document.getElementById('customerNotifList');
+  if (listEl) {
+    if (notifs.length === 0) {
+      listEl.innerHTML = `
+        <div class="notif-empty-state">
+          <span>🌾</span>
+          <p>No new order updates right now. When the mill updates your stage, you'll be alerted here!</p>
+        </div>
+      `;
+    } else {
+      listEl.innerHTML = notifs.map(n => `
+        <div class="notif-item-card" onclick="openOrderTrackerModal('${n.orderId}'); toggleCustomerNotifDropdown();">
+          <div class="notif-item-title">
+            <span>#${n.orderId}</span>
+            <span style="font-size: 0.72rem; color: #78350f;">${n.time || 'Just now'}</span>
+          </div>
+          <div class="notif-item-desc">
+            ${n.message || `Order status updated to: ${n.status}`}
+          </div>
+        </div>
+      `).join('');
+    }
   }
 
-  listEl.innerHTML = notifs.map(n => `
-    <div class="notif-item-card" onclick="openOrderTrackerModal('${n.orderId}'); toggleCustomerNotifDropdown();">
-      <div class="notif-item-title">
-        <span>#${n.orderId}</span>
-        <span style="font-size: 0.72rem; color: #78350f;">${n.time || 'Just now'}</span>
-      </div>
-      <div class="notif-item-desc">
-        ${n.message || `Order status updated to: ${n.status}`}
-      </div>
-    </div>
-  `).join('');
+  // 2. Render Mobile Drawer Accordion List
+  const drawerListEl = document.getElementById('mobileDrawerNotifList');
+  if (drawerListEl) {
+    if (notifs.length === 0) {
+      drawerListEl.innerHTML = `
+        <div style="text-align: center; padding: 14px 10px; color: #64748b; font-size: 0.80rem;">
+          <div style="font-size: 1.5rem; margin-bottom: 4px;">🌾</div>
+          <p style="margin: 0; line-height: 1.4;">No new order updates right now. When the mill updates your stage, alerts will appear here!</p>
+        </div>
+      `;
+    } else {
+      drawerListEl.innerHTML = notifs.map(n => `
+        <div class="drawer-notif-item-card" onclick="openOrderTrackerModal('${n.orderId}'); closeMobileNavDrawer();">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <strong style="color: #064e3b; font-size: 0.82rem;">#${n.orderId}</strong>
+            <span style="font-size: 0.70rem; color: #78350f; font-weight: 600;">${n.time || 'Just now'}</span>
+          </div>
+          <div style="font-size: 0.78rem; color: #334155; line-height: 1.35;">
+            ${n.message || `Order status updated to: ${n.status}`}
+          </div>
+        </div>
+      `).join('');
+    }
+  }
 }
 
 function showCustomerStatusNotificationBanner(order) {
@@ -2094,6 +2154,7 @@ window.manualRefreshOrders = manualRefreshOrders;
 window.dismissCustomerStatusBanner = dismissCustomerStatusBanner;
 window.fetchOrdersFromServer = fetchOrdersFromServer;
 window.toggleCustomerNotifDropdown = toggleCustomerNotifDropdown;
+window.toggleMobileDrawerOrderUpdates = toggleMobileDrawerOrderUpdates;
 window.clearCustomerNotifs = clearCustomerNotifs;
 window.renderCustomerNotificationsDropdown = renderCustomerNotificationsDropdown;
 window.getMyCustomerOrders = getMyCustomerOrders;
