@@ -406,11 +406,11 @@ function handleCheckoutSubmit(e) {
     return;
   }
 
-  // 1. Validate 10-digit mobile phone number for freight driver dispatch
+  // 1. Validate 10-digit mobile phone number
   const cleanPhone = phone.replace(/\D/g, '');
   if (cleanPhone.length < 10) {
     if (window.cart && window.cart.showToast) {
-      window.cart.showToast('Please enter a valid 10-digit phone number for truck driver dispatch', 'error');
+      window.cart.showToast('Please enter a valid 10-digit mobile number', 'error');
     }
     const phoneInput = document.getElementById('checkoutPhone');
     if (phoneInput) phoneInput.focus();

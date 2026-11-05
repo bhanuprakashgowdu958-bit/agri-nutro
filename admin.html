@@ -2029,7 +2029,7 @@
                 <div style="display: flex; align-items: center; gap: 8px; margin: 4px 0;">
                   <a href="tel:${order.phone || ''}" class="customer-phone">📞 ${order.phone || 'Phone Not Provided'}</a>
                   ${step !== 4 ? `
-                  <button type="button" class="btn btn-sm btn-secondary" onclick="editOrderPhone('${order.orderId}')" style="padding: 2px 7px; font-size: 0.7rem; border-radius: 6px; cursor: pointer;" title="Edit Driver Dispatch Phone">
+                  <button type="button" class="btn btn-sm btn-secondary" onclick="editOrderPhone('${order.orderId}')" style="padding: 2px 7px; font-size: 0.7rem; border-radius: 6px; cursor: pointer;" title="Edit Customer Phone">
                     ✏️ Edit
                   </button>
                   ` : ''}
@@ -3221,7 +3221,7 @@
     function editOrderPhone(orderId) {
       const order = allOrders.find(o => o.orderId === orderId);
       if (!order) return;
-      const newPhone = prompt(`Update Driver Dispatch Phone for Order #${orderId} (${order.farmerName || 'Customer'}):`, order.phone || '');
+      const newPhone = prompt(`Update Customer Phone for Order #${orderId} (${order.farmerName || 'Customer'}):`, order.phone || '');
       if (newPhone === null) return;
       const trimmed = newPhone.trim();
       if (!trimmed || trimmed.replace(/\D/g, '').length < 10) {
