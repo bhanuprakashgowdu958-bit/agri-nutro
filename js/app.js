@@ -196,7 +196,7 @@ function removeSavedGoogleAccount(email, event) {
     const currentUser = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
     if (currentUser && currentUser.email && currentUser.email.toLowerCase() === email.toLowerCase()) {
       localStorage.removeItem('nutriagro_user');
-      updateHeaderUserStatus();
+      onUserSessionChange(null);
     }
     
     renderGoogleAccountsPicker();
@@ -204,6 +204,40 @@ function removeSavedGoogleAccount(email, event) {
       window.cart.showToast(`Account ${email} removed from this device.`, 'info');
     }
   } catch (e) {}
+}
+
+// Central Session Lifecycle & Account Isolation Hook
+function onUserSessionChange(newUser, options = { mergeGuestCart: true }) {
+  // 1. Switch cart storage and memory state to the target account (or guest)
+  if (window.cart && typeof window.cart.switchUser === 'function') {
+    window.cart.switchUser(newUser, options);
+  }
+
+  // 2. Isolate Checkout Form: Auto-fill active account profile or wipe clean
+  const checkoutName = document.getElementById('checkoutFarmerName');
+  const checkoutPhone = document.getElementById('checkoutPhone');
+  const checkoutAddress = document.getElementById('checkoutAddress');
+  const checkoutAdditional = document.getElementById('checkoutAdditionalAddress');
+
+  if (newUser) {
+    if (checkoutName) checkoutName.value = newUser.fullName || '';
+    if (checkoutPhone) checkoutPhone.value = (newUser.phone && newUser.phone !== '9876543210') ? newUser.phone : '';
+    if (checkoutAddress && newUser.address) {
+      checkoutAddress.value = `${newUser.address}, ${newUser.state || ''} ${newUser.pincode ? '(PIN: ' + newUser.pincode + ')' : ''}`.trim();
+    }
+  } else {
+    // Guest / Signed Out: Reset all checkout inputs to prevent leaking previous user PII
+    if (checkoutName) checkoutName.value = '';
+    if (checkoutPhone) checkoutPhone.value = '';
+    if (checkoutAddress) checkoutAddress.value = '';
+    if (checkoutAdditional) checkoutAdditional.value = '';
+  }
+
+  // 3. Update top navbar, badges, and orders hub
+  updateHeaderUserStatus();
+  if (typeof updateAllOrderBadges === 'function') {
+    updateAllOrderBadges();
+  }
 }
 
 function renderGoogleAccountsPicker() {
@@ -501,7 +535,7 @@ async function handleModalSignup(e) {
     gateway.style.display = 'none';
     gateway.classList.add('hidden');
   }
-  updateHeaderUserStatus();
+  onUserSessionChange(user, { mergeGuestCart: true });
   if (window.cart && typeof window.cart.showToast === 'function') {
     window.cart.showToast(`🌾 Account created! Welcome, ${name.split(' ')[0]}. 10% discount active!`, 'success');
   }
@@ -590,7 +624,7 @@ async function handleModalLogin(e) {
     gateway.style.display = 'none';
     gateway.classList.add('hidden');
   }
-  updateHeaderUserStatus();
+  onUserSessionChange(loggedUser, { mergeGuestCart: true });
   if (window.cart && typeof window.cart.showToast === 'function') {
     window.cart.showToast(`🌾 Welcome back, ${loggedUser.fullName || 'Farmer'}!`, 'success');
   }
@@ -624,8 +658,9 @@ async function chooseGoogleAccount(name, email, picture, phone = '', farmName = 
   }
 
   const cleanName = name || email.split('@')[0];
-  const userPhone = phone || '9876543210';
-  const userFarm = farmName || `${cleanName.split(' ')[0]}'s Commercial Farm`;
+  // Do not assign dummy phone numbers (like 9876543210) to new Google accounts
+  const userPhone = (phone && phone !== '9876543210') ? phone : '';
+  const userFarm = farmName || (cleanName ? `${cleanName.split(' ')[0]}'s Commercial Farm` : 'My Commercial Farm');
 
   const googleUser = {
     userId: 'GOOGLE-' + Math.floor(100000 + Math.random() * 900000),
@@ -667,7 +702,7 @@ async function chooseGoogleAccount(name, email, picture, phone = '', farmName = 
     gateway.classList.add('hidden');
     gateway.style.display = 'none';
   }
-  updateHeaderUserStatus();
+  onUserSessionChange(googleUser, { mergeGuestCart: true });
   if (window.cart && typeof window.cart.showToast === 'function') {
     window.cart.showToast(`🌾 Signed in as ${cleanName} (${email})! 10% wholesale discount (FARM10) unlocked.`, 'success');
   }
@@ -682,6 +717,7 @@ function bypassAsGuest() {
     gateway.classList.add('hidden');
     setTimeout(() => { gateway.style.display = 'none'; }, 350);
   }
+  onUserSessionChange(null);
   if (window.cart && typeof window.cart.showToast === 'function') {
     window.cart.showToast('Browsing as Guest. Sign in with Google anytime from the top bar to unlock wholesale checkout.', 'info');
   }
@@ -692,7 +728,7 @@ function signOutUser() {
     localStorage.removeItem('nutriagro_user');
     sessionStorage.removeItem('nutriagro_guest');
   } catch (e) {}
-  updateHeaderUserStatus();
+  onUserSessionChange(null);
   openAccountChooserModal();
 }
 

@@ -1,7 +1,8 @@
 // E-Commerce Cart Engine for NutriAgro Feeds (Exclusively Indian Rupee ₹ INR)
+// Features Account-Scoped Cart Isolation: Each customer and guest gets an isolated cart session.
 class CartManager {
   constructor() {
-    this.storageKey = 'nutriagro_livestock_cart_v1';
+    this.legacyStorageKey = 'nutriagro_livestock_cart_v1';
     this.promoCodes = {
       'NUTRI10': { discountPercent: 10, label: '10% NutriAgro Welcome Promo' },
       'FARMFRESH10': { discountPercent: 10, label: '10% Farmgate Harvest Promo' },
@@ -16,20 +17,65 @@ class CartManager {
     } catch (e) {}
 
     this.currency = '₹';
+    this.migrateLegacyCartIfNeeded();
     this.items = this.loadCart();
     this.initEventListeners();
     this.updateUI();
   }
 
-  loadCart() {
+  getCurrentUser() {
     try {
-      const data = localStorage.getItem(this.storageKey);
+      return JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
+    } catch (e) {
+      return null;
+    }
+  }
+
+  getUserStorageKey(user = undefined) {
+    const u = user !== undefined ? user : this.getCurrentUser();
+    if (u) {
+      if (u.userId) {
+        return `nutriagro_cart_user_${u.userId.toString().replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+      }
+      if (u.email) {
+        return `nutriagro_cart_user_${u.email.toLowerCase().replace(/[^a-z0-9_-]/g, '_')}`;
+      }
+    }
+    return 'nutriagro_cart_guest';
+  }
+
+  migrateLegacyCartIfNeeded() {
+    try {
+      const legacyData = localStorage.getItem(this.legacyStorageKey);
+      if (legacyData) {
+        const legacyItems = JSON.parse(legacyData);
+        if (Array.isArray(legacyItems) && legacyItems.length > 0) {
+          const currentKey = this.getUserStorageKey();
+          const existing = localStorage.getItem(currentKey);
+          if (!existing) {
+            localStorage.setItem(currentKey, JSON.stringify(legacyItems));
+          }
+        }
+        localStorage.removeItem(this.legacyStorageKey);
+      }
+    } catch (e) {}
+  }
+
+  loadCart(user = undefined) {
+    try {
+      const key = this.getUserStorageKey(user);
+      const data = localStorage.getItem(key);
       const loaded = data ? JSON.parse(data) : [];
       // Synchronize price with standard INR price
-      loaded.forEach(item => {
-        item.price = getProductPrice(item.productId, item.bagSize);
-      });
-      return loaded;
+      if (Array.isArray(loaded)) {
+        loaded.forEach(item => {
+          if (typeof getProductPrice === 'function') {
+            item.price = getProductPrice(item.productId, item.bagSize);
+          }
+        });
+        return loaded;
+      }
+      return [];
     } catch (e) {
       console.error('Error loading cart:', e);
       return [];
@@ -38,10 +84,48 @@ class CartManager {
 
   saveCart() {
     try {
-      localStorage.setItem(this.storageKey, JSON.stringify(this.items));
+      const key = this.getUserStorageKey();
+      localStorage.setItem(key, JSON.stringify(this.items));
     } catch (e) {
       console.error('Error saving cart:', e);
     }
+    this.updateUI();
+  }
+
+  switchUser(newUser, options = { mergeGuestCart: false }) {
+    const currentKey = this.getUserStorageKey();
+    const nextKey = this.getUserStorageKey(newUser);
+
+    // If logging in from guest state and mergeGuestCart is true, merge guest items into account cart
+    if (options && options.mergeGuestCart && currentKey === 'nutriagro_cart_guest' && nextKey !== 'nutriagro_cart_guest') {
+      try {
+        const guestData = localStorage.getItem('nutriagro_cart_guest');
+        const guestItems = guestData ? JSON.parse(guestData) : [];
+        if (Array.isArray(guestItems) && guestItems.length > 0) {
+          const targetData = localStorage.getItem(nextKey);
+          let targetItems = targetData ? JSON.parse(targetData) : [];
+          if (!Array.isArray(targetItems)) targetItems = [];
+
+          guestItems.forEach(gItem => {
+            const existIdx = targetItems.findIndex(t => t.itemKey === gItem.itemKey);
+            if (existIdx > -1) {
+              targetItems[existIdx].quantity += (gItem.quantity || 1);
+            } else {
+              targetItems.push(gItem);
+            }
+          });
+
+          localStorage.setItem(nextKey, JSON.stringify(targetItems));
+          localStorage.removeItem('nutriagro_cart_guest'); // Guest items merged
+        }
+      } catch (e) {
+        console.warn('Cart merge notice:', e);
+      }
+    }
+
+    // Now switch active in-memory items to the new user's cart
+    this.items = this.loadCart(newUser);
+    this.appliedPromo = null; // Reset promo for new session
     this.updateUI();
   }
 

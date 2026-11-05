@@ -208,26 +208,36 @@ function openCheckoutModal() {
   overlay.classList.add('active');
   document.body.classList.add('modal-open');
 
-  // Auto-fill details if registered farmer is logged in
+  // Auto-fill details if registered farmer is logged in, or ensure guest isolation
   try {
     const loggedUser = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
+    const nameInput = document.getElementById('checkoutFarmerName');
+    const phoneInput = document.getElementById('checkoutPhone');
+    const addrInput = document.getElementById('checkoutAddress');
+
     if (loggedUser) {
-      const nameInput = document.getElementById('checkoutFarmerName');
-      const phoneInput = document.getElementById('checkoutPhone');
-      const addrInput = document.getElementById('checkoutAddress');
-      if (nameInput && !nameInput.value.trim() && loggedUser.fullName) {
-        nameInput.value = loggedUser.fullName;
+      if (nameInput) {
+        nameInput.value = loggedUser.fullName || '';
       }
-      if (phoneInput && !phoneInput.value.trim() && loggedUser.phone) {
-        phoneInput.value = loggedUser.phone;
+      if (phoneInput) {
+        const ph = loggedUser.phone || '';
+        phoneInput.value = (ph && ph !== '9876543210') ? ph : '';
       }
-      if (addrInput && !addrInput.value.trim() && loggedUser.address) {
+      if (addrInput && loggedUser.address) {
         addrInput.value = `${loggedUser.address}, ${loggedUser.state || ''} ${loggedUser.pincode ? '(PIN: ' + loggedUser.pincode + ')' : ''}`.trim();
         const badge = document.getElementById('autoDetectBadge');
         if (badge) {
           badge.textContent = '✓ Saved Farm Profile';
           badge.style.color = '#10b981';
         }
+      }
+    } else {
+      // Guest: clear inputs if they hold previous account values
+      if (nameInput && (nameInput.value === 'Come Learn SAP' || nameInput.value === 'Bhanu Prakash')) {
+        nameInput.value = '';
+      }
+      if (phoneInput && phoneInput.value === '9876543210') {
+        phoneInput.value = '';
       }
     }
   } catch (e) {}
