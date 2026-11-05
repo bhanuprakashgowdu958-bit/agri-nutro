@@ -208,6 +208,13 @@ module.exports = async function handler(req, res) {
   }
 
   if (req.method === 'GET') {
+    const urlObj = new URL(req.url, 'http://localhost');
+    const singleId = urlObj.searchParams.get('id') || urlObj.searchParams.get('orderId');
+    if (singleId) {
+      const match = (orders || []).find(o => o && o.orderId && o.orderId.toLowerCase() === singleId.toLowerCase());
+      if (match) return res.status(200).json(match);
+      return res.status(404).json({ error: 'Order not found', orderId: singleId });
+    }
     return res.status(200).json(orders || []);
   }
 
@@ -216,11 +223,20 @@ module.exports = async function handler(req, res) {
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
 
       if (body.action === 'update_status' && body.orderId) {
-        const match = orders.find(o => o.orderId && o.orderId.toLowerCase() === body.orderId.toLowerCase());
+        const match = orders.find(o => o && o.orderId && o.orderId.toLowerCase() === body.orderId.toLowerCase());
+        const step = body.currentStep !== undefined ? parseInt(body.currentStep, 10) : (match ? match.currentStep : 1);
+        const calculatedEta = body.eta || (
+          step === 1 ? 'Tomorrow by 4:00 PM (Farmgate Arrival)' :
+          step === 2 ? 'Tomorrow by 4:00 PM (Farmgate Arrival)' :
+          step === 3 ? 'Out for Farmgate Delivery (Today by 6:00 PM)' :
+          step === 4 ? 'Delivered at Farmgate' :
+          (match && match.eta && match.eta !== 'Pending Admin Review' ? match.eta : 'Tomorrow by 4:00 PM (Farmgate Arrival)')
+        );
         const patch = {
-          currentStep: body.currentStep !== undefined ? parseInt(body.currentStep, 10) : (match ? match.currentStep : 1),
+          currentStep: step,
           status: body.status || (match ? match.status : 'Order confirmed'),
-          adminApproval: body.adminApproval || (match ? match.adminApproval : 'accepted'),
+          adminApproval: body.adminApproval || (step >= 1 ? 'accepted' : (match ? match.adminApproval : 'pending')),
+          eta: calculatedEta,
           rejectionReason: body.rejectionReason !== undefined ? body.rejectionReason : (match ? match.rejectionReason : ''),
           lastUpdated: new Date().toISOString()
         };
@@ -228,6 +244,7 @@ module.exports = async function handler(req, res) {
           match.currentStep = patch.currentStep;
           match.status = patch.status;
           match.adminApproval = patch.adminApproval;
+          match.eta = patch.eta;
           match.rejectionReason = patch.rejectionReason;
           match.lastUpdated = patch.lastUpdated;
         }

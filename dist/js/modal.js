@@ -706,8 +706,75 @@ function updateAllOrderBadges(count) {
 
 const FIREBASE_RTDB_ORDERS_URL = 'https://nutriagro-feeds-default-rtdb.firebaseio.com/orders';
 
+function integrateOrderIntoLocalStore(orderData) {
+  if (!orderData || !orderData.orderId) return;
+  const deletedIds = getDeletedOrderIds();
+  if (deletedIds.has(String(orderData.orderId).toLowerCase())) return;
+
+  const local = getStoredOrders();
+  const existingIdx = local.findIndex(o => o.orderId && o.orderId.toLowerCase() === orderData.orderId.toLowerCase());
+  if (existingIdx !== -1) {
+    local[existingIdx] = Object.assign({}, local[existingIdx], orderData);
+  } else {
+    local.unshift(orderData);
+  }
+  local.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+  localStorage.setItem('nutriagro_orders', JSON.stringify(local));
+
+  // If this device placed or tracked this order as guest, ensure ID is recorded
+  const myOrderIds = JSON.parse(localStorage.getItem('nutriagro_my_order_ids') || '[]');
+  if (!myOrderIds.includes(orderData.orderId)) {
+    myOrderIds.unshift(orderData.orderId);
+    localStorage.setItem('nutriagro_my_order_ids', JSON.stringify(myOrderIds));
+  }
+
+  updateAllOrderBadges();
+  checkCustomerOrderStatusChanges(local);
+}
+
+async function fetchSingleOrderLive(orderId) {
+  if (!orderId) return null;
+  const cleanId = orderId.trim();
+  const deletedIds = getDeletedOrderIds();
+  if (deletedIds.has(cleanId.toLowerCase())) return null;
+
+  // 1. Ultra-fast direct fetch from Firebase Cloud Realtime Database (Single Document)
+  try {
+    const fbRes = await fetch(`${FIREBASE_RTDB_ORDERS_URL}/${encodeURIComponent(cleanId)}.json?_t=${Date.now()}`, {
+      method: 'GET',
+      cache: 'no-store'
+    });
+    if (fbRes.ok) {
+      const orderData = await fbRes.json();
+      if (orderData && orderData.orderId) {
+        integrateOrderIntoLocalStore(orderData);
+        return orderData;
+      }
+    }
+  } catch (fbErr) {}
+
+  // 2. Fallback fetch from /api/orders?id=...
+  try {
+    const apiRes = await fetch(`${getOrdersApiEndpoint()}?id=${encodeURIComponent(cleanId)}&_t=${Date.now()}`, {
+      method: 'GET',
+      cache: 'no-store'
+    });
+    if (apiRes.ok) {
+      const apiData = await apiRes.json();
+      if (apiData && apiData.orderId) {
+        integrateOrderIntoLocalStore(apiData);
+        return apiData;
+      }
+    }
+  } catch (apiErr) {}
+
+  return null;
+}
+
 async function fetchOrdersFromServer(callback) {
   const deletedIds = getDeletedOrderIds();
+  let serverOrders = null;
+
   // 1. Try Firebase Cloud Database directly (real multi-device cloud store)
   try {
     const fbRes = await fetch(`${FIREBASE_RTDB_ORDERS_URL}.json?_t=${Date.now()}`, {
@@ -718,48 +785,65 @@ async function fetchOrdersFromServer(callback) {
       const fbData = await fbRes.json();
       if (fbData && typeof fbData === 'object') {
         const list = Array.isArray(fbData) ? fbData : Object.values(fbData);
-        const cleanServer = list.filter(o => 
+        serverOrders = list.filter(o => 
           o && o.orderId && 
           !o.action && 
           (o.farmerName || o.items || o.finalTotal) && 
           !deletedIds.has(String(o.orderId).toLowerCase())
         );
-        cleanServer.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-        localStorage.setItem('nutriagro_orders', JSON.stringify(cleanServer));
-        updateAllOrderBadges();
-        checkCustomerOrderStatusChanges(cleanServer);
-        refreshOpenTrackerModalUI(cleanServer);
-        if (typeof callback === 'function') callback(cleanServer);
-        return cleanServer;
       }
     }
   } catch (fbErr) {}
 
   // 2. Fallback to /api/orders endpoint
-  try {
-    const res = await fetch(getOrdersApiEndpoint() + '?_t=' + Date.now(), {
-      method: 'GET',
-      cache: 'no-store',
-      headers: { 'Accept': 'application/json', 'Cache-Control': 'no-cache, no-store' }
-    });
-    if (res.ok) {
-      const serverOrders = await res.json();
-      if (Array.isArray(serverOrders)) {
-        const cleanServer = serverOrders.filter(o => 
-          o && o.orderId && 
-          !o.action && 
-          (o.farmerName || o.items || o.finalTotal) && 
-          !deletedIds.has(String(o.orderId).toLowerCase())
-        );
-        localStorage.setItem('nutriagro_orders', JSON.stringify(cleanServer));
-        updateAllOrderBadges(cleanServer.length);
-        checkCustomerOrderStatusChanges(cleanServer);
-        refreshOpenTrackerModalUI(cleanServer);
-        if (typeof callback === 'function') callback(cleanServer);
-        return cleanServer;
+  if (!serverOrders || serverOrders.length === 0) {
+    try {
+      const res = await fetch(getOrdersApiEndpoint() + '?_t=' + Date.now(), {
+        method: 'GET',
+        cache: 'no-store',
+        headers: { 'Accept': 'application/json', 'Cache-Control': 'no-cache, no-store' }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (Array.isArray(json)) {
+          serverOrders = json.filter(o => 
+            o && o.orderId && 
+            !o.action && 
+            (o.farmerName || o.items || o.finalTotal) && 
+            !deletedIds.has(String(o.orderId).toLowerCase())
+          );
+        }
       }
-    }
-  } catch (err) {}
+    } catch (err) {}
+  }
+
+  if (serverOrders) {
+    // Intelligently merge: start with local cache, overlay all server updates
+    const local = getStoredOrders();
+    const orderMap = new Map();
+    local.forEach(o => {
+      if (o && o.orderId && !deletedIds.has(String(o.orderId).toLowerCase())) {
+        orderMap.set(o.orderId.toLowerCase(), o);
+      }
+    });
+    serverOrders.forEach(so => {
+      const key = so.orderId.toLowerCase();
+      const existing = orderMap.get(key);
+      if (existing) {
+        orderMap.set(key, Object.assign({}, existing, so));
+      } else {
+        orderMap.set(key, so);
+      }
+    });
+    const merged = Array.from(orderMap.values()).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    localStorage.setItem('nutriagro_orders', JSON.stringify(merged));
+    updateAllOrderBadges();
+    checkCustomerOrderStatusChanges(merged);
+    refreshOpenTrackerModalUI(merged);
+    if (typeof callback === 'function') callback(merged);
+    return merged;
+  }
+
   const current = getStoredOrders();
   updateAllOrderBadges();
   if (typeof callback === 'function') callback(current);
@@ -831,14 +915,19 @@ async function updateOrderStatus(orderId, newStepVal) {
   if (!match) return;
 
   match.currentStep = step;
+  if (step >= 1) match.adminApproval = 'accepted';
   if (step === 1) {
     match.status = 'Order confirmed';
+    match.eta = (match.eta && match.eta !== 'Pending Admin Review') ? match.eta : 'Tomorrow by 4:00 PM (Farmgate Arrival)';
   } else if (step === 2) {
     match.status = 'Packing';
+    match.eta = (match.eta && match.eta !== 'Pending Admin Review') ? match.eta : 'Tomorrow by 4:00 PM (Farmgate Arrival)';
   } else if (step === 3) {
     match.status = 'Dispatch';
+    match.eta = 'Out for Farmgate Delivery (Today by 6:00 PM)';
   } else if (step === 4) {
     match.status = 'Delivered';
+    match.eta = 'Delivered at Farmgate';
   }
   match.lastUpdated = new Date().toISOString();
 
@@ -849,8 +938,10 @@ async function updateOrderStatus(orderId, newStepVal) {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        adminApproval: match.adminApproval,
         currentStep: step,
         status: match.status,
+        eta: match.eta,
         lastUpdated: match.lastUpdated
       })
     }).catch(() => {});
@@ -863,8 +954,10 @@ async function updateOrderStatus(orderId, newStepVal) {
       body: JSON.stringify({
         action: 'update_status',
         orderId: orderId,
+        adminApproval: match.adminApproval,
         currentStep: step,
-        status: match.status
+        status: match.status,
+        eta: match.eta
       })
     });
   } catch (err) {
@@ -1148,6 +1241,41 @@ function checkCustomerOrderStatusChanges(allOrders) {
 
 let statusWatcherTimer = null;
 let firebaseEventSource = null;
+let activeTrackerPollTimer = null;
+
+async function refreshActiveDisplayedOrderLive() {
+  const trackerModal = document.getElementById('orderTrackerModal');
+  if (!trackerModal || !trackerModal.classList.contains('active')) return;
+  const trackingTab = document.getElementById('trackerLiveTrackingTab');
+  if (!trackingTab || trackingTab.style.display === 'none') return;
+
+  const inputEl = document.getElementById('orderTrackerInput');
+  const targetId = (inputEl && inputEl.value.trim()) || localStorage.getItem('nutriagro_my_latest_order_id');
+  if (!targetId) return;
+
+  try {
+    const fresh = await fetchSingleOrderLive(targetId);
+    if (fresh) {
+      const all = getStoredOrders();
+      const my = getMyCustomerOrders(all);
+      renderOrderTrackingCard(fresh, my, false);
+    }
+  } catch (e) {}
+}
+
+function startActiveTrackerLivePolling() {
+  stopActiveTrackerLivePolling();
+  activeTrackerPollTimer = setInterval(() => {
+    refreshActiveDisplayedOrderLive();
+  }, 1800);
+}
+
+function stopActiveTrackerLivePolling() {
+  if (activeTrackerPollTimer) {
+    clearInterval(activeTrackerPollTimer);
+    activeTrackerPollTimer = null;
+  }
+}
 
 function startOrderStatusWatcher() {
   if (statusWatcherTimer) clearInterval(statusWatcherTimer);
@@ -1158,6 +1286,18 @@ function startOrderStatusWatcher() {
     fetchOrdersFromServer();
   }, 2500);
 
+  // Tab visibility & mobile phone wakeup: fetch instantly when customer unminimizes browser
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      fetchOrdersFromServer();
+      refreshActiveDisplayedOrderLive();
+    }
+  });
+  window.addEventListener('focus', () => {
+    fetchOrdersFromServer();
+    refreshActiveDisplayedOrderLive();
+  });
+
   // Cross-tab Instant Sync via BroadcastChannel (Same Device / Browser Tabs)
   try {
     if (typeof BroadcastChannel !== 'undefined' && !window._nutriagroOrdersChannel) {
@@ -1165,6 +1305,11 @@ function startOrderStatusWatcher() {
       window._nutriagroOrdersChannel.onmessage = (event) => {
         const data = event.data;
         if (data && (data.type === 'ORDER_ACCEPTED' || data.type === 'STATUS_UPDATED' || data.type === 'NEW_ORDER' || data.type === 'ORDER_REJECTED')) {
+          if (data.orderId) {
+            fetchSingleOrderLive(data.orderId).then(() => {
+              refreshActiveDisplayedOrderLive();
+            });
+          }
           fetchOrdersFromServer();
         }
       };
@@ -1178,11 +1323,13 @@ function startOrderStatusWatcher() {
       firebaseEventSource.addEventListener('put', (event) => {
         try {
           fetchOrdersFromServer();
+          refreshActiveDisplayedOrderLive();
         } catch (e) {}
       });
       firebaseEventSource.addEventListener('patch', (event) => {
         try {
           fetchOrdersFromServer();
+          refreshActiveDisplayedOrderLive();
         } catch (e) {}
       });
       firebaseEventSource.onerror = () => {
@@ -1205,6 +1352,9 @@ function openOrderTrackerModal(targetOrderId) {
   const overlay = document.getElementById('modalOverlay');
   if (!modal || !overlay) return;
 
+  // Background refresh full orders list immediately
+  fetchOrdersFromServer();
+
   const allOrders = getStoredOrders();
   const myOrders = getMyCustomerOrders(allOrders);
   const countBadge = document.getElementById('ordersCountBadge');
@@ -1215,13 +1365,33 @@ function openOrderTrackerModal(targetOrderId) {
     switchTrackerTab('tracking');
     const inputEl = document.getElementById('orderTrackerInput');
     if (inputEl) inputEl.value = targetOrderId;
-    const match = myOrders.find(o => o.orderId.toLowerCase() === targetOrderId.toLowerCase()) ||
-                  allOrders.find(o => o.orderId.toLowerCase() === targetOrderId.toLowerCase());
+    const match = myOrders.find(o => o.orderId && o.orderId.toLowerCase() === targetOrderId.toLowerCase()) ||
+                  allOrders.find(o => o.orderId && o.orderId.toLowerCase() === targetOrderId.toLowerCase());
     if (match) {
-      renderOrderTrackingCard(match, myOrders);
+      renderOrderTrackingCard(match, myOrders, true);
     } else {
-      renderOrderNotFoundCard(targetOrderId);
+      const container = document.getElementById('orderTrackerResultContainer');
+      if (container) {
+        container.innerHTML = `
+          <div style="background: #ffffff; border: 1.5px solid var(--color-gray-200); border-radius: var(--radius-lg); padding: 32px 20px; text-align: center;">
+            <div style="font-size: 2.2rem; margin-bottom: 10px;">🛰️</div>
+            <div style="font-size: 1.05rem; font-weight: 800; color: var(--color-primary); margin-bottom: 4px;">Connecting to Mill Satellite Logistics...</div>
+            <div style="font-size: 0.82rem; color: var(--color-dark-muted);">Retrieving live mill dispatch for <strong>#${targetOrderId}</strong></div>
+          </div>
+        `;
+      }
     }
+
+    // Direct Real-time Cloud Fetch
+    fetchSingleOrderLive(targetOrderId).then(fresh => {
+      if (fresh) {
+        const upAll = getStoredOrders();
+        const upMy = getMyCustomerOrders(upAll);
+        renderOrderTrackingCard(fresh, upMy, false);
+      } else if (!match) {
+        renderOrderNotFoundCard(targetOrderId);
+      }
+    });
   } else {
     // Default when opening from navigation menu: Open the Customer Orders List!
     switchTrackerTab('list');
@@ -1230,6 +1400,8 @@ function openOrderTrackerModal(targetOrderId) {
   modal.classList.add('active');
   overlay.classList.add('active');
   document.body.classList.add('modal-open');
+
+  startActiveTrackerLivePolling();
 }
 
 function closeOrderTrackerModal() {
@@ -1238,6 +1410,7 @@ function closeOrderTrackerModal() {
   if (modal) modal.classList.remove('active');
   if (overlay) overlay.classList.remove('active');
   document.body.classList.remove('modal-open');
+  stopActiveTrackerLivePolling();
 }
 
 function switchTrackerTab(tabName) {
@@ -1252,6 +1425,7 @@ function switchTrackerTab(tabName) {
   if (countBadge) countBadge.textContent = myOrders.length;
 
   if (tabName === 'list') {
+    stopActiveTrackerLivePolling();
     if (listTab) listTab.style.display = 'block';
     if (trackingTab) trackingTab.style.display = 'none';
     if (btnList) btnList.classList.add('active');
@@ -1263,21 +1437,32 @@ function switchTrackerTab(tabName) {
     if (btnList) btnList.classList.remove('active');
     if (btnTracking) btnTracking.classList.add('active');
     
-    // For live tracking: ONLY auto-load this customer's own order
+    // For live tracking: auto-load this customer's own order
     const container = document.getElementById('orderTrackerResultContainer');
     const inputEl = document.getElementById('orderTrackerInput');
     const currentInputVal = inputEl ? inputEl.value.trim().toLowerCase() : '';
-    const alreadyShown = myOrders.find(o => o.orderId.toLowerCase() === currentInputVal);
+    const activeTarget = currentInputVal || (myOrders[0] ? myOrders[0].orderId : '') || localStorage.getItem('nutriagro_my_latest_order_id');
 
-    if (!alreadyShown) {
-      if (myOrders.length > 0) {
-        if (inputEl) inputEl.value = myOrders[0].orderId;
-        renderOrderTrackingCard(myOrders[0], myOrders);
-      } else {
-        if (inputEl) inputEl.value = '';
-        renderEmptyOrderTrackerState(myOrders);
+    if (activeTarget) {
+      if (inputEl) inputEl.value = activeTarget;
+      const match = myOrders.find(o => o.orderId && o.orderId.toLowerCase() === activeTarget.toLowerCase()) ||
+                    allOrders.find(o => o.orderId && o.orderId.toLowerCase() === activeTarget.toLowerCase());
+      if (match) {
+        renderOrderTrackingCard(match, myOrders, true);
       }
+      fetchSingleOrderLive(activeTarget).then(fresh => {
+        if (fresh) {
+          const upAll = getStoredOrders();
+          const upMy = getMyCustomerOrders(upAll);
+          renderOrderTrackingCard(fresh, upMy, false);
+        }
+      });
+    } else {
+      if (inputEl) inputEl.value = '';
+      renderEmptyOrderTrackerState(myOrders);
     }
+
+    startActiveTrackerLivePolling();
   }
 }
 
@@ -1548,93 +1733,75 @@ function lookupSingleOrderAsGuest() {
     if (window.cart && window.cart.showToast) window.cart.showToast('Please enter an Order ID or Phone number', 'error');
     return;
   }
-  const orders = getStoredOrders();
-  const valLower = val.toLowerCase();
-  const valDigits = val.replace(/\D/g, '');
-  const match = orders.find(o => 
-    (o.orderId && o.orderId.toLowerCase() === valLower) ||
-    (valDigits.length >= 10 && o.phone && o.phone.replace(/\D/g, '').endsWith(valDigits.slice(-10)))
-  );
-  if (match) {
-    switchTrackerTab('tracking');
-    const trackerInput = document.getElementById('orderTrackerInput');
-    if (trackerInput) trackerInput.value = match.orderId;
-    renderOrderTrackingCard(match, [match]);
-  } else {
-    if (window.cart && window.cart.showToast) {
-      window.cart.showToast(`No order found matching "${val}". Please check your Order ID.`, 'error');
-    }
-  }
+  switchTrackerTab('tracking');
+  const trackerInput = document.getElementById('orderTrackerInput');
+  if (trackerInput) trackerInput.value = val;
+  trackOrderSubmit();
 }
 
-function updateOrderStatus(orderId, newStepVal) {
-  const step = parseInt(newStepVal, 10);
-  const orders = getStoredOrders();
-  const match = orders.find(o => o.orderId === orderId);
-  if (!match) return;
-
-  match.currentStep = step;
-  if (step === 1) {
-    match.status = 'Order confirmed';
-  } else if (step === 2) {
-    match.status = 'Packing';
-  } else if (step === 3) {
-    match.status = 'Dispatch';
-  } else if (step === 4) {
-    match.status = 'Delivered';
-  }
-
-  localStorage.setItem('nutriagro_orders', JSON.stringify(orders));
-  if (window.cart) window.cart.showToast(`Order #${orderId} status updated to Step ${step}!`, 'success');
-  renderOrdersListView(orders);
-}
-
-function trackOrderSubmit() {
+async function trackOrderSubmit() {
   const input = document.getElementById('orderTrackerInput');
   const query = input ? input.value.trim() : '';
 
   if (!query) {
-    if (window.cart && window.cart.showToast) window.cart.showToast('Please enter an Order ID', 'info');
+    if (window.cart && window.cart.showToast) window.cart.showToast('Please enter an Order ID or Phone number', 'info');
     return;
   }
 
   const allOrders = getStoredOrders();
   const myOrders = getMyCustomerOrders(allOrders);
 
-  // 1. Check in customer's own orders first
+  // 1. Optimistic check in customer's own orders first
   const ownMatch = myOrders.find(o => 
     (o.orderId && o.orderId.toLowerCase() === query.toLowerCase()) || 
     (o.phone && o.phone.replace(/\D/g, '').endsWith(query.replace(/\D/g, '')))
   );
 
-  if (ownMatch) {
-    renderOrderTrackingCard(ownMatch, myOrders);
-    return;
+  const exactMatch = ownMatch || allOrders.find(o => o.orderId && o.orderId.toLowerCase() === query.toLowerCase());
+
+  if (exactMatch) {
+    // Show instantly from cache with cloud syncing badge
+    renderOrderTrackingCard(exactMatch, myOrders, true);
+  } else {
+    // Display searching state while fetching from cloud
+    const container = document.getElementById('orderTrackerResultContainer');
+    if (container) {
+      container.innerHTML = `
+        <div style="background: #ffffff; border: 1.5px solid var(--color-gray-200); border-radius: var(--radius-lg); padding: 32px 20px; text-align: center;">
+          <div style="font-size: 2.2rem; margin-bottom: 10px;">🛰️</div>
+          <div style="font-size: 1.05rem; font-weight: 800; color: var(--color-primary); margin-bottom: 4px;">Contacting Mill Cloud Logistics...</div>
+          <div style="font-size: 0.82rem; color: var(--color-dark-muted);">Locating batch records and live status for <strong>#${query}</strong>...</div>
+        </div>
+      `;
+    }
   }
 
-  // 2. Check if this is an exact Order ID in global orders
-  const exactMatch = allOrders.find(o => o.orderId && o.orderId.toLowerCase() === query.toLowerCase());
-  if (exactMatch) {
-    let currentUser = null;
-    try {
-      currentUser = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
-    } catch (e) {}
+  // 2. Fetch fresh order directly from Firebase Realtime Database
+  let freshOrder = null;
+  if (query.toUpperCase().startsWith('NUTRI-') || query.includes('-')) {
+    freshOrder = await fetchSingleOrderLive(query);
+  }
 
-    // Security check: if signed in, do not allow looking into another user's order
-    if (currentUser && exactMatch.userEmail && currentUser.email && exactMatch.userEmail.toLowerCase() !== currentUser.email.toLowerCase()) {
-      if (window.cart && window.cart.showToast) {
-        window.cart.showToast(`Order #${query} does not belong to your account.`, 'error');
-      }
-      return;
-    }
+  // 3. If not found or if query might be phone number, fetch full list from server
+  if (!freshOrder) {
+    const freshAll = await fetchOrdersFromServer();
+    const freshMy = getMyCustomerOrders(freshAll);
+    freshOrder = freshMy.find(o => 
+      (o.orderId && o.orderId.toLowerCase() === query.toLowerCase()) || 
+      (o.phone && o.phone.replace(/\D/g, '').endsWith(query.replace(/\D/g, '')))
+    ) || freshAll.find(o => o.orderId && o.orderId.toLowerCase() === query.toLowerCase());
+  }
 
-    renderOrderTrackingCard(exactMatch, myOrders);
-  } else {
+  if (freshOrder) {
+    const finalAll = getStoredOrders();
+    const finalMy = getMyCustomerOrders(finalAll);
+    renderOrderTrackingCard(freshOrder, finalMy, false);
+  } else if (!exactMatch) {
     renderOrderNotFoundCard(query);
   }
 }
 
-function renderOrderTrackingCard(order, allOrders) {
+function renderOrderTrackingCard(order, allOrders, isSyncing = false) {
   const container = document.getElementById('orderTrackerResultContainer');
   if (!container) return;
 
@@ -1654,6 +1821,10 @@ function renderOrderTrackingCard(order, allOrders) {
           : (currentStep === 3 
             ? '🚚 3. Dispatch' 
             : '🏡 4. Delivered'))));
+
+  const displayEta = (!isPending && !isRejected && (!order.eta || order.eta === 'Pending Admin Review'))
+    ? (currentStep >= 3 ? 'Out for Delivery (Today by 6:00 PM)' : (currentStep === 4 ? 'Delivered at Farmgate' : 'Tomorrow by 4:00 PM (Farmgate Arrival)'))
+    : (order.eta || 'Tomorrow by 4:00 PM');
 
   let itemsHtml = '';
   if (order.items && order.items.length > 0) {
@@ -1777,7 +1948,18 @@ function renderOrderTrackingCard(order, allOrders) {
       <!-- Card Header -->
       <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid var(--color-gray-200); padding-bottom: 14px; margin-bottom: 18px;">
         <div>
-          <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; color: var(--color-dark-muted);">Order Reference</span>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; color: var(--color-dark-muted);">Order Reference</span>
+            ${isSyncing ? `
+              <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.7rem; color: #2563eb; font-weight: 700; background: rgba(37,99,235,0.08); padding: 1px 7px; border-radius: 9999px;">
+                <span style="font-size: 0.65rem;">🔄</span> Syncing Cloud...
+              </span>
+            ` : `
+              <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.7rem; color: #047857; font-weight: 700; background: rgba(16,185,129,0.1); padding: 1px 7px; border-radius: 9999px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981; display: inline-block;"></span> Live Cloud Tracked
+              </span>
+            `}
+          </div>
           <div style="font-size: 1.35rem; font-weight: 800; color: var(--color-primary);">${order.orderId}</div>
           <div style="font-size: 0.78rem; color: var(--color-dark-muted);">Placed on: ${order.date || 'Today'}</div>
         </div>
@@ -1785,7 +1967,7 @@ function renderOrderTrackingCard(order, allOrders) {
           <span style="display: inline-block; background: rgba(245, 158, 11, 0.15); color: ${statusColor}; font-weight: 700; font-size: 0.8rem; padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(245, 158, 11, 0.3);">
             ${statusBadgeText}
           </span>
-          <div style="font-size: 0.76rem; color: #059669; font-weight: 600; margin-top: 4px;">ETA: ${order.eta || 'Tomorrow by 4:00 PM'}</div>
+          <div style="font-size: 0.76rem; color: #059669; font-weight: 600; margin-top: 4px;">ETA: ${displayEta}</div>
         </div>
       </div>
 
@@ -1916,6 +2098,8 @@ window.clearCustomerNotifs = clearCustomerNotifs;
 window.renderCustomerNotificationsDropdown = renderCustomerNotificationsDropdown;
 window.getMyCustomerOrders = getMyCustomerOrders;
 window.renderOrderNotFoundCard = renderOrderNotFoundCard;
+window.fetchSingleOrderLive = fetchSingleOrderLive;
+window.refreshActiveDisplayedOrderLive = refreshActiveDisplayedOrderLive;
 
 // Start order sync & customer watcher immediately
 if (document.readyState === 'loading') {
