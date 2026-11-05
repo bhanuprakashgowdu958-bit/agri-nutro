@@ -22,6 +22,32 @@ class CartManager {
     this.items = this.loadCart();
     this.initEventListeners();
     this.updateUI();
+    this.checkAndNotifyRestoredCart();
+  }
+
+  // Subtle Cart Expiration & Restoration Notification
+  checkAndNotifyRestoredCart(user = null) {
+    const u = user || this.getCurrentUser();
+    if (!u || !this.items || this.items.length === 0) return;
+
+    const sessionKey = `nutriagro_cart_restored_${this.activeStorageKey}`;
+    try {
+      if (sessionStorage.getItem(sessionKey)) return;
+      sessionStorage.setItem(sessionKey, '1');
+    } catch (e) {}
+
+    const rawName = u.fullName || u.name || (u.email ? u.email.split('@')[0] : 'Farmer');
+    const firstName = rawName.trim().split(' ')[0] || 'Farmer';
+    const count = this.items.length;
+    const totalBags = this.getTotalBags();
+
+    setTimeout(() => {
+      this.showToast(
+        `<span>Welcome back, <strong>${firstName}</strong>! We restored ${count} item${count > 1 ? 's' : ''} from your previous cart.</span>` +
+        `<button type="button" class="toast-view-cart-btn" onclick="cart.openDrawer()">View Cart (${totalBags})</button>`,
+        'success'
+      );
+    }, 700);
   }
 
   getCurrentUser() {
@@ -185,6 +211,14 @@ class CartManager {
     this.items = this.loadCart(newUser);
     this.appliedPromo = null; // Reset promo for new session
     this.updateUI();
+
+    // Subtle Cart Restoration Notice when account logs in
+    if (newUser && this.items.length > 0) {
+      try {
+        sessionStorage.removeItem(`nutriagro_cart_restored_${this.activeStorageKey}`);
+      } catch (e) {}
+      this.checkAndNotifyRestoredCart(newUser);
+    }
   }
 
   switchCurrency(newCurrency) {

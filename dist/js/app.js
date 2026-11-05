@@ -644,7 +644,9 @@ async function handleModalLogin(e) {
   }
   onUserSessionChange(loggedUser, { mergeGuestCart: true });
   if (window.cart && typeof window.cart.showToast === 'function') {
-    window.cart.showToast(`🌾 Welcome back, ${loggedUser.fullName || 'Farmer'}!`, 'success');
+    if (!window.cart.items || window.cart.items.length === 0) {
+      window.cart.showToast(`🌾 Welcome back, ${loggedUser.fullName || 'Farmer'}!`, 'success');
+    }
   }
 }
 
@@ -755,7 +757,9 @@ async function chooseGoogleAccount(name, email, picture, phone = '', farmName = 
   }
   onUserSessionChange(googleUser, { mergeGuestCart: true });
   if (window.cart && typeof window.cart.showToast === 'function') {
-    window.cart.showToast(`🌾 Signed in as ${cleanName} (${email})! 10% wholesale discount (FARM10) unlocked.`, 'success');
+    if (!window.cart.items || window.cart.items.length === 0) {
+      window.cart.showToast(`🌾 Signed in as ${cleanName} (${email})! 10% wholesale discount (FARM10) unlocked.`, 'success');
+    }
   }
 }
 
