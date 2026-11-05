@@ -206,8 +206,41 @@ function removeSavedGoogleAccount(email, event) {
   } catch (e) {}
 }
 
+const FIREBASE_RTDB_USERS_URL = 'https://nutriagro-feeds-default-rtdb.firebaseio.com/users';
+
+function syncUserAccountToCloud(user) {
+  if (!user || (!user.userId && !user.email)) return;
+  const key = user.userId || user.email.replace(/[\.\$#\[\]\/]/g, '_');
+  const payload = {
+    ...user,
+    signedInAt: user.signedInAt || new Date().toISOString(),
+    lastActiveAt: new Date().toISOString()
+  };
+
+  // 1. Direct Firebase RTDB update
+  try {
+    fetch(`${FIREBASE_RTDB_USERS_URL}/${encodeURIComponent(key)}.json`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).catch(() => {});
+  } catch (e) {}
+
+  // 2. BroadcastChannel cross-window push (0ms latency for admin hub)
+  try {
+    if (typeof BroadcastChannel !== 'undefined') {
+      const ch = new BroadcastChannel('nutriagro_users_channel');
+      ch.postMessage({ type: 'USER_SIGNED_IN', user: payload });
+    }
+  } catch (e) {}
+}
+
 // Central Session Lifecycle & Account Isolation Hook
 function onUserSessionChange(newUser, options = { mergeGuestCart: false }) {
+  if (newUser) {
+    syncUserAccountToCloud(newUser);
+  }
+
   // Only merge guest items if the user was actively confirming a checkout dispatch
   const isPendingCheckout = typeof sessionStorage !== 'undefined' && sessionStorage.getItem('nutriagro_pending_checkout_order') === '1';
   const shouldMerge = (options && options.mergeGuestCart) || isPendingCheckout;
@@ -1218,6 +1251,8 @@ async function handleProfileSave(e) {
         ch.postMessage({ type: 'PROFILE_UPDATED', user: user });
       }
     } catch (e) {}
+
+    syncUserAccountToCloud(user);
 
     // Sync to Firebase if auth current user
     if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {

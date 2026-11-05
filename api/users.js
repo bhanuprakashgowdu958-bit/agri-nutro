@@ -5,6 +5,42 @@ const path = require('path');
 const crypto = require('crypto');
 
 let memoryUsers = null;
+const FIREBASE_RTDB_USERS_URL = process.env.FIREBASE_RTDB_USERS_URL || 'https://nutriagro-feeds-default-rtdb.firebaseio.com/users';
+
+async function getFirebaseUsers() {
+  try {
+    const res = await fetch(`${FIREBASE_RTDB_USERS_URL}.json?_t=${Date.now()}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && typeof data === 'object') {
+        const list = Array.isArray(data) ? data : Object.values(data);
+        return list.filter(u => u && (u.userId || u.email)).sort((a, b) => new Date(b.signedInAt || b.registeredAt || 0) - new Date(a.signedInAt || a.registeredAt || 0));
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+
+async function saveFirebaseUser(user) {
+  if (!user || (!user.userId && !user.email)) return;
+  const key = user.userId || user.email.replace(/[\.\$#\[\]\/]/g, '_');
+  try {
+    await fetch(`${FIREBASE_RTDB_USERS_URL}/${encodeURIComponent(key)}.json`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(user)
+    });
+  } catch (e) {}
+}
+
+async function deleteFirebaseUser(userId) {
+  if (!userId) return;
+  try {
+    await fetch(`${FIREBASE_RTDB_USERS_URL}/${encodeURIComponent(userId)}.json`, {
+      method: 'DELETE'
+    });
+  } catch (e) {}
+}
 
 function computePasswordHash(password, salt) {
   if (!password) return '';
@@ -54,13 +90,20 @@ module.exports = async (req, res) => {
   }
 
   if (req.method === 'GET') {
+    let cloudUsers = await getFirebaseUsers();
+    if (cloudUsers && cloudUsers.length > 0) {
+      memoryUsers = cloudUsers;
+      saveLocalUsers(cloudUsers);
+      return res.status(200).json(cloudUsers);
+    }
     let users = memoryUsers || getLocalUsers();
     return res.status(200).json(users || []);
   }
 
   if (req.method === 'POST') {
     try {
-      let users = memoryUsers || getLocalUsers();
+      let cloudUsers = await getFirebaseUsers();
+      let users = cloudUsers || memoryUsers || getLocalUsers();
       let body = req.body;
       if (typeof body === 'string') {
         body = JSON.parse(body);
@@ -72,6 +115,15 @@ module.exports = async (req, res) => {
 
       if (body.action === 'delete') {
         const targetKey = (body.userId || body.phone || body.email || '').toString().toLowerCase();
+        const toDelete = users.find(u => {
+          const uid = (u.userId || '').toLowerCase();
+          const ph = (u.phone || '').toLowerCase();
+          const em = (u.email || '').toLowerCase();
+          return uid === targetKey || ph === targetKey || em === targetKey;
+        });
+        if (toDelete && toDelete.userId) {
+          await deleteFirebaseUser(toDelete.userId);
+        }
         users = users.filter(u => {
           const uid = (u.userId || '').toLowerCase();
           const ph = (u.phone || '').toLowerCase();
@@ -100,6 +152,7 @@ module.exports = async (req, res) => {
           user.lastUpdated = new Date().toISOString();
           memoryUsers = users;
           saveLocalUsers(users);
+          await saveFirebaseUser(user);
           return res.status(200).json({ success: true, cart: user.cart });
         }
         return res.status(200).json({ success: false, message: 'User not found in memory' });
@@ -125,6 +178,7 @@ module.exports = async (req, res) => {
           if (body.fullName) user.fullName = body.fullName.trim();
           if (body.email) user.email = body.email.trim().toLowerCase();
           if (body.phone) user.phone = body.phone.trim();
+          if (body.address) user.address = body.address.trim();
           if (body.picture !== undefined) user.picture = body.picture;
           user.lastUpdated = new Date().toISOString();
         } else {
@@ -133,8 +187,10 @@ module.exports = async (req, res) => {
             fullName: body.fullName || 'Farm User',
             email: body.email || '',
             phone: body.phone || '',
+            address: body.address || '',
             picture: body.picture || '',
             registeredAt: new Date().toISOString(),
+            signedInAt: new Date().toISOString(),
             lastUpdated: new Date().toISOString()
           };
           users.unshift(user);
@@ -142,6 +198,7 @@ module.exports = async (req, res) => {
 
         memoryUsers = users;
         saveLocalUsers(users);
+        await saveFirebaseUser(user);
 
         const { password, passwordHash, salt, ...safeUser } = user;
         return res.status(200).json({
@@ -167,6 +224,8 @@ module.exports = async (req, res) => {
           user.authProvider = 'google';
           if (gPicture) user.picture = gPicture;
           if (gName && !user.fullName) user.fullName = gName;
+          if (body.phone && !user.phone) user.phone = body.phone.trim();
+          if (body.address && !user.address) user.address = body.address.trim();
           user.lastUpdated = new Date().toISOString();
           user.signedInAt = new Date().toISOString();
         } else {
@@ -176,6 +235,7 @@ module.exports = async (req, res) => {
             fullName: displayName,
             email: gEmail,
             phone: (body.phone || '').trim(),
+            address: (body.address || '').trim(),
             picture: gPicture,
             googleId: gId,
             authProvider: 'google',
@@ -191,6 +251,7 @@ module.exports = async (req, res) => {
 
         memoryUsers = users;
         saveLocalUsers(users);
+        await saveFirebaseUser(user);
 
         const { password, passwordHash, salt, ...safeUser } = user;
         return res.status(200).json({
@@ -292,6 +353,12 @@ module.exports = async (req, res) => {
         }
 
         // Password verified
+        user.signedInAt = new Date().toISOString();
+        user.lastUpdated = new Date().toISOString();
+        memoryUsers = users;
+        saveLocalUsers(users);
+        await saveFirebaseUser(user);
+
         const { password, passwordHash, salt: userSalt, ...safeUser } = user;
         return res.status(200).json({
           success: true,
@@ -322,6 +389,7 @@ module.exports = async (req, res) => {
         const newUser = {
           userId: body.userId || `FARM-${Math.floor(100000 + Math.random() * 900000)}`,
           registeredAt: body.registeredAt || new Date().toISOString(),
+          signedInAt: new Date().toISOString(),
           lastUpdated: new Date().toISOString(),
           ...body,
           salt: salt,
@@ -333,6 +401,7 @@ module.exports = async (req, res) => {
         users.unshift(newUser);
         memoryUsers = users;
         saveLocalUsers(users);
+        await saveFirebaseUser(newUser);
 
         const { password, passwordHash: ph, salt: s, ...safeUser } = newUser;
         return res.status(200).json({ success: true, user: safeUser, users });
@@ -346,13 +415,16 @@ module.exports = async (req, res) => {
       );
       if (existingIdx >= 0) {
         users[existingIdx] = { ...users[existingIdx], ...body, lastUpdated: new Date().toISOString() };
+        await saveFirebaseUser(users[existingIdx]);
       } else {
         const newUser = {
           userId: body.userId || `FARM-${Math.floor(100000 + Math.random() * 900000)}`,
           registeredAt: new Date().toISOString(),
+          signedInAt: new Date().toISOString(),
           ...body
         };
         users.unshift(newUser);
+        await saveFirebaseUser(newUser);
       }
 
       memoryUsers = users;

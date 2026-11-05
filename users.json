@@ -42,5 +42,17 @@
     "authProvider": "google",
     "signedInAt": "2026-11-03T07:27:03.067Z",
     "lastUpdated": "2026-11-03T07:27:03.201Z"
+  },
+  {
+    "userId": "GOOGLE-696058",
+    "fullName": "Come Learn SAP",
+    "email": "comelearnsap@gmail.com",
+    "phone": "9876543210",
+    "address": "Sholinganallur, Chennai, Tamil Nadu, India",
+    "authProvider": "google",
+    "registeredAt": "2026-11-04T08:00:00.000Z",
+    "signedInAt": "2026-11-05T07:35:00.000Z",
+    "tier": "Verified Google Member (10% Rebate)",
+    "picture": ""
   }
 ]

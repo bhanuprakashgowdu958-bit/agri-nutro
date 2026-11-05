@@ -926,6 +926,87 @@
       grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
       gap: 18px;
     }
+
+    .customer-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #10b981;
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+
+    .badge-google {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+
+    .badge-email {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      background: #f8fafc;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+    }
+
+    .pill-status-active {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #047857;
+      background: #ecfdf5;
+      padding: 2px 8px;
+      border-radius: 12px;
+      border: 1px solid #a7f3d0;
+    }
+
+    .pill-status-recent {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #b45309;
+      background: #fffbeb;
+      padding: 2px 8px;
+      border-radius: 12px;
+      border: 1px solid #fde68a;
+    }
+
+    .pill-status-dormant {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #64748b;
+      background: #f1f5f9;
+      padding: 2px 8px;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+    }
   </style>
 </head>
 <body>
@@ -1017,7 +1098,7 @@
         <span>📦</span> Orders & Dispatch Operations (<span id="tabOrdersCount" class="view-tab-badge">0</span>)
       </button>
       <button type="button" class="view-tab-btn" id="tabFarmersBtn" onclick="switchAdminView('farmers')">
-        <span>🌾</span> Registered Farmers Directory (<span id="tabFarmersCount" class="view-tab-badge">0</span>)
+        <span>👥</span> Signed-in Customers & Accounts (<span id="tabFarmersCount" class="view-tab-badge">0</span>)
       </button>
     </div>
 
@@ -1130,104 +1211,104 @@
       </section>
     </div>
 
-    <!-- VIEW 2: REGISTERED FARMERS & ENTERPRISE DIRECTORY -->
+    <!-- VIEW 2: SIGNED-IN CUSTOMERS & USER ACCOUNTS DIRECTORY -->
     <div id="farmersSectionView" style="display: none;">
-      <!-- Farmers KPI Metric Cards Grid -->
+      <!-- Customer Accounts KPI Metric Cards Grid -->
       <section class="kpi-grid">
         <div class="kpi-card">
-          <div class="kpi-icon-box" style="background: rgba(6, 78, 59, 0.1); color: var(--primary);">👨‍🌾</div>
+          <div class="kpi-icon-box" style="background: rgba(6, 78, 59, 0.1); color: var(--primary);">👥</div>
           <div>
             <div class="kpi-val" id="kpiTotalFarmers">0</div>
-            <div class="kpi-label">Registered Farmers</div>
+            <div class="kpi-label">Registered Customer Accounts</div>
           </div>
         </div>
 
         <div class="kpi-card">
-          <div class="kpi-icon-box" style="background: rgba(59, 130, 246, 0.12); color: #2563eb;">🐄</div>
+          <div class="kpi-icon-box" style="background: rgba(16, 185, 129, 0.12); color: #047857;">🟢</div>
           <div>
-            <div class="kpi-val" id="kpiDairyFarmers">0</div>
-            <div class="kpi-label">Dairy Cattle Herds</div>
+            <div class="kpi-val" id="kpiActiveToday">0</div>
+            <div class="kpi-label">Active / Signed In Today</div>
           </div>
         </div>
 
         <div class="kpi-card">
-          <div class="kpi-icon-box" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-dark);">🐔</div>
+          <div class="kpi-icon-box" style="background: rgba(59, 130, 246, 0.12); color: #2563eb;">🔍</div>
           <div>
-            <div class="kpi-val" id="kpiPoultryFarmers">0</div>
-            <div class="kpi-label">Commercial Poultry Flocks</div>
+            <div class="kpi-val" id="kpiGoogleUsers">0</div>
+            <div class="kpi-label">Google Verified Members</div>
           </div>
         </div>
 
         <div class="kpi-card">
-          <div class="kpi-icon-box" style="background: rgba(16, 185, 129, 0.12); color: var(--success);">🏛️</div>
+          <div class="kpi-icon-box" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-dark);">📦</div>
           <div>
-            <div class="kpi-val" id="kpiGstFarmers">0</div>
-            <div class="kpi-label">GST Registered Accounts</div>
+            <div class="kpi-val" id="kpiOrderUsers">0</div>
+            <div class="kpi-label">Customers with Orders</div>
           </div>
         </div>
       </section>
 
-      <!-- Farmers Controls Strip -->
+      <!-- Customer Accounts Controls Strip -->
       <section class="controls-strip">
         <div class="search-input-wrap">
           <span class="search-icon">🔍</span>
-          <input type="text" id="farmerSearchInput" class="search-input" placeholder="Search farmer by Name, Farm Name, Phone, District, State, or Pincode..." oninput="filterFarmers()" />
+          <input type="text" id="farmerSearchInput" class="search-input" placeholder="Search customer by Name, Email, Phone, User ID, Address..." oninput="filterFarmers()" />
         </div>
 
         <div class="filter-tabs">
-          <button type="button" class="filter-btn active farmer-filter-btn" data-farmer-filter="all" onclick="setFarmerFilter('all')">All Farms (<span id="countFarmersAll">0</span>)</button>
-          <button type="button" class="filter-btn farmer-filter-btn" data-farmer-filter="dairy" onclick="setFarmerFilter('dairy')">🐄 Dairy (<span id="countFarmersDairy">0</span>)</button>
-          <button type="button" class="filter-btn farmer-filter-btn" data-farmer-filter="poultry" onclick="setFarmerFilter('poultry')">🐔 Poultry (<span id="countFarmersPoultry">0</span>)</button>
-          <button type="button" class="filter-btn farmer-filter-btn" data-farmer-filter="goat" onclick="setFarmerFilter('goat')">🐐 Goat/Sheep (<span id="countFarmersGoat">0</span>)</button>
-          <button type="button" class="filter-btn farmer-filter-btn" data-farmer-filter="other" onclick="setFarmerFilter('other')">🐟 Aqua/Swine (<span id="countFarmersOther">0</span>)</button>
+          <button type="button" class="filter-btn active farmer-filter-btn" data-farmer-filter="all" onclick="setFarmerFilter('all')">All Customers (<span id="countFarmersAll">0</span>)</button>
+          <button type="button" class="filter-btn farmer-filter-btn" data-farmer-filter="active" onclick="setFarmerFilter('active')">🟢 Active Recently (<span id="countFarmersActive">0</span>)</button>
+          <button type="button" class="filter-btn farmer-filter-btn" data-farmer-filter="google" onclick="setFarmerFilter('google')">🔍 Google Accounts (<span id="countFarmersGoogle">0</span>)</button>
+          <button type="button" class="filter-btn farmer-filter-btn" data-farmer-filter="orders" onclick="setFarmerFilter('orders')">📦 Placed Orders (<span id="countFarmersWithOrders">0</span>)</button>
+          <button type="button" class="filter-btn farmer-filter-btn" data-farmer-filter="cart" onclick="setFarmerFilter('cart')">🛒 Active Cart (<span id="countFarmersWithCart">0</span>)</button>
         </div>
 
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
           <button type="button" class="btn btn-sm btn-primary" onclick="openRegisterFarmerModal()">
-            ➕ Register Farmer
+            ➕ Add Account
           </button>
           <button type="button" class="btn btn-sm btn-accent" onclick="loadAdminFarmers(true)">
-            🔄 Refresh Farmers
+            🔄 Refresh Users
           </button>
           <button type="button" class="btn btn-sm btn-light" style="background:#e2e8f0; color:#334155;" onclick="exportFarmersToCSV()">
-            📥 Export Farmers CSV
+            📥 Export Users CSV
           </button>
         </div>
       </section>
 
-      <!-- Farmers Grid Section -->
+      <!-- Users Grid Section -->
       <section>
         <div class="section-title-wrap">
           <div class="section-title">
-            <span>🌾</span> Verified Registered Farmers & Commercial Farm Accounts
+            <span>👥</span> Verified Customer Accounts & Sign-In Activity
           </div>
           <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">
-            Source: users.json & Online Farm Registration Portal • Real-time Account Directory
+            Source: Firebase Cloud RTDB & User Auth • Real-time Customer Activity Directory
           </span>
         </div>
 
-        <!-- Farmers Cards Grid -->
+        <!-- Users Cards Grid -->
         <div id="farmersListWrap" class="farmer-grid">
           <!-- Injected via JavaScript -->
         </div>
       </section>
     </div>
 
-    <!-- Modal: Register New Farmer Profile Manually -->
+    <!-- Modal: Add Customer Account Manually -->
     <div id="farmerModalOverlay" class="auth-gate-overlay" style="display: none; z-index: 100000;">
       <div class="auth-card" style="max-width: 520px; text-align: left;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-          <h3 style="font-size: 1.25rem; color: var(--primary); font-weight: 800; margin: 0;">➕ Register New Farmer Profile</h3>
+          <h3 style="font-size: 1.25rem; color: var(--primary); font-weight: 800; margin: 0;">➕ Add Customer Account</h3>
           <button type="button" onclick="closeRegisterFarmerModal()" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-muted);">✕</button>
         </div>
         <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 18px;">
-          Add a verified livestock farm account to the central directory (saved to users.json and available across millgate operations).
+          Add a customer account to the central directory (saved to Firebase Cloud RTDB and accessible across store operations).
         </p>
 
         <form id="manualFarmerForm" onsubmit="submitNewFarmerForm(event)">
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
             <div>
-              <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Farmer Full Name *</label>
+              <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Customer Full Name *</label>
               <input type="text" id="mFarmerName" required class="search-input" style="padding: 8px 12px;" placeholder="e.g. Ramesh Patel" />
             </div>
             <div>
@@ -1238,36 +1319,19 @@
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
             <div>
-              <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Farm / Enterprise Name</label>
+              <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Email Address</label>
+              <input type="email" id="mFarmerEmail" class="search-input" style="padding: 8px 12px;" placeholder="e.g. ramesh.patel@gmail.com" />
+            </div>
+            <div>
+              <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Farm / Business Name</label>
               <input type="text" id="mFarmName" class="search-input" style="padding: 8px 12px;" placeholder="e.g. Patel Dairy Farm" />
             </div>
-            <div>
-              <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Farm Enterprise Type</label>
-              <select id="mFarmType" class="search-input" style="padding: 8px 12px;">
-                <option value="Dairy Cattle & Buffalo">Dairy Cattle & Buffalo</option>
-                <option value="Poultry (Broiler & Layer)">Poultry (Broiler & Layer)</option>
-                <option value="Goat & Sheep Farming">Goat & Sheep Farming</option>
-                <option value="Aquaculture (Fish & Shrimp)">Aquaculture (Fish & Shrimp)</option>
-                <option value="Commercial Swine / Piggery">Commercial Swine / Piggery</option>
-              </select>
-            </div>
           </div>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
             <div>
-              <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Herd / Flock Capacity</label>
-              <input type="text" id="mHerdSize" class="search-input" style="padding: 8px 12px;" placeholder="e.g. 35 Milking Cows" />
-            </div>
-            <div>
-              <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Primary Feed Formula</label>
-              <input type="text" id="mPrimaryFeed" class="search-input" style="padding: 8px 12px;" placeholder="e.g. NutriBov LactaMax™" />
-            </div>
-          </div>
-
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-            <div>
-              <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">District & State *</label>
-              <input type="text" id="mStateDistrict" required class="search-input" style="padding: 8px 12px;" placeholder="e.g. Anand, Gujarat" />
+              <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">District & State</label>
+              <input type="text" id="mStateDistrict" class="search-input" style="padding: 8px 12px;" placeholder="e.g. Anand, Gujarat" />
             </div>
             <div>
               <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Pincode</label>
@@ -1276,13 +1340,13 @@
           </div>
 
           <div style="margin-bottom: 14px;">
-            <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Delivery Address / Landmark</label>
-            <input type="text" id="mAddress" class="search-input" style="padding: 8px 12px;" placeholder="e.g. Near Milk Chilling Center, Anand Bypass" />
+            <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Delivery Address / Farm Location</label>
+            <input type="text" id="mAddress" class="search-input" style="padding: 8px 12px;" placeholder="e.g. Survey 42, Anand Bypass" />
           </div>
 
           <div style="display: flex; justify-content: flex-end; gap: 10px;">
             <button type="button" class="btn btn-light" style="color: #333;" onclick="closeRegisterFarmerModal()">Cancel</button>
-            <button type="submit" class="btn btn-primary">Save Farmer Profile</button>
+            <button type="submit" class="btn btn-primary">Save Customer Account</button>
           </div>
         </form>
       </div>
@@ -1399,6 +1463,7 @@
     }
 
     const FIREBASE_RTDB_ORDERS_URL = 'https://nutriagro-feeds-default-rtdb.firebaseio.com/orders';
+    const FIREBASE_RTDB_USERS_URL = 'https://nutriagro-feeds-default-rtdb.firebaseio.com/users';
 
     function getApiEndpoint() {
       if (window.location.protocol === 'file:') {
@@ -2548,45 +2613,62 @@
     }
 
     // ══════════════════════════════════════════════════════════════
-    // REGISTERED FARMERS DIRECTORY OPERATIONS
+    // SIGNED-IN CUSTOMERS & ACCOUNTS CRM (REAL-TIME FIREBASE)
     // ══════════════════════════════════════════════════════════════
 
     async function loadAdminFarmers(isManual = false) {
       if (!isAuthorized()) return;
 
-      // 1. Try /api/users endpoint
+      let fetchedUsers = [];
+
+      // 1. Direct Realtime Database (Firebase RTDB)
       try {
-        const res = await fetch(getUsersApiEndpoint() + '?_t=' + Date.now(), {
-          method: 'GET',
-          cache: 'no-store'
-        });
+        const fbRes = await fetch(`${FIREBASE_RTDB_USERS_URL}.json?_t=${Date.now()}`, { cache: 'no-store' });
+        if (fbRes.ok) {
+          const fbData = await fbRes.json();
+          if (fbData && typeof fbData === 'object') {
+            fetchedUsers = Array.isArray(fbData) ? fbData : Object.values(fbData);
+          }
+        }
+      } catch (err) {}
+
+      // 2. If Firebase returned users, merge and display immediately
+      if (fetchedUsers.length > 0) {
+        mergeFarmersList(fetchedUsers);
+        if (isManual) showToast(`👥 Loaded ${fetchedUsers.length} customer accounts from cloud!`, 'success');
+        return;
+      }
+
+      // 3. Fallback: /api/users
+      try {
+        const res = await fetch(getUsersApiEndpoint() + '?_t=' + Date.now(), { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
             mergeFarmersList(data);
-            if (isManual) showToast('Farmer accounts refreshed from server!', 'success');
+            if (isManual) showToast('Customer accounts loaded from server!', 'success');
             return;
           }
         }
       } catch (err) {}
 
-      // 2. Try users.json static file
+      // 4. Fallback: users.json
       try {
         const res = await fetch('users.json?_t=' + Date.now());
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
             mergeFarmersList(data);
-            if (isManual) showToast('Farmer accounts loaded from users.json!', 'success');
+            if (isManual) showToast('Customer accounts loaded from users.json!', 'success');
             return;
           }
         }
       } catch (err) {}
 
-      // 3. Fallback to localStorage
+      // 5. Fallback: localStorage
       try {
         const local = JSON.parse(localStorage.getItem('nutriagro_users_list') || '[]');
-        mergeFarmersList(local);
+        if (local.length > 0) mergeFarmersList(local);
       } catch (e) {}
     }
 
@@ -2596,47 +2678,16 @@
         localList = JSON.parse(localStorage.getItem('nutriagro_users_list') || '[]');
       } catch (e) {}
 
-      const defaultSeed = [
-        {
-          userId: "FARM-108219",
-          fullName: "Sardar Gurpreet Singh",
-          phone: "9876543210",
-          email: "gurpreet.dairy@gmail.com",
-          farmName: "Golden Harvest Dairy Farm",
-          farmType: "Dairy Cattle & Buffalo",
-          herdSize: "45 Cattle (Milking & Dry)",
-          primaryFeed: "NutriBov LactaMax™ High-Yield Dairy Feed",
-          pincode: "141001",
-          state: "Punjab",
-          district: "Ludhiana",
-          address: "GT Road, Near Canal Bridge, Ludhiana, Punjab",
-          gstin: "03AAAAA0000A1Z5",
-          whatsappAlerts: true,
-          registeredAt: "2026-10-11T10:00:00.000Z",
-          tier: "Progressive Farmer Tier"
-        },
-        {
-          userId: "FARM-205934",
-          fullName: "M. Thangaraj",
-          phone: "9443218765",
-          email: "thangaraj.poultry@gmail.com",
-          farmName: "Sri Murugan Broiler Farms",
-          farmType: "Poultry (Broiler & Layer)",
-          herdSize: "12,000 Birds per Batch",
-          primaryFeed: "NutriAvi BroilerMax™ Starter & Finisher",
-          pincode: "637211",
-          state: "Tamil Nadu",
-          district: "Namakkal",
-          address: "Trichy Main Road, Namakkal District, Tamil Nadu",
-          gstin: "33BBBBB0000B2Z8",
-          whatsappAlerts: true,
-          registeredAt: "2026-10-12T14:30:00.000Z",
-          tier: "Commercial Poultry Tier"
-        }
-      ];
+      let deletedFromStorage = [];
+      try {
+        deletedFromStorage = JSON.parse(localStorage.getItem('nutriagro_deleted_farmers') || '[]');
+      } catch (e) {}
+      deletedFromStorage.forEach(k => deletedFarmerKeys.add(k.toString().toLowerCase()));
 
       const mergedMap = new Map();
-      [...incoming, ...localList, ...defaultSeed].forEach(item => {
+
+      // ONLY real users: NO mock seed data (NO Sardar Gurpreet Singh, NO M. Thangaraj)
+      [...incoming, ...localList].forEach(item => {
         if (!item) return;
         const uid = (item.userId || '').toString().toLowerCase().trim();
         const em = (item.email || '').toString().toLowerCase().trim();
@@ -2649,7 +2700,7 @@
         const primaryKey = uid || em || ph;
         if (!primaryKey) return;
 
-        // Check if matching farmer exists by userId OR email
+        // Check if matching customer exists by userId OR email
         let existingKey = null;
         if (mergedMap.has(primaryKey)) {
           existingKey = primaryKey;
@@ -2666,7 +2717,7 @@
 
         if (existingKey) {
           const existing = mergedMap.get(existingKey);
-          const isItemNewer = (item.lastUpdated && (!existing.lastUpdated || item.lastUpdated >= existing.lastUpdated));
+          const isItemNewer = (item.signedInAt || item.lastUpdated || '') >= (existing.signedInAt || existing.lastUpdated || '');
           if (isItemNewer) {
             mergedMap.set(existingKey, { ...existing, ...item });
           } else {
@@ -2677,7 +2728,39 @@
         }
       });
 
-      allFarmers = Array.from(mergedMap.values());
+      // Cross-reference customer profiles with actual orders placed in allOrders
+      allFarmers = Array.from(mergedMap.values()).map(user => {
+        const uPhoneNorm = (user.phone || '').replace(/\D/g, '');
+        const uEmailLower = (user.email || '').toLowerCase().trim();
+        const uIdLower = (user.userId || '').toLowerCase().trim();
+
+        const userOrders = allOrders.filter(o => {
+          const oEmail = (o.userEmail || o.email || '').toLowerCase().trim();
+          const oPhone = (o.phone || '').replace(/\D/g, '');
+          const oUid = (o.userId || '').toLowerCase().trim();
+          return (uEmailLower && oEmail && oEmail === uEmailLower) ||
+                 (uIdLower && oUid && oUid === uIdLower) ||
+                 (uPhoneNorm && oPhone && uPhoneNorm.length >= 10 && oPhone === uPhoneNorm);
+        });
+
+        const totalSpent = userOrders.reduce((sum, o) => sum + (o.finalTotal || 0), 0);
+        const sortedOrders = userOrders.slice().sort((a, b) => new Date(b.placedAt || b.orderDate || 0) - new Date(a.placedAt || a.orderDate || 0));
+
+        return {
+          ...user,
+          ordersCount: userOrders.length,
+          totalSpent: totalSpent,
+          latestOrder: sortedOrders[0] || null
+        };
+      });
+
+      // Sort: Most recently signed in / active first
+      allFarmers.sort((a, b) => {
+        const tA = new Date(a.signedInAt || a.lastActiveAt || a.lastUpdated || a.registeredAt || 0).getTime();
+        const tB = new Date(b.signedInAt || b.lastActiveAt || b.lastUpdated || b.registeredAt || 0).getTime();
+        return tB - tA;
+      });
+
       try {
         localStorage.setItem('nutriagro_users_list', JSON.stringify(allFarmers));
       } catch (e) {}
@@ -2688,34 +2771,43 @@
 
     function updateFarmerCounters() {
       const total = allFarmers.length;
-      const dairy = allFarmers.filter(f => /dairy|cattle|cow|buffalo/i.test((f.farmType || '') + ' ' + (f.primaryFeed || ''))).length;
-      const poultry = allFarmers.filter(f => /poultry|broiler|layer|bird/i.test((f.farmType || '') + ' ' + (f.primaryFeed || ''))).length;
-      const goat = allFarmers.filter(f => /goat|sheep/i.test((f.farmType || '') + ' ' + (f.primaryFeed || ''))).length;
-      const other = Math.max(0, total - dairy - poultry - goat);
-      const gst = allFarmers.filter(f => f.gstin && f.gstin.trim().length >= 8).length;
+      const now = Date.now();
+      const oneDay = 24 * 60 * 60 * 1000;
+
+      const activeToday = allFarmers.filter(f => {
+        const t = new Date(f.signedInAt || f.lastActiveAt || f.lastUpdated || 0).getTime();
+        return !isNaN(t) && (now - t) < oneDay;
+      }).length;
+
+      const googleUsers = allFarmers.filter(f => 
+        f.authProvider === 'google' || (f.userId && f.userId.startsWith('GOOGLE-')) || (f.picture && f.picture.includes('google'))
+      ).length;
+
+      const orderUsers = allFarmers.filter(f => (f.ordersCount || 0) > 0).length;
+      const cartUsers = allFarmers.filter(f => Array.isArray(f.cart) && f.cart.length > 0).length;
 
       const badge = document.getElementById('tabFarmersCount');
       if (badge) badge.textContent = total;
 
       const kTotal = document.getElementById('kpiTotalFarmers');
       if (kTotal) kTotal.textContent = total;
-      const kDairy = document.getElementById('kpiDairyFarmers');
-      if (kDairy) kDairy.textContent = dairy;
-      const kPoultry = document.getElementById('kpiPoultryFarmers');
-      if (kPoultry) kPoultry.textContent = poultry;
-      const kGst = document.getElementById('kpiGstFarmers');
-      if (kGst) kGst.textContent = gst;
+      const kActive = document.getElementById('kpiActiveToday');
+      if (kActive) kActive.textContent = activeToday;
+      const kGoogle = document.getElementById('kpiGoogleUsers');
+      if (kGoogle) kGoogle.textContent = googleUsers;
+      const kOrders = document.getElementById('kpiOrderUsers');
+      if (kOrders) kOrders.textContent = orderUsers;
 
       const cAll = document.getElementById('countFarmersAll');
       if (cAll) cAll.textContent = total;
-      const cDairy = document.getElementById('countFarmersDairy');
-      if (cDairy) cDairy.textContent = dairy;
-      const cPoultry = document.getElementById('countFarmersPoultry');
-      if (cPoultry) cPoultry.textContent = poultry;
-      const cGoat = document.getElementById('countFarmersGoat');
-      if (cGoat) cGoat.textContent = goat;
-      const cOther = document.getElementById('countFarmersOther');
-      if (cOther) cOther.textContent = other;
+      const cActive = document.getElementById('countFarmersActive');
+      if (cActive) cActive.textContent = activeToday;
+      const cGoogle = document.getElementById('countFarmersGoogle');
+      if (cGoogle) cGoogle.textContent = googleUsers;
+      const cOrders = document.getElementById('countFarmersOrders');
+      if (cOrders) cOrders.textContent = orderUsers;
+      const cCart = document.getElementById('countFarmersCart');
+      if (cCart) cCart.textContent = cartUsers;
     }
 
     function setFarmerFilter(filter) {
@@ -2732,46 +2824,66 @@
       renderFarmersCards();
     }
 
+    function filterOrdersByCustomer(query) {
+      if (!query) return;
+      switchAdminView('orders');
+      setFilter('all');
+      const input = document.getElementById('adminSearchInput');
+      if (input) {
+        input.value = query;
+        filterOrders();
+        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      showToast(`Showing orders placed by customer: "${query}"`, 'info');
+    }
+
     function renderFarmersCards() {
       const container = document.getElementById('farmersListWrap');
       if (!container) return;
 
+      const now = Date.now();
+      const twoDays = 48 * 60 * 60 * 1000;
+
       let filtered = allFarmers.slice();
 
-      if (currentFarmerFilter === 'dairy') {
-        filtered = filtered.filter(f => /dairy|cattle|cow|buffalo/i.test((f.farmType || '') + ' ' + (f.primaryFeed || '')));
-      } else if (currentFarmerFilter === 'poultry') {
-        filtered = filtered.filter(f => /poultry|broiler|layer|bird/i.test((f.farmType || '') + ' ' + (f.primaryFeed || '')));
-      } else if (currentFarmerFilter === 'goat') {
-        filtered = filtered.filter(f => /goat|sheep/i.test((f.farmType || '') + ' ' + (f.primaryFeed || '')));
-      } else if (currentFarmerFilter === 'other') {
-        filtered = filtered.filter(f => !/dairy|cattle|cow|buffalo|poultry|broiler|layer|bird|goat|sheep/i.test((f.farmType || '') + ' ' + (f.primaryFeed || '')));
+      if (currentFarmerFilter === 'active') {
+        filtered = filtered.filter(f => {
+          const t = new Date(f.signedInAt || f.lastActiveAt || f.lastUpdated || 0).getTime();
+          return !isNaN(t) && (now - t) < twoDays;
+        });
+      } else if (currentFarmerFilter === 'google') {
+        filtered = filtered.filter(f => 
+          f.authProvider === 'google' || (f.userId && f.userId.startsWith('GOOGLE-')) || (f.picture && f.picture.includes('google'))
+        );
+      } else if (currentFarmerFilter === 'orders') {
+        filtered = filtered.filter(f => (f.ordersCount || 0) > 0);
+      } else if (currentFarmerFilter === 'cart') {
+        filtered = filtered.filter(f => Array.isArray(f.cart) && f.cart.length > 0);
       }
 
       if (farmerSearchQuery) {
         filtered = filtered.filter(f =>
           (f.fullName && f.fullName.toLowerCase().includes(farmerSearchQuery)) ||
-          (f.farmName && f.farmName.toLowerCase().includes(farmerSearchQuery)) ||
-          (f.phone && f.phone.toLowerCase().includes(farmerSearchQuery)) ||
           (f.email && f.email.toLowerCase().includes(farmerSearchQuery)) ||
-          (f.state && f.state.toLowerCase().includes(farmerSearchQuery)) ||
+          (f.phone && f.phone.toLowerCase().includes(farmerSearchQuery)) ||
+          (f.userId && f.userId.toLowerCase().includes(farmerSearchQuery)) ||
+          (f.farmName && f.farmName.toLowerCase().includes(farmerSearchQuery)) ||
+          (f.address && f.address.toLowerCase().includes(farmerSearchQuery)) ||
           (f.district && f.district.toLowerCase().includes(farmerSearchQuery)) ||
-          (f.pincode && f.pincode.toLowerCase().includes(farmerSearchQuery)) ||
-          (f.primaryFeed && f.primaryFeed.toLowerCase().includes(farmerSearchQuery)) ||
-          (f.gstin && f.gstin.toLowerCase().includes(farmerSearchQuery))
+          (f.state && f.state.toLowerCase().includes(farmerSearchQuery))
         );
       }
 
       if (filtered.length === 0) {
         container.innerHTML = `
           <div class="empty-state" style="grid-column: 1 / -1;">
-            <div style="font-size: 2.8rem; margin-bottom: 12px;">🌾</div>
-            <h3 style="font-size: 1.2rem; color: var(--text-main); margin-bottom: 6px;">No Farmers Found</h3>
+            <div style="font-size: 2.8rem; margin-bottom: 12px;">👥</div>
+            <h3 style="font-size: 1.2rem; color: var(--text-main); margin-bottom: 6px;">No Customer Accounts Found</h3>
             <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 440px; margin: 0 auto 18px auto;">
-              No registered farmers match your active search or enterprise filter.
+              No signed-in customer accounts match your active search or filter.
             </p>
             <button type="button" class="btn btn-primary" onclick="setFarmerFilter('all'); document.getElementById('farmerSearchInput').value=''; filterFarmers();">
-              View All Registered Farmers
+              View All Customer Accounts
             </button>
           </div>
         `;
@@ -2780,66 +2892,136 @@
 
       container.innerHTML = filtered.map(f => {
         const cleanPhone = (f.phone || '').replace(/\D/g, '');
-        const waMsg = encodeURIComponent(`Namaste ${f.fullName || 'Farmer'} ji, greetings from NutriAgro Feeds India. Regarding your livestock feed requirements at ${f.farmName || 'your farm'}...`);
-        const regDate = f.registeredAt ? new Date(f.registeredAt).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Verified Account';
-        const encodedFarmer = encodeURIComponent(JSON.stringify(f));
+        const isGoogle = f.authProvider === 'google' || (f.userId && f.userId.startsWith('GOOGLE-')) || (f.picture && f.picture.includes('google'));
+        const waMsg = encodeURIComponent(`Namaste ${f.fullName || 'Customer'} ji, greetings from NutriAgro Feeds India. Regarding your livestock feed requirements...`);
+
+        // Calculate time status
+        const lastActiveTime = new Date(f.signedInAt || f.lastActiveAt || f.lastUpdated || f.registeredAt || 0).getTime();
+        const diffMs = !isNaN(lastActiveTime) && lastActiveTime > 0 ? (now - lastActiveTime) : Infinity;
+        let statusBadge = { text: '⚪ Joined', cls: 'pill-status-dormant' };
+        if (diffMs < 30 * 60 * 1000) {
+          statusBadge = { text: '🟢 Active Just Now', cls: 'pill-status-active' };
+        } else if (diffMs < 24 * 60 * 60 * 1000) {
+          const hrs = Math.max(1, Math.floor(diffMs / 3600000));
+          statusBadge = { text: `🟢 Active ${hrs}h ago`, cls: 'pill-status-active' };
+        } else if (diffMs < 7 * 24 * 60 * 60 * 1000) {
+          const days = Math.floor(diffMs / (24 * 3600000));
+          statusBadge = { text: `🟡 Signed in ${days}d ago`, cls: 'pill-status-recent' };
+        } else if (lastActiveTime > 0) {
+          statusBadge = { text: `⚪ Signed in ${new Date(lastActiveTime).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}`, cls: 'pill-status-dormant' };
+        }
+
+        // Initials for avatar
+        const initials = ((f.fullName || f.email || 'U').split(' ').map(w => w[0]).join('').slice(0, 2)).toUpperCase();
+        const avatarHtml = f.picture ? `
+          <img src="${f.picture}" alt="${f.fullName || 'Customer'}" class="customer-avatar" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'customer-avatar\\'>${initials}</div>';"/>
+        ` : `
+          <div class="customer-avatar" style="background: linear-gradient(135deg, #ecfdf5, #d1fae5); color: #065f46;">
+            ${initials}
+          </div>
+        `;
+
+        const authBadgeHtml = isGoogle ? `
+          <span class="badge-google" title="Google Verified Account">
+            <svg width="12" height="12" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.65v3.03h3.88c2.27-2.09 3.66-5.17 3.66-9.12z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.03c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.13C3.25 21.36 7.34 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.29c-.25-.72-.38-1.49-.38-2.29s.13-1.57.38-2.29V6.58H1.26C.46 8.18 0 9.99 0 12s.46 3.82 1.26 5.42l4.02-3.13z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.25 2.64 1.26 6.58l4.02 3.13c.95-2.83 3.6-4.96 6.72-4.96z"/></svg>
+            Google Verified
+          </span>
+        ` : `
+          <span class="badge-email" title="Email & Password Registered Account">
+            ✉️ Email Member
+          </span>
+        `;
+
+        // Cart details
+        const cartItemsCount = Array.isArray(f.cart) ? f.cart.reduce((s, i) => s + (i.quantity || 1), 0) : 0;
+        const cartTotalVal = Array.isArray(f.cart) ? f.cart.reduce((s, i) => s + ((i.price || 0) * (i.quantity || 1)), 0) : 0;
+
+        const encodedCustomer = encodeURIComponent(JSON.stringify(f));
+        const customerSearchRef = (f.email || f.phone || f.userId || '').replace(/'/g, "\\'");
 
         return `
           <div class="farmer-card">
             <div>
-              <div class="farmer-card-header">
-                <div>
-                  <span style="font-size: 0.72rem; font-weight: 800; color: var(--primary); background: rgba(6,78,59,0.1); padding: 2px 8px; border-radius: 6px; letter-spacing: 0.04em;">
-                    ${f.userId || 'FARM-VERIFIED'}
-                  </span>
-                  <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); margin-top: 6px; line-height: 1.3;">
-                    ${f.farmName || 'Commercial Farm'}
-                  </h3>
-                  <div style="font-size: 0.86rem; font-weight: 600; color: #334155;">
-                    👨‍🌾 ${f.fullName || 'Farmer Partner'}
+              <!-- Header with Avatar & Identifiers -->
+              <div class="farmer-card-header" style="align-items: center;">
+                <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+                  ${avatarHtml}
+                  <div style="min-width: 0;">
+                    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 2px;">
+                      <span style="font-size: 0.70rem; font-weight: 800; color: var(--primary); background: rgba(6,78,59,0.08); padding: 2px 7px; border-radius: 5px; letter-spacing: 0.04em;">
+                        ${f.userId || 'USER'}
+                      </span>
+                      ${authBadgeHtml}
+                      <span class="${statusBadge.cls}">${statusBadge.text}</span>
+                    </div>
+                    <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin: 0; line-height: 1.25; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+                      ${f.fullName || 'Customer Account'}
+                    </h3>
+                    <div style="font-size: 0.80rem; font-weight: 600; color: #64748b; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+                      ${f.farmName || 'Commercial Farm Account'}
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <span class="farmer-badge-tier ${f.gstin ? 'farmer-badge-verified' : ''}">
-                    ${f.gstin ? '🏛️ GST Verified' : '🌱 ' + (f.tier || 'Progressive Tier')}
-                  </span>
                 </div>
               </div>
 
-              <!-- Contact & Location Grid -->
-              <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.83rem; margin-bottom: 16px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #f8fafc; padding: 8px 12px; border-radius: 8px;">
-                  <span><strong>📞 Phone:</strong> <a href="tel:${f.phone || ''}" style="color: var(--primary); font-weight: 700; text-decoration: none;">${f.phone || 'N/A'}</a></span>
-                  <div style="display: flex; gap: 6px;">
-                    <button type="button" class="btn btn-sm btn-secondary" onclick="editFarmerPhone('${f.userId || f.phone}')" style="padding: 3px 8px; font-size: 0.72rem; cursor: pointer;" title="Edit mobile number">
+              <!-- Contact & Location Box -->
+              <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.82rem; margin-bottom: 14px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #f8fafc; padding: 7px 10px; border-radius: 8px;">
+                  <span><strong>📞 Phone:</strong> ${f.phone ? `<a href="tel:${f.phone}" style="color: var(--primary); font-weight: 700; text-decoration: none;">${f.phone}</a>` : '<span style="color: #94a3b8;">Not provided</span>'}</span>
+                  <div style="display: flex; gap: 5px;">
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="editFarmerPhone('${f.userId || f.phone}')" style="padding: 2px 7px; font-size: 0.70rem;" title="Edit phone number">
                       ✏️ Edit
                     </button>
-                    <a href="https://wa.me/91${cleanPhone}?text=${waMsg}" target="_blank" class="btn btn-sm btn-whatsapp" style="padding: 4px 10px; font-size: 0.74rem;">
-                      💬 WhatsApp
-                    </a>
+                    ${cleanPhone ? `
+                      <a href="https://wa.me/91${cleanPhone}?text=${waMsg}" target="_blank" class="btn btn-sm btn-whatsapp" style="padding: 2px 8px; font-size: 0.70rem;">
+                        💬 WhatsApp
+                      </a>
+                    ` : ''}
                   </div>
                 </div>
 
-                ${f.email ? `<div><strong>✉️ Email:</strong> <a href="mailto:${f.email}" style="color: #475569;">${f.email}</a></div>` : ''}
+                ${f.email ? `<div><strong>✉️ Email:</strong> <a href="mailto:${f.email}" style="color: #2563eb; text-decoration: none; word-break: break-all;">${f.email}</a></div>` : ''}
 
-                <div><strong>📍 Location:</strong> ${f.address || (f.district ? f.district + ', ' : '') + (f.state || '') + (f.pincode ? ' - ' + f.pincode : '')}</div>
-                <div><strong>🐄 Farm Type:</strong> ${f.farmType || 'Livestock Farm'}</div>
-                <div><strong>📊 Capacity / Herd:</strong> <span style="color: var(--primary); font-weight: 700;">${f.herdSize || 'Commercial Scale'}</span></div>
-                <div><strong>🌾 Primary Feed:</strong> ${f.primaryFeed || 'NutriAgro Balanced Ration'}</div>
-                ${f.gstin ? `<div><strong>🏛️ GSTIN:</strong> <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.76rem;">${f.gstin}</code></div>` : ''}
-                <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 4px;">Registered: ${regDate}</div>
+                <div><strong>📍 Location:</strong> ${f.address || (f.district ? f.district + ', ' : '') + (f.state || '') + (f.pincode ? ' - ' + f.pincode : '<span style="color: #94a3b8;">Location not set</span>')}</div>
+              </div>
+
+              <!-- Commercial Operations: Order History & Active Cart -->
+              <div style="background: #f1f5f9; padding: 10px 12px; border-radius: 8px; font-size: 0.80rem; margin-bottom: 14px; display: flex; flex-direction: column; gap: 6px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span><strong>📦 Orders Placed:</strong> <strong style="color: ${f.ordersCount > 0 ? '#047857' : '#64748b'}; font-size: 0.88rem;">${f.ordersCount || 0} order${f.ordersCount === 1 ? '' : 's'}</strong></span>
+                  ${f.ordersCount > 0 ? `<span style="font-weight: 800; color: var(--primary);">₹${f.totalSpent.toLocaleString('en-IN')} total</span>` : ''}
+                </div>
+
+                ${f.latestOrder ? `
+                  <div style="font-size: 0.75rem; color: #475569; background: #ffffff; padding: 5px 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                    Latest: <strong>#${f.latestOrder.orderId}</strong> (${f.latestOrder.currentStepName || 'Confirmed'}) on ${new Date(f.latestOrder.placedAt || f.latestOrder.orderDate || Date.now()).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}
+                  </div>
+                ` : ''}
+
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed #cbd5e1; padding-top: 6px; margin-top: 2px;">
+                  <span><strong>🛒 Active Cart:</strong> ${cartItemsCount > 0 ? `<span style="color: #047857; font-weight: 700;">${cartItemsCount} item(s)</span>` : '<span style="color: #94a3b8;">Empty</span>'}</span>
+                  ${cartTotalVal > 0 ? `<span style="color: #047857; font-weight: 700;">₹${cartTotalVal.toLocaleString('en-IN')}</span>` : ''}
+                </div>
               </div>
             </div>
 
-            <!-- Footer Actions -->
-            <div style="display: flex; gap: 8px; padding-top: 14px; border-top: 1px solid var(--border); flex-wrap: wrap;">
-              <button type="button" class="btn btn-sm btn-primary" onclick="triggerFarmerOrder('${encodedFarmer}')" style="flex: 1; justify-content: center;">
-                📝 Log Order
-              </button>
-              <a href="https://wa.me/91${cleanPhone}?text=${waMsg}" target="_blank" class="btn btn-sm btn-whatsapp" style="padding: 6px 12px;">
-                📲 Chat
-              </a>
-              <button type="button" class="btn-delete-badge" onclick="deleteFarmer('${f.userId || f.phone}')" title="Remove farmer from list">
+            <!-- Footer Action Buttons -->
+            <div style="display: flex; gap: 6px; padding-top: 12px; border-top: 1px solid var(--border); flex-wrap: wrap;">
+              ${f.ordersCount > 0 ? `
+                <button type="button" class="btn btn-sm btn-primary" onclick="filterOrdersByCustomer('${customerSearchRef}')" style="flex: 1; justify-content: center; font-size: 0.76rem;">
+                  📦 View Orders (${f.ordersCount})
+                </button>
+              ` : `
+                <button type="button" class="btn btn-sm btn-secondary" onclick="triggerFarmerOrder('${encodedCustomer}')" style="flex: 1; justify-content: center; font-size: 0.76rem;">
+                  📝 Log First Order
+                </button>
+              `}
+              ${cleanPhone ? `
+                <a href="https://wa.me/91${cleanPhone}?text=${waMsg}" target="_blank" class="btn btn-sm btn-whatsapp" style="padding: 5px 10px; font-size: 0.74rem;">
+                  📲 Chat
+                </a>
+              ` : ''}
+              <button type="button" class="btn-delete-badge" onclick="deleteFarmer('${f.userId || f.phone || f.email}')" title="Delete customer account">
                 🗑️
               </button>
             </div>
@@ -2874,37 +3056,43 @@
 
     async function submitNewFarmerForm(e) {
       e.preventDefault();
-      const name = document.getElementById('mFarmerName').value.trim();
-      const phone = document.getElementById('mFarmerPhone').value.trim();
-      const farmName = document.getElementById('mFarmName').value.trim() || `${name}'s Farm`;
-      const farmType = document.getElementById('mFarmType').value;
-      const herdSize = document.getElementById('mHerdSize').value.trim() || 'Commercial Scale';
-      const primaryFeed = document.getElementById('mPrimaryFeed').value.trim() || 'NutriBov LactaMax™ High-Yield Dairy Feed';
-      const stateDist = document.getElementById('mStateDistrict').value.trim();
-      const pincode = document.getElementById('mPincode').value.trim() || '560001';
-      const address = document.getElementById('mAddress').value.trim() || stateDist;
+      const name = document.getElementById('mFarmerName')?.value.trim() || 'Customer';
+      const phone = document.getElementById('mFarmerPhone')?.value.trim() || '';
+      const email = document.getElementById('mFarmerEmail')?.value.trim() || '';
+      const farmName = document.getElementById('mFarmName')?.value.trim() || `${name}'s Farm`;
+      const stateDist = document.getElementById('mStateDistrict')?.value.trim() || '';
+      const pincode = document.getElementById('mPincode')?.value.trim() || '';
+      const address = document.getElementById('mAddress')?.value.trim() || stateDist;
 
-      const newFarmer = {
+      const newCustomer = {
         userId: 'FARM-' + Math.floor(100000 + Math.random() * 900000),
         fullName: name,
         phone: phone,
-        email: '',
+        email: email,
         farmName: farmName,
-        farmType: farmType,
-        herdSize: herdSize,
-        primaryFeed: primaryFeed,
+        farmType: 'Commercial Livestock & Dairy',
         state: stateDist.includes(',') ? stateDist.split(',')[1].trim() : stateDist,
         district: stateDist.includes(',') ? stateDist.split(',')[0].trim() : stateDist,
         pincode: pincode,
         address: address,
-        whatsappAlerts: true,
+        authProvider: email ? 'email' : 'phone',
         registeredAt: new Date().toISOString(),
-        tier: 'Progressive Farmer Tier'
+        signedInAt: new Date().toISOString(),
+        tier: 'Registered Farm Customer'
       };
 
-      allFarmers.unshift(newFarmer);
+      allFarmers.unshift(newCustomer);
       try {
         localStorage.setItem('nutriagro_users_list', JSON.stringify(allFarmers));
+      } catch (err) {}
+
+      // Push directly to Firebase Realtime Database
+      try {
+        fetch(`${FIREBASE_RTDB_USERS_URL}/${encodeURIComponent(newCustomer.userId)}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newCustomer)
+        }).catch(() => {});
       } catch (err) {}
 
       // POST to /api/users
@@ -2912,20 +3100,26 @@
         fetch(getUsersApiEndpoint(), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newFarmer)
+          body: JSON.stringify(newCustomer)
         }).catch(() => {});
       } catch (err) {}
 
       closeRegisterFarmerModal();
-      showToast(`🎉 Farmer "${name}" (${farmName}) registered successfully!`, 'success');
+      showToast(`🎉 Customer Account "${name}" registered successfully!`, 'success');
       updateFarmerCounters();
       renderFarmersCards();
     }
 
     function deleteFarmer(userIdOrPhone) {
-      if (!confirm('Are you sure you want to remove this farmer from the directory?')) return;
+      if (!confirm('Are you sure you want to delete this customer account from the directory?')) return;
       const targetKey = (userIdOrPhone || '').toString().toLowerCase();
       deletedFarmerKeys.add(targetKey);
+
+      try {
+        let delList = JSON.parse(localStorage.getItem('nutriagro_deleted_farmers') || '[]');
+        delList.push(targetKey);
+        localStorage.setItem('nutriagro_deleted_farmers', JSON.stringify(delList));
+      } catch (e) {}
 
       allFarmers = allFarmers.filter(f => {
         const uid = (f.userId || '').toString().toLowerCase();
@@ -2938,6 +3132,13 @@
         localStorage.setItem('nutriagro_users_list', JSON.stringify(allFarmers));
       } catch (e) {}
 
+      // Delete from Firebase RTDB directly
+      try {
+        fetch(`${FIREBASE_RTDB_USERS_URL}/${encodeURIComponent(userIdOrPhone)}.json`, {
+          method: 'DELETE'
+        }).catch(() => {});
+      } catch (e) {}
+
       // Inform backend of deletion
       try {
         fetch(getUsersApiEndpoint(), {
@@ -2947,35 +3148,36 @@
         }).catch(() => {});
       } catch (err) {}
 
-      showToast('Farmer profile removed.', 'info');
+      showToast('Customer account deleted.', 'info');
       updateFarmerCounters();
       renderFarmersCards();
     }
 
     function exportFarmersToCSV() {
       if (allFarmers.length === 0) {
-        showToast('No registered farmers to export.', 'info');
+        showToast('No customer accounts to export.', 'info');
         return;
       }
-      let csv = 'User ID,Farmer Name,Mobile,Email,Farm Name,Farm Type,Herd Size,Primary Feed,District,State,Pincode,Address,GSTIN,Registered Date\n';
+      let csv = 'User ID,Customer Name,Email,Mobile,Auth Method,Orders Placed,Total Spend (INR),Active Cart Items,Farm Name,Address,District,State,Pincode,Last Signed In,Registered Date\n';
       allFarmers.forEach(f => {
-        csv += `"${f.userId||''}","${(f.fullName||'').replace(/"/g,'""')}","${f.phone||''}","${f.email||''}","${(f.farmName||'').replace(/"/g,'""')}","${f.farmType||''}","${(f.herdSize||'').replace(/"/g,'""')}","${(f.primaryFeed||'').replace(/"/g,'""')}","${f.district||''}","${f.state||''}","${f.pincode||''}","${(f.address||'').replace(/"/g,'""')}","${f.gstin||''}","${f.registeredAt||''}"\n`;
+        const cartCnt = Array.isArray(f.cart) ? f.cart.reduce((s, i) => s + (i.quantity || 1), 0) : 0;
+        csv += `"${f.userId||''}","${(f.fullName||'').replace(/"/g,'""')}","${f.email||''}","${f.phone||''}","${f.authProvider||'google'}","${f.ordersCount||0}","${f.totalSpent||0}","${cartCnt}","${(f.farmName||'').replace(/"/g,'""')}","${(f.address||'').replace(/"/g,'""')}","${f.district||''}","${f.state||''}","${f.pincode||''}","${f.signedInAt||''}","${f.registeredAt||''}"\n`;
       });
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.setAttribute('href', url);
-      link.setAttribute('download', `NutriAgro_Farmers_Directory_${new Date().toISOString().slice(0,10)}.csv`);
+      link.setAttribute('download', `NutriAgro_Customer_Accounts_${new Date().toISOString().slice(0,10)}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      showToast('Exported Farmers Directory CSV successfully!', 'success');
+      showToast('Exported Customer Accounts CSV successfully!', 'success');
     }
 
     function editFarmerPhone(userIdOrPhone) {
-      const f = allFarmers.find(x => (x.userId && x.userId === userIdOrPhone) || (x.phone && x.phone === userIdOrPhone));
+      const f = allFarmers.find(x => (x.userId && x.userId === userIdOrPhone) || (x.phone && x.phone === userIdOrPhone) || (x.email && x.email === userIdOrPhone));
       if (!f) return;
-      const newPhone = prompt(`Update Mobile Number for ${f.fullName || 'Farmer'}:`, f.phone || '');
+      const newPhone = prompt(`Update Mobile Number for ${f.fullName || 'Customer'}:`, f.phone || '');
       if (newPhone === null) return;
       const trimmed = newPhone.trim();
       if (!trimmed || trimmed.replace(/\D/g, '').length < 10) {
@@ -2989,6 +3191,14 @@
       localStorage.setItem('nutriagro_users_list', JSON.stringify(allFarmers));
 
       try {
+        fetch(`${FIREBASE_RTDB_USERS_URL}/${encodeURIComponent(f.userId || f.phone)}.json`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: trimmed, lastUpdated: f.lastUpdated })
+        }).catch(() => {});
+      } catch (e) {}
+
+      try {
         fetch(getUsersApiEndpoint(), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -2998,7 +3208,7 @@
 
       renderFarmersCards();
       updateFarmerCounters();
-      showToast(`Mobile number updated to ${trimmed} for ${f.fullName || 'Farmer'}!`, 'success');
+      showToast(`Mobile number updated to ${trimmed} for ${f.fullName || 'Customer'}!`, 'success');
     }
 
     function editOrderPhone(orderId) {
@@ -3036,7 +3246,7 @@
       showToast(`Order #${orderId} dispatch phone updated to ${trimmed}!`, 'success');
     }
 
-    // Auto-refresh polling: orders every 3.5s, farmers every 7s
+    // Auto-refresh polling: orders every 3.5s, customer accounts every 4s
     setInterval(() => {
       if (isAuthorized()) {
         loadAdminOrders(false);
@@ -3047,7 +3257,7 @@
       if (isAuthorized()) {
         loadAdminFarmers(false);
       }
-    }, 7000);
+    }, 4000);
 
     // Cross-tab immediate synchronization (0ms latency when order/profile updated in another tab/window)
     window.addEventListener('storage', (e) => {
@@ -3063,7 +3273,7 @@
       }
     });
 
-    // BroadcastChannel synchronization across windows/tabs
+    // BroadcastChannel synchronization across windows/tabs (Real-time 0ms push)
     try {
       if (typeof BroadcastChannel !== 'undefined') {
         const adminChannel = new BroadcastChannel('nutriagro_orders_channel');
@@ -3076,6 +3286,15 @@
             }
           }
           if (ev.data && ev.data.type === 'PROFILE_UPDATED') {
+            if (isAuthorized()) {
+              loadAdminFarmers(false);
+            }
+          }
+        };
+
+        const usersChannel = new BroadcastChannel('nutriagro_users_channel');
+        usersChannel.onmessage = (ev) => {
+          if (ev.data && (ev.data.type === 'USER_SIGNED_IN' || ev.data.type === 'USER_REGISTERED' || ev.data.type === 'USER_UPDATED')) {
             if (isAuthorized()) {
               loadAdminFarmers(false);
             }
