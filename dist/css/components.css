@@ -3451,6 +3451,17 @@
   border-left-color: var(--color-danger);
 }
 
+.toast.toast-warning {
+  border-left-color: #f59e0b;
+}
+
+.size-btn.out-of-stock-btn,
+.modal-pkg-btn.out-of-stock-btn {
+  opacity: 0.8;
+  cursor: pointer;
+  position: relative;
+}
+
 .toast.fade-out {
   opacity: 0;
   transform: translateY(10px);

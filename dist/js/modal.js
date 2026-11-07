@@ -112,12 +112,24 @@ function updateModalPriceUI() {
 }
 
 function selectModalBagSize(size) {
+  if (size === '25kg') {
+    if (window.cart && typeof window.cart.showToast === 'function') {
+      window.cart.showToast('⚠️ 25 kg Bag is currently out of stock. Standard 50 kg bags are available.', 'warning');
+    }
+    return;
+  }
   selectedModalBagSize = size;
   updateModalPriceUI();
 }
 
 function addModalProductToCart() {
   if (!selectedModalProduct) return;
+  if (selectedModalBagSize === '25kg') {
+    if (window.cart && typeof window.cart.showToast === 'function') {
+      window.cart.showToast('⚠️ 25 kg Bag is currently out of stock. Standard 50 kg bags are available.', 'warning');
+    }
+    return;
+  }
   const qtyInput = document.getElementById('modalQtyInput');
   const qty = parseInt(qtyInput ? qtyInput.value : 1, 10) || 1;
 

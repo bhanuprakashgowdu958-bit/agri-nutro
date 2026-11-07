@@ -231,6 +231,11 @@ class CartManager {
       sessionStorage.setItem('nutriagro_guest_explicit_cart', '1');
     }
 
+    if (bagSize === '25kg') {
+      this.showToast('⚠️ 25 kg Bag is currently out of stock. Please order 50 kg bags.', 'warning');
+      return;
+    }
+
     quantity = parseInt(quantity, 10);
     if (isNaN(quantity) || quantity < 1) quantity = 1;
 
@@ -424,7 +429,7 @@ class CartManager {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     
-    const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ';
+    const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : type === 'warning' ? '⚠️' : 'ℹ';
     toast.innerHTML = `
       <span class="toast-icon">${icon}</span>
       <span class="toast-text">${message}</span>

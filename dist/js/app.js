@@ -1427,8 +1427,8 @@ function renderCatalog() {
           <div class="card-size-selector">
             <span class="size-label">Packaging:</span>
             <div class="size-options">
-              <button type="button" class="size-btn ${selectedSize === '25kg' ? 'active' : ''}" 
-                onclick="changeCardBagSize('${product.id}', '25kg')">25 kg Bag</button>
+              <button type="button" class="size-btn out-of-stock-btn ${selectedSize === '25kg' ? 'active' : ''}" 
+                onclick="changeCardBagSize('${product.id}', '25kg')" title="Currently Out of Stock">25 kg Bag</button>
               <button type="button" class="size-btn ${selectedSize === '50kg' ? 'active' : ''}" 
                 onclick="changeCardBagSize('${product.id}', '50kg')">50 kg Bag</button>
             </div>
@@ -1459,6 +1459,13 @@ function renderCatalog() {
 }
 
 function changeCardBagSize(productId, size) {
+  if (size === '25kg') {
+    if (window.cart && typeof window.cart.showToast === 'function') {
+      window.cart.showToast('⚠️ 25 kg Bag is currently out of stock. Standard 50 kg bags are available.', 'warning');
+    }
+    return;
+  }
+
   cardSelectedSizes[productId] = size;
   const priceEl = document.getElementById(`cardPrice_${productId}`);
   if (priceEl) {
@@ -1479,6 +1486,12 @@ function changeCardBagSize(productId, size) {
 
 function handleCardAddToCart(productId, btnElement) {
   const size = cardSelectedSizes[productId] || '50kg';
+  if (size === '25kg') {
+    if (window.cart && typeof window.cart.showToast === 'function') {
+      window.cart.showToast('⚠️ 25 kg Bag is currently out of stock. Standard 50 kg bags are available.', 'warning');
+    }
+    return;
+  }
   if (window.cart) {
     window.cart.addItem(productId, size, 1);
   }

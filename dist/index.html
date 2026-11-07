@@ -3740,6 +3740,17 @@ button, input, select, textarea {
   border-left-color: var(--color-danger);
 }
 
+.toast.toast-warning {
+  border-left-color: #f59e0b;
+}
+
+.size-btn.out-of-stock-btn,
+.modal-pkg-btn.out-of-stock-btn {
+  opacity: 0.8;
+  cursor: pointer;
+  position: relative;
+}
+
 .toast.fade-out {
   opacity: 0;
   transform: translateY(10px);
@@ -7119,7 +7130,7 @@ html, body {
         <div class="modal-pkg-selector">
           <span style="font-size: 0.82rem; font-weight: 700;">Select Commercial Packaging:</span>
           <div class="modal-pkg-buttons">
-            <button type="button" class="modal-pkg-btn" id="modalSize25kg" onclick="selectModalBagSize('25kg')">25 kg Bag</button>
+            <button type="button" class="modal-pkg-btn out-of-stock-btn" id="modalSize25kg" onclick="selectModalBagSize('25kg')" title="Currently Out of Stock">25 kg Bag</button>
             <button type="button" class="modal-pkg-btn active" id="modalSize50kg" onclick="selectModalBagSize('50kg')">50 kg Bag (Standard)</button>
           </div>
         </div>
@@ -7655,14 +7666,14 @@ html, body {
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- Scripts -->
-  <script src="js/data.js?v=5.3"></script>
-  <script src="js/cart.js?v=5.3"></script>
-  <script src="js/modal.js?v=5.3"></script>
-  <script src="js/weather.js?v=5.3"></script>
-  <script src="js/gemini.js?v=5.3"></script>
-  <script src="js/hero-slider.js?v=5.3"></script>
-  <script src="js/animal-slider.js?v=5.3"></script>
-  <script src="js/app.js?v=5.3"></script>
+  <script src="js/data.js?v=5.4"></script>
+  <script src="js/cart.js?v=5.4"></script>
+  <script src="js/modal.js?v=5.4"></script>
+  <script src="js/weather.js?v=5.4"></script>
+  <script src="js/gemini.js?v=5.4"></script>
+  <script src="js/hero-slider.js?v=5.4"></script>
+  <script src="js/animal-slider.js?v=5.4"></script>
+  <script src="js/app.js?v=5.4"></script>
 
 </body>
 </html>
