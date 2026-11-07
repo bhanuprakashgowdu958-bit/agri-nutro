@@ -385,8 +385,37 @@ const CALCULATOR_PRESETS = {
   }
 };
 
+// Central Dispatch Mill Hub & 50km Delivery Radius Configuration
+const DISPATCH_HUB_CONFIG = {
+  name: "NutriAgro Central Feed Mill & Dispatch Hub",
+  address: "Koturu, Nallamgadu, Bangarupalem Mandal, Chittoor District, Andhra Pradesh 517416",
+  village: "Koturu",
+  locality: "Nallamgadu",
+  mandal: "Bangarupalem",
+  district: "Chittoor",
+  state: "Andhra Pradesh",
+  pincode: "517416",
+  lat: 13.2521036,
+  lng: 78.9177864,
+  maxRadiusKm: 50,
+  googleMapsUrl: "https://maps.app.goo.gl/TuFrwPXzDNwqn2Zq8"
+};
+
 // Regional Authorized Dealer & Feed Mill Depots
 const DEALER_LOCATIONS = [
+  {
+    id: "dl-koturu",
+    name: "NutriAgro Central Feed Mill & Primary Dispatch Hub",
+    city: "Koturu (Bangarupalem)",
+    state: "Andhra Pradesh (Chittoor Dist)",
+    pincode: "517416",
+    address: "Koturu, Nallamgadu, Bangarupalem Mandal (50 km Farmgate Radius)",
+    phone: "+91 98765 43210",
+    inStockCategories: ["Dairy Cattle", "Poultry Broiler", "Aquaculture", "Swine", "Goat & Sheep"],
+    isMill: true,
+    openingHours: "Mon-Sat: 6:00 AM - 7:30 PM",
+    mapsUrl: "https://maps.app.goo.gl/TuFrwPXzDNwqn2Zq8"
+  },
   {
     id: "dl-1",
     name: "NutriAgro North Grain & Dairy Central Mill",

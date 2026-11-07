@@ -3133,6 +3133,34 @@
   transform: translate(-50%, -50%) scale(1);
 }
 
+/* Delivery Radius 50km Verification Banners */
+.delivery-radius-banner {
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  margin-top: 8px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  animation: fadeIn 0.25s ease-in-out;
+}
+
+.delivery-radius-banner.eligible {
+  background: #ecfdf5;
+  border: 1.5px solid #a7f3d0;
+  color: #065f46;
+}
+
+.delivery-radius-banner.ineligible {
+  background: #fef2f2;
+  border: 1.5px solid #fecaca;
+  color: #991b1b;
+}
+
+.delivery-radius-banner.loading {
+  background: #f0fdf4;
+  border: 1.5px dashed #86efac;
+  color: #166534;
+}
+
 /* Responsive Two-Column Helper Grids */
 .checkout-form-2col {
   display: grid;

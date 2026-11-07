@@ -371,6 +371,186 @@ function closeCheckoutModal() {
   unlockModalScroll();
 }
 
+// ========================================================
+// 50 KM DELIVERY RADIUS VERIFICATION (KOTURU HUB 517416)
+// ========================================================
+let currentDeliveryDistanceKm = null;
+let isDeliveryEligible = true;
+let addressGeocodeDebounceTimer = null;
+
+// Haversine formula to compute great-circle distance between two GPS coordinates
+function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Math.round(R * c * 10) / 10;
+}
+
+function updateDeliveryRadiusUI(distKm, addressText, isChecking = false) {
+  const statusEl = document.getElementById('deliveryRadiusStatus');
+  const submitBtn = document.getElementById('checkoutSubmitBtn');
+  if (!statusEl) return;
+
+  if (isChecking) {
+    statusEl.innerHTML = `
+      <div class="delivery-radius-banner loading">
+        <span>⏳ Calculating distance from Koturu Central Mill Hub (517416)...</span>
+      </div>
+    `;
+    return;
+  }
+
+  if (distKm === null) {
+    statusEl.innerHTML = `
+      <div class="delivery-radius-banner loading">
+        <span>📍 Please verify your farm location or enter 6-digit PIN code to check 50 km delivery eligibility.</span>
+      </div>
+    `;
+    return;
+  }
+
+  currentDeliveryDistanceKm = distKm;
+  const hub = (typeof DISPATCH_HUB_CONFIG !== 'undefined') ? DISPATCH_HUB_CONFIG : {
+    name: "NutriAgro Koturu Central Mill",
+    pincode: "517416",
+    maxRadiusKm: 50
+  };
+
+  if (distKm <= hub.maxRadiusKm) {
+    isDeliveryEligible = true;
+    statusEl.innerHTML = `
+      <div class="delivery-radius-banner eligible">
+        <div style="display: flex; align-items: flex-start; gap: 8px;">
+          <span style="font-size: 1.15rem; line-height: 1.1;">✅</span>
+          <div>
+            <strong style="color: #065f46; font-size: 0.84rem; display: block;">Farmgate Delivery Available (~${distKm} km)</strong>
+            <span style="color: #047857; font-size: 0.76rem;">Within our 50 km delivery zone from Koturu Hub (517416). Direct delivery guaranteed!</span>
+          </div>
+        </div>
+      </div>
+    `;
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = '1';
+      submitBtn.style.cursor = 'pointer';
+      submitBtn.title = 'Confirm your order for farmgate delivery';
+    }
+  } else {
+    isDeliveryEligible = false;
+    statusEl.innerHTML = `
+      <div class="delivery-radius-banner ineligible">
+        <div style="display: flex; align-items: flex-start; gap: 8px;">
+          <span style="font-size: 1.25rem; line-height: 1.1;">🚫</span>
+          <div style="flex: 1;">
+            <strong style="color: #991b1b; font-size: 0.85rem; display: block;">Delivery Unavailable (~${distKm} km from Hub)</strong>
+            <span style="color: #b91c1c; font-size: 0.77rem; display: block; margin-top: 2px;">
+              We currently only deliver within a <strong>50 km radius</strong> of our central mill in Koturu, Andhra Pradesh (517416). Your location is <strong>~${distKm} km away</strong>.
+            </span>
+            <div style="margin-top: 8px; font-size: 0.75rem; color: #7f1d1d; background: #fff5f5; border: 1px dashed #fca5a5; padding: 6px 10px; border-radius: 6px;">
+              🚛 <strong>Need bulk full-truckload (10+ MT) beyond 50 km?</strong><br/>
+              <a href="https://wa.me/919876543210?text=Hello%20NutriAgro%20Dispatch,%20I%20am%20located%20at%20${encodeURIComponent(addressText || '')}%20(${distKm}%20km)%20and%20need%20bulk%20freight%20inquiry." target="_blank" style="color: #047857; font-weight: 800; text-decoration: underline; display: inline-block; margin-top: 3px;">
+                💬 Contact Freight Dispatch on WhatsApp
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.5';
+      submitBtn.style.cursor = 'not-allowed';
+      submitBtn.title = `Unable to deliver: Location is ~${distKm} km away (Max radius: 50 km)`;
+    }
+  }
+}
+
+async function geocodeAddressAndVerify(queryText) {
+  if (!queryText || queryText.trim().length < 3) return;
+
+  const hub = (typeof DISPATCH_HUB_CONFIG !== 'undefined') ? DISPATCH_HUB_CONFIG : {
+    lat: 13.2521036,
+    lng: 78.9177864,
+    maxRadiusKm: 50
+  };
+
+  updateDeliveryRadiusUI(null, queryText, true);
+
+  try {
+    const pinMatch = queryText.match(/\b([1-9][0-9]{5})\b/);
+    let searchUrl = '';
+    if (pinMatch) {
+      searchUrl = `https://nominatim.openstreetmap.org/search?format=json&postalcode=${pinMatch[1]}&countrycodes=in&limit=1`;
+    } else {
+      searchUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryText + ', India')}&limit=1`;
+    }
+
+    const res = await fetch(searchUrl);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.length > 0) {
+        const destLat = parseFloat(data[0].lat);
+        const destLon = parseFloat(data[0].lon);
+        const dist = calculateDistanceKm(hub.lat, hub.lng, destLat, destLon);
+        updateDeliveryRadiusUI(dist, queryText);
+        return;
+      }
+    }
+  } catch (err) {
+    console.warn('Nominatim geocode query error:', err);
+  }
+
+  // Fallback heuristics for regional postal codes & mandals
+  const lower = queryText.toLowerCase();
+  if (lower.includes('517416') || lower.includes('koturu') || lower.includes('bangarupalem') || lower.includes('nallamgadu')) {
+    updateDeliveryRadiusUI(1.5, queryText);
+  } else if (lower.includes('517408') || lower.includes('palamaner')) {
+    updateDeliveryRadiusUI(18.5, queryText);
+  } else if (lower.includes('517001') || lower.includes('chittoor')) {
+    updateDeliveryRadiusUI(22.0, queryText);
+  } else if (lower.includes('517425') || lower.includes('kuppam')) {
+    updateDeliveryRadiusUI(42.0, queryText);
+  } else if (lower.includes('632001') || lower.includes('vellore') || lower.includes('gudiyatham')) {
+    updateDeliveryRadiusUI(35.0, queryText);
+  } else {
+    updateDeliveryRadiusUI(null, queryText);
+  }
+}
+
+function handleAddressManualInput() {
+  const addressInput = document.getElementById('checkoutAddress');
+  if (!addressInput) return;
+  const val = addressInput.value.trim();
+
+  clearTimeout(addressGeocodeDebounceTimer);
+  addressGeocodeDebounceTimer = setTimeout(() => {
+    geocodeAddressAndVerify(val);
+  }, 600);
+}
+
+function toggleManualAddressEdit() {
+  const addressInput = document.getElementById('checkoutAddress');
+  if (!addressInput) return;
+  addressInput.readOnly = false;
+  addressInput.style.backgroundColor = '#ffffff';
+  addressInput.style.cursor = 'text';
+  addressInput.focus();
+  if (window.cart && window.cart.showToast) {
+    window.cart.showToast('You can now type your farm village, town or 6-digit PIN code.', 'info');
+  }
+}
+
+window.toggleManualAddressEdit = toggleManualAddressEdit;
+window.handleAddressManualInput = handleAddressManualInput;
+window.geocodeAddressAndVerify = geocodeAddressAndVerify;
+window.calculateDistanceKm = calculateDistanceKm;
+window.updateDeliveryRadiusUI = updateDeliveryRadiusUI;
+
 // Automatically detect Customer Delivery Address via GPS & Reverse Geocoding
 async function autoDetectDeliveryAddress() {
   const addressInput = document.getElementById('checkoutAddress');
@@ -378,22 +558,36 @@ async function autoDetectDeliveryAddress() {
 
   if (!addressInput) return;
 
+  const hub = (typeof DISPATCH_HUB_CONFIG !== 'undefined') ? DISPATCH_HUB_CONFIG : {
+    lat: 13.2521036,
+    lng: 78.9177864,
+    maxRadiusKm: 50
+  };
+
   if (detectBtn) {
-    detectBtn.innerHTML = '<span>⏳</span> Detecting...';
+    detectBtn.innerHTML = '<span>⏳</span> Locating...';
     detectBtn.disabled = true;
   }
-  addressInput.placeholder = 'Detecting delivery address via GPS...';
+  addressInput.placeholder = 'Detecting farm address & verifying 50 km delivery zone via GPS...';
+  updateDeliveryRadiusUI(null, '', true);
 
-  function setConfirmedAddress(fullText) {
+  function setConfirmedAddress(fullText, lat, lon) {
     if (!addressInput) return;
     addressInput.value = fullText;
-    addressInput.readOnly = true;
+    addressInput.readOnly = false;
     addressInput.style.backgroundColor = '#f8fafc';
     addressInput.style.color = '#1e293b';
-    addressInput.style.cursor = 'default';
+
     if (detectBtn) {
-      detectBtn.innerHTML = '<span>🔄</span> Detect Again';
+      detectBtn.innerHTML = '<span>📍</span> Detect GPS';
       detectBtn.disabled = false;
+    }
+
+    if (lat !== undefined && lon !== undefined) {
+      const dist = calculateDistanceKm(hub.lat, hub.lng, lat, lon);
+      updateDeliveryRadiusUI(dist, fullText);
+    } else {
+      geocodeAddressAndVerify(fullText);
     }
   }
 
@@ -417,7 +611,7 @@ async function autoDetectDeliveryAddress() {
             if (data.countryName) parts.push(data.countryName);
 
             if (parts.length > 0) {
-              setConfirmedAddress(parts.join(', '), 'GPS');
+              setConfirmedAddress(parts.join(', '), lat, lon);
               return;
             }
           }
@@ -431,7 +625,7 @@ async function autoDetectDeliveryAddress() {
           if (res2.ok) {
             const data2 = await res2.json();
             if (data2 && data2.display_name) {
-              setConfirmedAddress(data2.display_name, 'GPS Map');
+              setConfirmedAddress(data2.display_name, lat, lon);
               return;
             }
           }
@@ -440,7 +634,7 @@ async function autoDetectDeliveryAddress() {
         }
 
         // Coordinates fallback
-        setConfirmedAddress(`Customer GPS Location: ${lat.toFixed(5)}°N, ${lon.toFixed(5)}°E`, 'GPS Coords');
+        setConfirmedAddress(`Farm GPS Coords: ${lat.toFixed(5)}°N, ${lon.toFixed(5)}°E`, lat, lon);
       },
       (err) => {
         console.warn('GPS permission prompt dismissed or timed out, trying IP geolocation:', err);
@@ -464,7 +658,9 @@ async function autoDetectDeliveryAddress() {
         if (ipData.country) parts.push(ipData.country);
         const addr = parts.join(', ');
         if (addr) {
-          setConfirmedAddress(addr, 'Network Location');
+          const lat = parseFloat(ipData.latitude);
+          const lon = parseFloat(ipData.longitude);
+          setConfirmedAddress(addr, lat, lon);
           return;
         }
       }
@@ -472,8 +668,8 @@ async function autoDetectDeliveryAddress() {
       console.warn('IP location detection error:', e);
     }
 
-    // Default fallback
-    setConfirmedAddress('Sholinganallur, Chennai, Tamil Nadu, PIN: 600119, India', 'Local Area');
+    // Default regional sample within Koturu dispatch zone
+    setConfirmedAddress('Koturu, Nallamgadu, Bangarupalem Mandal, Chittoor District, Andhra Pradesh, PIN: 517416', hub.lat, hub.lng);
   }
 }
 
@@ -517,7 +713,23 @@ function handleCheckoutSubmit(e) {
     }
   }
 
-  // 2. Mandatory Account Verification: Block Guest Order Placement
+  // 2. Validate 50km Delivery Radius from Koturu Hub (517416)
+  const hubConfig = (typeof DISPATCH_HUB_CONFIG !== 'undefined') ? DISPATCH_HUB_CONFIG : {
+    name: "Koturu Central Mill",
+    pincode: "517416",
+    maxRadiusKm: 50
+  };
+
+  if (!isDeliveryEligible || (currentDeliveryDistanceKm !== null && currentDeliveryDistanceKm > hubConfig.maxRadiusKm)) {
+    if (window.cart && window.cart.showToast) {
+      window.cart.showToast(`🚫 Unable to deliver: Destination is ~${currentDeliveryDistanceKm || '50+'} km away. We only deliver within a 50 km radius of our central mill in Koturu (517416).`, 'error');
+    }
+    const statusEl = document.getElementById('deliveryRadiusStatus');
+    if (statusEl) statusEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  // 3. Mandatory Account Verification: Block Guest Order Placement
   let loggedUser = null;
   try {
     loggedUser = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
@@ -642,6 +854,8 @@ function handleCheckoutSubmit(e) {
       eta: 'Pending Admin Review',
       driverName: 'Ramesh Singh (Agro Hauler #HR-05-AB-4821)',
       driverPhone: '+91 98123 45678',
+      deliveryDistanceKm: currentDeliveryDistanceKm !== null ? currentDeliveryDistanceKm : 0,
+      dispatchHub: (typeof DISPATCH_HUB_CONFIG !== 'undefined') ? DISPATCH_HUB_CONFIG.name : 'Koturu Central Mill (517416)',
       currentStep: 0 // 0: Pending Review, 1: Confirmed & Logged, 2: Milling, 3: Dispatched, 4: Delivered
     };
 

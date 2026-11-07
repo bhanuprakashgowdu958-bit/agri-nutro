@@ -3427,6 +3427,34 @@ button, input, select, textarea {
   transform: translate(-50%, -50%) scale(1);
 }
 
+/* Delivery Radius 50km Verification Banners */
+.delivery-radius-banner {
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  margin-top: 8px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  animation: fadeIn 0.25s ease-in-out;
+}
+
+.delivery-radius-banner.eligible {
+  background: #ecfdf5;
+  border: 1.5px solid #a7f3d0;
+  color: #065f46;
+}
+
+.delivery-radius-banner.ineligible {
+  background: #fef2f2;
+  border: 1.5px solid #fecaca;
+  color: #991b1b;
+}
+
+.delivery-radius-banner.loading {
+  background: #f0fdf4;
+  border: 1.5px dashed #86efac;
+  color: #166534;
+}
+
 /* Responsive Two-Column Helper Grids */
 .checkout-form-2col {
   display: grid;
@@ -7438,15 +7466,26 @@ html, body {
               <input type="tel" id="checkoutAltPhone" class="calc-input" placeholder="e.g. Farm supervisor, manager or tractor driver mobile" />
             </div>
 
-            <!-- Delivery Address -->
-            <div style="margin-bottom: 14px;">
+            <!-- Delivery Address & 50km Verification -->
+            <div style="margin-bottom: 16px;">
               <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 4px;">
-                <label style="font-size: 0.82rem; font-weight: 700; margin: 0; color: #1e293b;">Delivery Address *</label>
-                <button type="button" id="detectLocationBtn" onclick="autoDetectDeliveryAddress()" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.4); color: #065f46; font-size: 0.74rem; font-weight: 700; padding: 3px 10px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s ease;">
-                  <span>🔄</span> Detect Again
-                </button>
+                <label style="font-size: 0.82rem; font-weight: 700; margin: 0; color: #1e293b;">
+                  Delivery Address & PIN Code *
+                  <span style="font-size: 0.72rem; color: #047857; font-weight: 600;">(50 km Koturu Hub Zone)</span>
+                </label>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <button type="button" id="detectLocationBtn" onclick="autoDetectDeliveryAddress()" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.4); color: #065f46; font-size: 0.74rem; font-weight: 700; padding: 3px 10px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s ease;">
+                    <span>📍</span> Detect GPS
+                  </button>
+                  <button type="button" id="editAddressManualBtn" onclick="toggleManualAddressEdit()" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; font-size: 0.74rem; font-weight: 700; padding: 3px 8px; border-radius: 12px; cursor: pointer;" title="Type village or PIN code manually">
+                    ✏️ Edit
+                  </button>
+                </div>
               </div>
-              <textarea id="checkoutAddress" required rows="2" class="calc-input" readonly tabindex="-1" style="background: #f8fafc; border: 1.5px solid #cbd5e1; color: #1e293b; cursor: default; resize: none;" placeholder="Auto-detecting delivery address as per your customer location..."></textarea>
+              <textarea id="checkoutAddress" required rows="2" class="calc-input" oninput="handleAddressManualInput()" style="background: #f8fafc; border: 1.5px solid #cbd5e1; color: #1e293b; resize: none;" placeholder="Auto-detecting farm address via GPS or enter postal PIN code..."></textarea>
+              
+              <!-- 50km Delivery Radius Status Box -->
+              <div id="deliveryRadiusStatus" style="margin-top: 6px;"></div>
             </div>
 
             <!-- 2. Additional Farm Address & Specific Landmark -->
@@ -7866,14 +7905,14 @@ html, body {
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- Scripts -->
-  <script src="js/data.js?v=5.8"></script>
-  <script src="js/cart.js?v=5.8"></script>
-  <script src="js/modal.js?v=5.8"></script>
-  <script src="js/weather.js?v=5.8"></script>
-  <script src="js/gemini.js?v=5.8"></script>
-  <script src="js/hero-slider.js?v=5.8"></script>
-  <script src="js/animal-slider.js?v=5.8"></script>
-  <script src="js/app.js?v=5.8"></script>
+  <script src="js/data.js?v=5.9"></script>
+  <script src="js/cart.js?v=5.9"></script>
+  <script src="js/modal.js?v=5.9"></script>
+  <script src="js/weather.js?v=5.9"></script>
+  <script src="js/gemini.js?v=5.9"></script>
+  <script src="js/hero-slider.js?v=5.9"></script>
+  <script src="js/animal-slider.js?v=5.9"></script>
+  <script src="js/app.js?v=5.9"></script>
 
 </body>
 </html>
