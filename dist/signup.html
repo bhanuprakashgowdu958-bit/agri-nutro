@@ -931,14 +931,9 @@
           };
         }
 
-        // Save local session
+        // Save local session (Safe user object without credentials)
         localStorage.setItem('nutriagro_user', JSON.stringify(registeredUser));
-        
-        let usersList = JSON.parse(localStorage.getItem('nutriagro_users_list') || '[]');
-        if (!usersList.some(u => u.email === email)) {
-          usersList.unshift({ ...registeredUser, passwordHash, salt });
-          localStorage.setItem('nutriagro_users_list', JSON.stringify(usersList));
-        }
+        try { localStorage.removeItem('nutriagro_users_list'); } catch (e) {}
 
         // Show Success
         const firstName = fullName.split(' ')[0] || 'Farmer';
@@ -1230,12 +1225,7 @@
       } catch (e) {}
 
       localStorage.setItem('nutriagro_user', JSON.stringify(gUser));
-
-      let usersList = JSON.parse(localStorage.getItem('nutriagro_users_list') || '[]');
-      if (!usersList.some(u => u.email === email)) {
-        usersList.unshift(gUser);
-        localStorage.setItem('nutriagro_users_list', JSON.stringify(usersList));
-      }
+      try { localStorage.removeItem('nutriagro_users_list'); } catch (e) {}
 
       showAlert('success', `Signed in as ${name} (${email})!`);
       setTimeout(() => {

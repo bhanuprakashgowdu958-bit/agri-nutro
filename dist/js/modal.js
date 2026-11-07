@@ -1577,12 +1577,14 @@ async function fetchOrdersFromServer(callback) {
       }
     });
     const merged = Array.from(orderMap.values()).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-    localStorage.setItem('nutriagro_orders', JSON.stringify(merged));
+    // DPDP Act (2023) Privacy Lockdown: Strictly isolate localStorage to the authenticated customer's own orders
+    const myOrders = getMyCustomerOrders(merged);
+    localStorage.setItem('nutriagro_orders', JSON.stringify(myOrders));
     updateAllOrderBadges();
-    checkCustomerOrderStatusChanges(merged);
-    refreshOpenTrackerModalUI(merged);
-    if (typeof callback === 'function') callback(merged);
-    return merged;
+    checkCustomerOrderStatusChanges(myOrders);
+    refreshOpenTrackerModalUI(myOrders);
+    if (typeof callback === 'function') callback(myOrders);
+    return myOrders;
   }
 
   const current = getStoredOrders();
