@@ -12,6 +12,9 @@ let selectedCompareProducts = [];
 function initCatalog() {
   checkGoogleOAuthHash();
   renderCatalog();
+  if (typeof setCatalogViewMode === 'function') {
+    setCatalogViewMode(currentCatalogViewMode);
+  }
   setupFilterTabs();
   setupSearch();
   setupSort();
@@ -1427,9 +1430,50 @@ async function handleProfileSave(e) {
   }
 }
 
+let currentCatalogViewMode = 'grid';
+try {
+  currentCatalogViewMode = localStorage.getItem('nutriagro_catalog_view_mode') || 'grid';
+} catch (e) {}
+
+function setCatalogViewMode(mode) {
+  currentCatalogViewMode = mode === 'list' ? 'list' : 'grid';
+  try {
+    localStorage.setItem('nutriagro_catalog_view_mode', currentCatalogViewMode);
+  } catch (e) {}
+
+  const grid = document.getElementById('productsGrid');
+  const btnGrid = document.getElementById('viewModeGridBtn');
+  const btnList = document.getElementById('viewModeListBtn');
+
+  if (grid) {
+    if (currentCatalogViewMode === 'list') {
+      grid.classList.add('view-mode-list');
+    } else {
+      grid.classList.remove('view-mode-list');
+    }
+  }
+
+  if (btnGrid) {
+    if (currentCatalogViewMode === 'grid') btnGrid.classList.add('active');
+    else btnGrid.classList.remove('active');
+  }
+  if (btnList) {
+    if (currentCatalogViewMode === 'list') btnList.classList.add('active');
+    else btnList.classList.remove('active');
+  }
+}
+window.setCatalogViewMode = setCatalogViewMode;
+
 function renderCatalog() {
   const grid = document.getElementById('productsGrid');
   if (!grid) return;
+
+  // Sync view mode classes (Amazon 2-Grid vs Flipkart List)
+  if (currentCatalogViewMode === 'list') {
+    grid.classList.add('view-mode-list');
+  } else {
+    grid.classList.remove('view-mode-list');
+  }
 
   // Filter
   let filtered = PRODUCTS_DATA.filter(product => {

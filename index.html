@@ -696,8 +696,22 @@
           </div>
         </div>
 
-        <div style="margin-bottom: 20px; font-size: 0.88rem; color: var(--color-gray-500);" id="catalogResultsCount">
-          Showing 8 commercial feed formulas
+        <!-- Results Counter & Amazon / Flipkart View Switcher -->
+        <div class="catalog-meta-bar">
+          <div class="catalog-results-count" id="catalogResultsCount">
+            Showing 8 commercial feed formulas
+          </div>
+
+          <div class="catalog-view-switcher" id="catalogViewSwitcher" role="group" aria-label="Catalog View Mode">
+            <button type="button" class="view-switch-btn active" id="viewModeGridBtn" onclick="setCatalogViewMode('grid')" title="Amazon 2-Column Grid View" aria-label="Grid view">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg>
+              <span>Grid</span>
+            </button>
+            <button type="button" class="view-switch-btn" id="viewModeListBtn" onclick="setCatalogViewMode('list')" title="Flipkart List View" aria-label="List view">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="4" width="5" height="4" rx="1"/><rect x="10" y="4" width="11" height="4" rx="1"/><rect x="3" y="10" width="5" height="4" rx="1"/><rect x="10" y="10" width="11" height="4" rx="1"/><rect x="3" y="16" width="5" height="4" rx="1"/><rect x="10" y="16" width="11" height="4" rx="1"/></svg>
+              <span>List</span>
+            </button>
+          </div>
         </div>
 
         <!-- Dynamic Products Grid -->
