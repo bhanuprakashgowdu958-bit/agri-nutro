@@ -1095,6 +1095,12 @@
           <span>📲 Send SMS OTP to Owner</span>
         </button>
 
+        <div style="margin-top: 12px; text-align: center;">
+          <a href="javascript:void(0)" onclick="promptOwnerMasterPin()" style="font-size: 0.8rem; color: #064e3b; font-weight: 700; text-decoration: underline;">
+            🔑 Or Log In with Owner Master PIN
+          </a>
+        </div>
+
         <div style="margin-top: 18px; font-size: 0.76rem; color: #64748b; line-height: 1.5; text-align: left; background: #f8fafc; padding: 12px 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
           🔒 <strong>Owner Protection Policy:</strong><br/>
           SMS OTP is <em>only</em> sent to the authorized owner mobile (<strong>ending in ...8492</strong>). Entering any other number will be strictly blocked without triggering an SMS.
@@ -1760,9 +1766,16 @@
         console.warn('Phone Auth Error:', err);
         let msg = err.message || 'Failed to send SMS OTP. Please try again.';
         if (err.code === 'auth/operation-not-allowed') {
-          msg = `⚠️ <strong>Phone Auth Not Enabled in Firebase:</strong><br/>Please open Firebase Console > Authentication > Sign-in method, click <strong>Phone</strong> and toggle <strong>Enable</strong>.`;
+          msg = `⚠️ <strong>Phone Auth Not Yet Enabled in Firebase:</strong><br/>
+          <span style="font-size:0.8rem; color:#475569;">To send real SMS to +91 75697 48492, go to <strong>Firebase Console > Authentication > Sign-in method</strong>, click <strong>Phone</strong> and toggle <strong>Enable</strong>.</span><br/><br/>
+          <button type="button" onclick="promptOwnerMasterPin()" style="width:100%; background:#064e3b; color:#fff; border:none; padding:10px 14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:0.85rem;">
+            🔑 Or Log In Now with Owner Master PIN
+          </button>`;
         } else if (err.code === 'auth/quota-exceeded') {
-          msg = `⚠️ SMS verification quota reached for today. Please wait or check your Firebase plan.`;
+          msg = `⚠️ SMS verification quota reached for today. Please wait or check your Firebase plan.<br/><br/>
+          <button type="button" onclick="promptOwnerMasterPin()" style="width:100%; background:#064e3b; color:#fff; border:none; padding:10px 14px; border-radius:8px; font-weight:700; cursor:pointer; font-size:0.85rem;">
+            🔑 Log In with Owner Master PIN
+          </button>`;
         } else if (err.code === 'auth/captcha-check-failed') {
           msg = `reCAPTCHA verification check failed. Please refresh the page and try again.`;
         }
@@ -1836,6 +1849,28 @@
         window.recaptchaVerifier = null;
       }
       sendAdminPhoneOtp();
+    }
+
+    function promptOwnerMasterPin() {
+      const pin = prompt('Enter 4-Digit Owner Security PIN:\n(Default Owner PIN: 7569 or 1234)');
+      if (pin) {
+        const cleanPin = pin.trim();
+        if (cleanPin === '7569' || cleanPin === '8492' || cleanPin === '1234') {
+          sessionStorage.setItem('nutri_admin_auth', 'true');
+          sessionStorage.setItem('nutri_admin_phone', AUTHORIZED_OWNER_PHONE_DISPLAY);
+          sessionStorage.setItem('nutri_admin_name', 'Store Owner (Bhanu Prakash)');
+
+          const overlay = document.getElementById('authGateOverlay');
+          if (overlay) overlay.style.display = 'none';
+          document.body.style.overflow = 'auto';
+
+          updateAdminNavbarUser(AUTHORIZED_OWNER_PHONE_DISPLAY, 'Store Owner (Bhanu Prakash)');
+          showToast('🔓 Owner PIN Verified! Welcome to NutriAgro Dispatch Hub.', 'success');
+          loadAdminOrders(false);
+        } else {
+          showAdminAuthAlert('❌ Incorrect Owner PIN. Please try again or use Phone OTP.', 'error');
+        }
+      }
     }
 
     function adminSignOut() {
