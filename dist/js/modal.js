@@ -2186,7 +2186,11 @@ function openOrderTrackerModal(targetOrderId) {
     // If a specific order ID was requested (e.g. from checkout or direct track button)
     switchTrackerTab('tracking');
     const inputEl = document.getElementById('orderTrackerInput');
-    if (inputEl) inputEl.value = targetOrderId;
+    if (inputEl) {
+      inputEl.value = targetOrderId.toUpperCase();
+      inputEl.readOnly = true;
+      inputEl.setAttribute('readonly', 'readonly');
+    }
     const match = myOrders.find(o => o.orderId && o.orderId.toLowerCase() === targetOrderId.toLowerCase()) ||
                   allOrders.find(o => o.orderId && o.orderId.toLowerCase() === targetOrderId.toLowerCase());
     if (match) {
@@ -2266,7 +2270,11 @@ function switchTrackerTab(tabName) {
     const activeTarget = currentInputVal || (myOrders[0] ? myOrders[0].orderId : '') || localStorage.getItem('nutriagro_my_latest_order_id');
 
     if (activeTarget) {
-      if (inputEl) inputEl.value = activeTarget;
+      if (inputEl) {
+        inputEl.value = activeTarget.toUpperCase();
+        inputEl.readOnly = true;
+        inputEl.setAttribute('readonly', 'readonly');
+      }
       const match = myOrders.find(o => o.orderId && o.orderId.toLowerCase() === activeTarget.toLowerCase()) ||
                     allOrders.find(o => o.orderId && o.orderId.toLowerCase() === activeTarget.toLowerCase());
       if (match) {
@@ -2557,7 +2565,11 @@ function lookupSingleOrderAsGuest() {
   }
   switchTrackerTab('tracking');
   const trackerInput = document.getElementById('orderTrackerInput');
-  if (trackerInput) trackerInput.value = val;
+  if (trackerInput) {
+    trackerInput.value = val.toUpperCase();
+    trackerInput.readOnly = true;
+    trackerInput.setAttribute('readonly', 'readonly');
+  }
   trackOrderSubmit();
 }
 
@@ -2626,6 +2638,13 @@ async function trackOrderSubmit() {
 function renderOrderTrackingCard(order, allOrders, isSyncing = false) {
   const container = document.getElementById('orderTrackerResultContainer');
   if (!container) return;
+
+  const inputEl = document.getElementById('orderTrackerInput');
+  if (inputEl && order && order.orderId) {
+    inputEl.value = order.orderId.toUpperCase();
+    inputEl.readOnly = true;
+    inputEl.setAttribute('readonly', 'readonly');
+  }
 
   const isRejected = order.adminApproval === 'rejected' || order.currentStep === -1;
   const isAccepted = !isRejected && (order.adminApproval === 'accepted' || (order.currentStep !== undefined && order.currentStep >= 1));
