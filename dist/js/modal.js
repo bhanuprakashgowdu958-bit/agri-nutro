@@ -1345,11 +1345,13 @@ function getStoredOrders() {
 }
 
 /**
- * Strictly scopes orders to the authenticated customer account.
- * Under no circumstances does this ever return another customer's orders.
+ * Evaluates whether an order belongs strictly to the active authenticated customer
+ * or to the current guest session on this device.
+ * Under no circumstances does this ever return true for another customer's orders.
  */
-function getMyCustomerOrders(allOrders) {
-  const orders = Array.isArray(allOrders) ? allOrders : getStoredOrders();
+function isOrderOwnedByCurrentUser(order) {
+  if (!order || !order.orderId) return false;
+
   let currentUser = null;
   try {
     currentUser = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
@@ -1360,47 +1362,47 @@ function getMyCustomerOrders(allOrders) {
     const userId = (currentUser.userId || '').toLowerCase().trim();
     const userPhone = (currentUser.phone || '').replace(/\D/g, '');
 
-    return orders.filter(o => {
-      if (!o || !o.orderId) return false;
-      const orderEmail = (o.userEmail || o.email || '').toLowerCase().trim();
-      const orderUserId = (o.userId || '').toLowerCase().trim();
-      const orderPhone = (o.phone || '').replace(/\D/g, '');
+    const orderEmail = (order.userEmail || order.email || '').toLowerCase().trim();
+    const orderUserId = (order.userId || '').toLowerCase().trim();
+    const orderPhone = (order.phone || '').replace(/\D/g, '');
 
-      // 1. Primary match: Email address
-      if (userEmail && orderEmail && userEmail === orderEmail) {
-        return true;
-      }
-      // 2. Primary match: Account User ID
-      if (userId && orderUserId && userId === orderUserId) {
-        return true;
-      }
-      // 3. Verified Phone Number (10 digits)
-      if (userPhone.length >= 10 && orderPhone.length >= 10 && userPhone.slice(-10) === orderPhone.slice(-10)) {
-        // Guard against cross-account collisions: if order is linked to a different email, do NOT match
-        if (orderEmail && userEmail && orderEmail !== userEmail) {
-          return false;
-        }
-        return true;
-      }
-      return false;
-    });
+    // 1. Primary match: Email address
+    if (userEmail && orderEmail && userEmail === orderEmail) {
+      return true;
+    }
+    // 2. Primary match: Account User ID
+    if (userId && orderUserId && userId === orderUserId) {
+      return true;
+    }
+    // 3. Verified Phone Number (10 digits)
+    if (userPhone.length >= 10 && orderPhone.length >= 10 && userPhone.slice(-10) === orderPhone.slice(-10)) {
+      // Guard against cross-account collisions: if order is linked to a different email or userId, do NOT match
+      if (orderEmail && userEmail && orderEmail !== userEmail) return false;
+      if (orderUserId && userId && orderUserId !== userId) return false;
+      return true;
+    }
+    return false;
   }
 
-  // Guest Visitor (Not Signed In): Only orders placed from this browser device
-  const guestOrderIds = JSON.parse(localStorage.getItem('nutriagro_my_order_ids') || '[]');
-  const latestGuestId = localStorage.getItem('nutriagro_my_latest_order_id');
-  if (latestGuestId && !guestOrderIds.includes(latestGuestId)) {
-    guestOrderIds.push(latestGuestId);
-  }
+  // Guest Visitor (Not Signed In): Only orders placed during this guest session on this device
+  let guestOrderIds = [];
+  try {
+    guestOrderIds = JSON.parse(sessionStorage.getItem('nutriagro_guest_order_ids') || '[]');
+    if (!guestOrderIds.length) {
+      guestOrderIds = JSON.parse(localStorage.getItem('nutriagro_guest_order_ids') || '[]');
+    }
+  } catch (e) {}
 
-  if (guestOrderIds.length === 0) {
-    return [];
-  }
+  return guestOrderIds.some(id => String(id).toLowerCase() === String(order.orderId).toLowerCase());
+}
 
-  return orders.filter(o => {
-    if (!o || !o.orderId) return false;
-    return guestOrderIds.includes(o.orderId);
-  });
+/**
+ * Strictly scopes orders to the authenticated customer account.
+ * Under no circumstances does this ever return another customer's orders.
+ */
+function getMyCustomerOrders(allOrders) {
+  const orders = Array.isArray(allOrders) ? allOrders : getStoredOrders();
+  return orders.filter(o => isOrderOwnedByCurrentUser(o));
 }
 
 function getUserOrderCount() {
@@ -1467,6 +1469,9 @@ function integrateOrderIntoLocalStore(orderData) {
   const deletedIds = getDeletedOrderIds();
   if (deletedIds.has(String(orderData.orderId).toLowerCase())) return;
 
+  // Strict DPDP privacy boundary: Never inject another customer's order into this device's storage
+  if (!isOrderOwnedByCurrentUser(orderData)) return;
+
   const local = getStoredOrders();
   const existingIdx = local.findIndex(o => o.orderId && o.orderId.toLowerCase() === orderData.orderId.toLowerCase());
   if (existingIdx !== -1) {
@@ -1476,13 +1481,6 @@ function integrateOrderIntoLocalStore(orderData) {
   }
   local.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
   localStorage.setItem('nutriagro_orders', JSON.stringify(local));
-
-  // If this device placed or tracked this order as guest, ensure ID is recorded
-  const myOrderIds = JSON.parse(localStorage.getItem('nutriagro_my_order_ids') || '[]');
-  if (!myOrderIds.includes(orderData.orderId)) {
-    myOrderIds.unshift(orderData.orderId);
-    localStorage.setItem('nutriagro_my_order_ids', JSON.stringify(myOrderIds));
-  }
 
   updateAllOrderBadges();
   checkCustomerOrderStatusChanges(local);
@@ -1612,16 +1610,37 @@ async function fetchOrdersFromServer(callback) {
 
 async function saveOrder(orderObj) {
   try {
+    let currentUser = null;
+    try {
+      currentUser = JSON.parse(localStorage.getItem('nutriagro_user') || 'null');
+    } catch (e) {}
+
+    if (currentUser) {
+      if (!orderObj.userId && currentUser.userId) orderObj.userId = currentUser.userId;
+      if (!orderObj.userEmail && currentUser.email) orderObj.userEmail = currentUser.email;
+      if (!orderObj.phone && currentUser.phone) orderObj.phone = currentUser.phone;
+    }
+
     const local = getStoredOrders();
     local.unshift(orderObj);
     localStorage.setItem('nutriagro_orders', JSON.stringify(local));
     localStorage.setItem('nutriagro_last_order_timestamp', String(Date.now()));
 
-    // Record order ID to user's device history
-    const myOrderIds = JSON.parse(localStorage.getItem('nutriagro_my_order_ids') || '[]');
-    if (!myOrderIds.includes(orderObj.orderId)) {
-      myOrderIds.unshift(orderObj.orderId);
-      localStorage.setItem('nutriagro_my_order_ids', JSON.stringify(myOrderIds));
+    // Record order ID scoped properly to current user or guest session
+    if (!currentUser) {
+      const guestOrderIds = JSON.parse(sessionStorage.getItem('nutriagro_guest_order_ids') || '[]');
+      if (!guestOrderIds.includes(orderObj.orderId)) {
+        guestOrderIds.unshift(orderObj.orderId);
+        sessionStorage.setItem('nutriagro_guest_order_ids', JSON.stringify(guestOrderIds));
+        localStorage.setItem('nutriagro_guest_order_ids', JSON.stringify(guestOrderIds));
+      }
+    } else {
+      const userKey = 'nutriagro_user_orders_' + (currentUser.userId || currentUser.email);
+      const userOrderIds = JSON.parse(localStorage.getItem(userKey) || '[]');
+      if (!userOrderIds.includes(orderObj.orderId)) {
+        userOrderIds.unshift(orderObj.orderId);
+        localStorage.setItem(userKey, JSON.stringify(userOrderIds));
+      }
     }
 
     localStorage.setItem('nutriagro_my_latest_order_id', orderObj.orderId);
@@ -1996,16 +2015,16 @@ function refreshOpenTrackerModalUI(orders) {
 
   if (trackingTab && trackingTab.style.display !== 'none') {
     const inputEl = document.getElementById('orderTrackerInput');
-    const targetId = (inputEl && inputEl.value.trim()) || localStorage.getItem('nutriagro_my_latest_order_id') || (myOrders[0] && myOrders[0].orderId);
+    const typedId = (inputEl && inputEl.value.trim().toLowerCase()) || '';
+    const targetId = typedId || (myOrders[0] ? myOrders[0].orderId : '');
     if (targetId) {
-      const match = myOrders.find(o => o.orderId && o.orderId.toLowerCase() === targetId.toLowerCase()) ||
-                    allOrders.find(o => o.orderId && o.orderId.toLowerCase() === targetId.toLowerCase());
+      const match = myOrders.find(o => o.orderId && o.orderId.toLowerCase() === targetId.toLowerCase());
       if (match) {
         renderOrderTrackingCard(match, myOrders);
       }
     }
   } else if (listTab && listTab.style.display !== 'none') {
-    renderOrdersListView(allOrders);
+    renderOrdersListView(myOrders);
   }
 }
 
@@ -2013,7 +2032,7 @@ function checkCustomerOrderStatusChanges(allOrders) {
   const myOrders = getMyCustomerOrders(allOrders);
   if (!myOrders || myOrders.length === 0) return;
 
-  const myOrderId = localStorage.getItem('nutriagro_my_latest_order_id') || myOrders[0].orderId;
+  const myOrderId = (myOrders[0] && myOrders[0].orderId) || '';
   if (!myOrderId) return;
 
   // Strictly verify the order belongs to this customer account
@@ -2071,16 +2090,22 @@ async function refreshActiveDisplayedOrderLive() {
   const trackingTab = document.getElementById('trackerLiveTrackingTab');
   if (!trackingTab || trackingTab.style.display === 'none') return;
 
+  const allOrders = getStoredOrders();
+  const myOrders = getMyCustomerOrders(allOrders);
+
   const inputEl = document.getElementById('orderTrackerInput');
-  const targetId = (inputEl && inputEl.value.trim()) || localStorage.getItem('nutriagro_my_latest_order_id');
+  const typedId = (inputEl && inputEl.value.trim().toLowerCase()) || '';
+  const targetId = typedId || (myOrders[0] ? myOrders[0].orderId : '');
   if (!targetId) return;
+
+  // Strict ownership check: Must belong to this customer
+  const isMine = myOrders.some(o => o.orderId && o.orderId.toLowerCase() === targetId.toLowerCase());
+  if (!isMine) return;
 
   try {
     const fresh = await fetchSingleOrderLive(targetId);
-    if (fresh) {
-      const all = getStoredOrders();
-      const my = getMyCustomerOrders(all);
-      renderOrderTrackingCard(fresh, my, false);
+    if (fresh && isOrderOwnedByCurrentUser(fresh)) {
+      renderOrderTrackingCard(fresh, myOrders, false);
     }
   } catch (e) {}
 }
@@ -2187,8 +2212,7 @@ function openOrderTrackerModal(targetOrderId) {
     switchTrackerTab('tracking');
     const inputEl = document.getElementById('orderTrackerInput');
     if (inputEl) inputEl.value = targetOrderId;
-    const match = myOrders.find(o => o.orderId && o.orderId.toLowerCase() === targetOrderId.toLowerCase()) ||
-                  allOrders.find(o => o.orderId && o.orderId.toLowerCase() === targetOrderId.toLowerCase());
+    const match = myOrders.find(o => o.orderId && o.orderId.toLowerCase() === targetOrderId.toLowerCase());
     if (match) {
       renderOrderTrackingCard(match, myOrders, true);
     } else {
@@ -2204,9 +2228,9 @@ function openOrderTrackerModal(targetOrderId) {
       }
     }
 
-    // Direct Real-time Cloud Fetch
+    // Direct Real-time Cloud Fetch with strict customer authorization
     fetchSingleOrderLive(targetOrderId).then(fresh => {
-      if (fresh) {
+      if (fresh && isOrderOwnedByCurrentUser(fresh)) {
         const upAll = getStoredOrders();
         const upMy = getMyCustomerOrders(upAll);
         renderOrderTrackingCard(fresh, upMy, false);
@@ -2252,7 +2276,7 @@ function switchTrackerTab(tabName) {
     if (trackingTab) trackingTab.style.display = 'none';
     if (btnList) btnList.classList.add('active');
     if (btnTracking) btnTracking.classList.remove('active');
-    renderOrdersListView(allOrders);
+    renderOrdersListView(myOrders);
   } else {
     if (listTab) listTab.style.display = 'none';
     if (trackingTab) trackingTab.style.display = 'block';
@@ -2263,28 +2287,36 @@ function switchTrackerTab(tabName) {
     const container = document.getElementById('orderTrackerResultContainer');
     const inputEl = document.getElementById('orderTrackerInput');
     const currentInputVal = inputEl ? inputEl.value.trim().toLowerCase() : '';
-    const activeTarget = currentInputVal || (myOrders[0] ? myOrders[0].orderId : '') || localStorage.getItem('nutriagro_my_latest_order_id');
+
+    // Strictly ensure target belongs to the active customer's own orders
+    let activeTarget = '';
+    if (currentInputVal) {
+      const match = myOrders.find(o => o.orderId && o.orderId.toLowerCase() === currentInputVal);
+      if (match) activeTarget = match.orderId;
+    }
+    if (!activeTarget && myOrders.length > 0) {
+      activeTarget = myOrders[0].orderId;
+    }
 
     if (activeTarget) {
       if (inputEl) inputEl.value = activeTarget;
-      const match = myOrders.find(o => o.orderId && o.orderId.toLowerCase() === activeTarget.toLowerCase()) ||
-                    allOrders.find(o => o.orderId && o.orderId.toLowerCase() === activeTarget.toLowerCase());
+      const match = myOrders.find(o => o.orderId && o.orderId.toLowerCase() === activeTarget.toLowerCase());
       if (match) {
         renderOrderTrackingCard(match, myOrders, true);
       }
       fetchSingleOrderLive(activeTarget).then(fresh => {
-        if (fresh) {
+        if (fresh && isOrderOwnedByCurrentUser(fresh)) {
           const upAll = getStoredOrders();
           const upMy = getMyCustomerOrders(upAll);
           renderOrderTrackingCard(fresh, upMy, false);
         }
       });
+      startActiveTrackerLivePolling();
     } else {
       if (inputEl) inputEl.value = '';
+      stopActiveTrackerLivePolling();
       renderEmptyOrderTrackerState(myOrders);
     }
-
-    startActiveTrackerLivePolling();
   }
 }
 
@@ -2573,17 +2605,16 @@ async function trackOrderSubmit() {
   const allOrders = getStoredOrders();
   const myOrders = getMyCustomerOrders(allOrders);
 
-  // 1. Optimistic check in customer's own orders first
+  // 1. Optimistic check in customer's own authorized orders first
+  const cleanPhone = query.replace(/\D/g, '');
   const ownMatch = myOrders.find(o => 
     (o.orderId && o.orderId.toLowerCase() === query.toLowerCase()) || 
-    (o.phone && o.phone.replace(/\D/g, '').endsWith(query.replace(/\D/g, '')))
+    (cleanPhone.length >= 10 && o.phone && o.phone.replace(/\D/g, '').endsWith(cleanPhone.slice(-10)))
   );
 
-  const exactMatch = ownMatch || allOrders.find(o => o.orderId && o.orderId.toLowerCase() === query.toLowerCase());
-
-  if (exactMatch) {
+  if (ownMatch) {
     // Show instantly from cache with cloud syncing badge
-    renderOrderTrackingCard(exactMatch, myOrders, true);
+    renderOrderTrackingCard(ownMatch, myOrders, true);
   } else {
     // Display searching state while fetching from cloud
     const container = document.getElementById('orderTrackerResultContainer');
@@ -2598,27 +2629,30 @@ async function trackOrderSubmit() {
     }
   }
 
-  // 2. Fetch fresh order directly from Firebase Realtime Database
+  // 2. Fetch fresh order directly from Firebase Realtime Database with strict ownership verification
   let freshOrder = null;
   if (query.toUpperCase().startsWith('NUTRI-') || query.includes('-')) {
-    freshOrder = await fetchSingleOrderLive(query);
+    const candidate = await fetchSingleOrderLive(query);
+    if (candidate && isOrderOwnedByCurrentUser(candidate)) {
+      freshOrder = candidate;
+    }
   }
 
-  // 3. If not found or if query might be phone number, fetch full list from server
+  // 3. If not found or if query was phone number, fetch list from server and check customer's orders
   if (!freshOrder) {
     const freshAll = await fetchOrdersFromServer();
     const freshMy = getMyCustomerOrders(freshAll);
     freshOrder = freshMy.find(o => 
       (o.orderId && o.orderId.toLowerCase() === query.toLowerCase()) || 
-      (o.phone && o.phone.replace(/\D/g, '').endsWith(query.replace(/\D/g, '')))
-    ) || freshAll.find(o => o.orderId && o.orderId.toLowerCase() === query.toLowerCase());
+      (cleanPhone.length >= 10 && o.phone && o.phone.replace(/\D/g, '').endsWith(cleanPhone.slice(-10)))
+    );
   }
 
-  if (freshOrder) {
+  if (freshOrder && isOrderOwnedByCurrentUser(freshOrder)) {
     const finalAll = getStoredOrders();
     const finalMy = getMyCustomerOrders(finalAll);
     renderOrderTrackingCard(freshOrder, finalMy, false);
-  } else if (!exactMatch) {
+  } else if (!ownMatch) {
     renderOrderNotFoundCard(query);
   }
 }

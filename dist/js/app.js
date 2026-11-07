@@ -248,6 +248,17 @@ function onUserSessionChange(newUser, options = { mergeGuestCart: false }) {
     syncUserAccountToCloud(newUser);
   }
 
+  // Clear previous session's order caches to guarantee strict customer isolation
+  try {
+    localStorage.removeItem('nutriagro_my_latest_order_id');
+    localStorage.removeItem('nutriagro_orders');
+    sessionStorage.removeItem('nutriagro_guest_order_ids');
+  } catch (e) {}
+
+  if (typeof fetchOrdersFromServer === 'function') {
+    fetchOrdersFromServer();
+  }
+
   // Only merge guest items if the user was actively confirming a checkout dispatch
   const isPendingCheckout = typeof sessionStorage !== 'undefined' && sessionStorage.getItem('nutriagro_pending_checkout_order') === '1';
   const shouldMerge = (options && options.mergeGuestCart) || isPendingCheckout;
@@ -901,6 +912,29 @@ function bypassAsGuest() {
   }
 }
 
+function clearCustomerOrderSession() {
+  try {
+    localStorage.removeItem('nutriagro_orders');
+    localStorage.removeItem('nutriagro_my_latest_order_id');
+    localStorage.removeItem('nutriagro_my_order_ids');
+    localStorage.removeItem('nutriagro_guest_order_ids');
+    sessionStorage.removeItem('nutriagro_guest_order_ids');
+    sessionStorage.removeItem('nutriagro_pending_checkout_order');
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith('nutriagro_tracked_status_')) {
+        keysToRemove.push(k);
+      }
+    }
+    keysToRemove.forEach(k => localStorage.removeItem(k));
+  } catch (e) {}
+  if (typeof updateAllOrderBadges === 'function') {
+    updateAllOrderBadges(0);
+  }
+}
+window.clearCustomerOrderSession = clearCustomerOrderSession;
+
 function signOutUser() {
   // First notify cart while active key is still known
   if (window.cart && typeof window.cart.switchUser === 'function') {
@@ -910,6 +944,7 @@ function signOutUser() {
     localStorage.removeItem('nutriagro_user');
     sessionStorage.removeItem('nutriagro_guest');
   } catch (e) {}
+  clearCustomerOrderSession();
   onUserSessionChange(null);
   openAccountChooserModal();
 }
@@ -921,6 +956,7 @@ function signOutGuest() {
     sessionStorage.removeItem('nutriagro_guest_explicit_cart');
     localStorage.removeItem('nutriagro_cart_guest');
   } catch (e) {}
+  clearCustomerOrderSession();
 
   if (window.cart && typeof window.cart.switchUser === 'function') {
     window.cart.switchUser(null);
