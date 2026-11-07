@@ -34,32 +34,60 @@
       --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body, button, input, select, textarea, optgroup {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    h1, h2, h3, h4, h5, h6, .brand-text h1, .kpi-val, .order-id-text, .farmer-card h3 {
+      font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    }
+
     body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
       background: var(--bg-base);
       color: var(--text-main);
       line-height: 1.5;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
     }
 
     /* Top Admin Navigation Bar */
     .admin-navbar {
       background: linear-gradient(135deg, #022c22 0%, #064e3b 100%);
       color: #ffffff;
-      padding: 14px 28px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 16px;
+      padding: 12px 24px;
       border-bottom: 2px solid var(--accent);
       position: sticky;
       top: 0;
       z-index: 1000;
       box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+
+    .admin-nav-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
     .brand-wrap {
@@ -80,21 +108,34 @@
       align-items: center;
       justify-content: center;
       font-size: 1.4rem;
+      flex-shrink: 0;
     }
 
     .brand-text h1 {
-      font-family: 'Outfit', sans-serif;
       font-size: 1.25rem;
       font-weight: 800;
       letter-spacing: -0.01em;
       margin: 0;
       line-height: 1.2;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .brand-text h1 span { color: var(--accent); }
+    .brand-pill {
+      background: rgba(245, 158, 11, 0.22);
+      color: #fde68a;
+      font-size: 0.68rem;
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+
     .brand-text p {
-      font-size: 0.76rem;
-      color: #9cb5aa;
+      font-size: 0.74rem;
+      color: #a7f3d0;
       margin: 0;
       font-weight: 600;
       letter-spacing: 0.04em;
@@ -104,8 +145,63 @@
     .nav-actions {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
       flex-wrap: wrap;
+    }
+
+    .admin-nav-sub {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .admin-user-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.16) !important;
+      border: 1px solid rgba(255, 255, 255, 0.28) !important;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      color: #ffffff !important;
+      font-weight: 700;
+      max-width: 320px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .btn-customer-store {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(245, 158, 11, 0.18);
+      color: #fef08a;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      padding: 5px 14px;
+      border-radius: 16px;
+      font-size: 0.80rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-customer-store:hover {
+      background: rgba(245, 158, 11, 0.32);
+      color: #ffffff;
+    }
+
+    .btn-signout {
+      background: #fff5f5;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+    }
+    .btn-signout:hover {
+      background: #fee2e2;
+      color: #b91c1c;
     }
 
     .status-pill-live {
@@ -874,6 +970,10 @@
       flex-wrap: wrap;
     }
 
+    .tab-text-mobile {
+      display: none;
+    }
+
     .view-tab-btn {
       display: inline-flex;
       align-items: center;
@@ -1061,6 +1161,322 @@
       border-radius: 12px;
       border: 1px solid #cbd5e1;
     }
+
+    /* ==========================================================
+       AMAZON & FLIPKART MOBILE APP EXPERIENCE (<= 768px)
+       ========================================================== */
+    @media (max-width: 768px) {
+      /* Global Mobile Layout */
+      .admin-navbar {
+        padding: 10px 12px !important;
+        position: sticky !important;
+        top: 0 !important;
+      }
+      .admin-nav-inner {
+        gap: 6px !important;
+      }
+      .brand-row {
+        gap: 8px !important;
+      }
+      .brand-badge-icon {
+        width: 34px !important;
+        height: 34px !important;
+        font-size: 1.15rem !important;
+        border-radius: 8px !important;
+      }
+      .brand-text h1 {
+        font-size: 1.05rem !important;
+      }
+      .brand-text p {
+        display: none !important;
+      }
+      .brand-pill {
+        display: inline-block !important;
+      }
+
+      /* Compact Action Icons in Navbar */
+      .nav-actions {
+        gap: 6px !important;
+        flex-wrap: nowrap !important;
+      }
+      .sync-text, .nav-btn-text {
+        display: none !important;
+      }
+      .status-pill-live {
+        padding: 5px 8px !important;
+        font-size: 0.72rem !important;
+      }
+      .nav-icon-btn, .btn-signout {
+        padding: 6px 10px !important;
+        font-size: 0.85rem !important;
+        border-radius: 8px !important;
+        min-width: unset !important;
+      }
+      .admin-nav-sub {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 8px !important;
+        padding-top: 6px !important;
+      }
+      .admin-user-pill {
+        font-size: 0.72rem !important;
+        padding: 3px 10px !important;
+        max-width: 170px !important;
+      }
+      .btn-customer-store {
+        font-size: 0.72rem !important;
+        padding: 4px 10px !important;
+        border-radius: 12px !important;
+      }
+
+      /* Main Container */
+      .admin-container {
+        padding: 12px 10px 60px 10px !important;
+      }
+
+      /* Flipkart/Amazon App Segmented View Switcher */
+      .tab-text-desktop {
+        display: none !important;
+      }
+      .tab-text-mobile {
+        display: inline !important;
+      }
+      .view-switcher-bar {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        background: #e2e8f0 !important;
+        padding: 4px !important;
+        border-radius: 12px !important;
+        border-bottom: none !important;
+        gap: 4px !important;
+        margin-bottom: 14px !important;
+      }
+      .view-tab-btn {
+        width: 100% !important;
+        justify-content: center !important;
+        padding: 10px 6px !important;
+        font-size: 0.85rem !important;
+        border-radius: 9px !important;
+        border: none !important;
+        background: transparent !important;
+        color: #475569 !important;
+        box-shadow: none !important;
+      }
+      .view-tab-btn.active {
+        background: #ffffff !important;
+        color: #064e3b !important;
+        font-weight: 800 !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+      }
+      .view-tab-btn.active .view-tab-badge {
+        background: #064e3b !important;
+        color: #ffffff !important;
+      }
+      .view-tab-btn:not(.active) .view-tab-badge {
+        background: #cbd5e1 !important;
+        color: #334155 !important;
+      }
+
+      /* KPI Metric Cards 2x2 Grid (Amazon/Flipkart Seller Hub) */
+      .kpi-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+        margin-bottom: 14px !important;
+      }
+      .kpi-card {
+        padding: 10px 12px !important;
+        border-radius: 12px !important;
+        gap: 10px !important;
+        min-height: 72px !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+      }
+      .kpi-icon-box {
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 1.2rem !important;
+        border-radius: 10px !important;
+        flex-shrink: 0 !important;
+      }
+      .kpi-val {
+        font-size: 1.3rem !important;
+        font-weight: 800 !important;
+        line-height: 1.1 !important;
+      }
+      .kpi-label {
+        font-size: 0.66rem !important;
+        font-weight: 700 !important;
+        line-height: 1.25 !important;
+        color: #475569 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.02em !important;
+        margin-top: 2px !important;
+      }
+
+      /* Month Filter Bar */
+      .kpi-header-strip {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+        margin-bottom: 12px !important;
+      }
+      .month-filter-wrap {
+        width: 100% !important;
+        justify-content: space-between !important;
+      }
+      .month-filter-select {
+        flex: 1 !important;
+      }
+
+      /* Search & Horizontal Scrollable Filter Chips */
+      .controls-strip {
+        padding: 12px 12px !important;
+        border-radius: 12px !important;
+        gap: 10px !important;
+        margin-bottom: 14px !important;
+      }
+      .search-input-wrap {
+        width: 100% !important;
+        min-width: 100% !important;
+      }
+      .search-input {
+        border-radius: 24px !important;
+        padding: 10px 14px 10px 38px !important;
+        font-size: 0.85rem !important;
+        background: #f1f5f9 !important;
+        border: 1.5px solid #cbd5e1 !important;
+      }
+      .filter-tabs {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+        gap: 8px !important;
+        width: 100% !important;
+        padding-bottom: 4px !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+      }
+      .filter-tabs::-webkit-scrollbar {
+        display: none !important;
+      }
+      .filter-btn {
+        flex-shrink: 0 !important;
+        padding: 7px 14px !important;
+        font-size: 0.78rem !important;
+        font-weight: 700 !important;
+        border-radius: 20px !important;
+      }
+      .controls-strip > div:last-child {
+        width: 100% !important;
+        display: flex !important;
+        gap: 8px !important;
+        overflow-x: auto !important;
+        padding-bottom: 2px !important;
+      }
+      .controls-strip > div:last-child .btn {
+        flex: 1 !important;
+        min-width: 100px !important;
+        justify-content: center !important;
+        font-size: 0.76rem !important;
+        padding: 8px 10px !important;
+        border-radius: 8px !important;
+        white-space: nowrap !important;
+      }
+
+      /* Section Titles on Mobile */
+      .section-title-wrap {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 4px !important;
+        margin-bottom: 12px !important;
+      }
+      .section-title {
+        font-size: 1.05rem !important;
+      }
+
+      /* Orders Cards on Mobile */
+      .order-card {
+        padding: 14px 14px !important;
+        border-radius: 14px !important;
+        margin-bottom: 12px !important;
+      }
+      .order-card-header {
+        padding-bottom: 10px !important;
+        margin-bottom: 12px !important;
+        gap: 8px !important;
+      }
+      .order-id-text {
+        font-size: 1.15rem !important;
+      }
+      .order-details-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+      }
+      .order-card-footer {
+        padding: 12px 14px !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+      }
+      .order-card-footer > div {
+        width: 100% !important;
+        justify-content: space-between !important;
+      }
+      .action-btns-group {
+        width: 100% !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+      }
+      .action-btns-group .btn,
+      .action-btns-group .status-dropdown {
+        flex: 1 !important;
+        min-width: 120px !important;
+        justify-content: center !important;
+        text-align: center !important;
+        padding: 9px 12px !important;
+        font-size: 0.82rem !important;
+      }
+      .status-select-wrap {
+        width: 100% !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 6px !important;
+      }
+      .status-dropdown {
+        width: 100% !important;
+      }
+
+      /* Customer Directory Cards on Mobile */
+      .farmer-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+      }
+      .farmer-card {
+        padding: 14px 14px !important;
+        border-radius: 14px !important;
+      }
+      .farmer-card-header {
+        padding-bottom: 10px !important;
+        margin-bottom: 12px !important;
+      }
+      .farmer-card h3 {
+        font-size: 1.05rem !important;
+      }
+
+      /* Toast Notification */
+      .admin-toast-container {
+        left: 12px !important;
+        right: 12px !important;
+        bottom: 16px !important;
+        width: calc(100% - 24px) !important;
+      }
+      .admin-toast {
+        padding: 10px 14px !important;
+        font-size: 0.82rem !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1099,39 +1515,48 @@
 
   <!-- Top Admin Navigation -->
   <header class="admin-navbar">
-    <a href="admin.html" class="brand-wrap">
-      <div class="brand-badge-icon">🌾</div>
-      <div class="brand-text">
-        <h1>Nutri<span>Agro</span> Feeds Admin Hub</h1>
-        <p>Live Mill Operations & Farmgate Dispatch</p>
+    <div class="admin-nav-inner">
+      <div class="brand-row">
+        <a href="admin.html" class="brand-wrap">
+          <div class="brand-badge-icon">🌾</div>
+          <div class="brand-text">
+            <h1>Nutri<span>Agro</span> Feeds <span class="brand-pill">Hub</span></h1>
+            <p>Live Mill Operations &amp; Farmgate Dispatch</p>
+          </div>
+        </a>
+
+        <div class="nav-actions">
+          <div class="status-pill-live" title="Server Connection Status">
+            <span class="pulse-dot"></span>
+            <span id="syncStatusText" class="sync-text">Server Live Connected</span>
+          </div>
+
+          <button type="button" class="btn btn-light nav-icon-btn" id="soundToggleBtn" onclick="toggleSoundAlerts()" title="Toggle Sound Alerts">
+            <span id="soundIcon">🔔</span>
+            <span class="nav-btn-text">Sound Alerts: <strong id="soundState">ON</strong></span>
+          </button>
+
+          <button type="button" class="btn btn-accent nav-icon-btn" onclick="loadAdminOrders(true)" title="Refresh Orders &amp; Data">
+            <span class="btn-refresh-icon">🔄</span>
+            <span class="nav-btn-text">Refresh Orders</span>
+          </button>
+
+          <button type="button" class="btn btn-signout" onclick="adminSignOut()" title="Sign Out of Admin Portal">
+            <span>🔒</span>
+            <span class="nav-btn-text">Sign Out</span>
+          </button>
+        </div>
       </div>
-    </a>
 
-    <div class="nav-actions">
-      <div class="status-pill-live">
-        <span class="pulse-dot"></span>
-        <span id="syncStatusText">Server Live Connected</span>
+      <div class="admin-nav-sub">
+        <div id="adminUserPill" class="admin-user-pill" style="display: none; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.16); border: 1px solid rgba(255, 255, 255, 0.28); padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; color: #ffffff; font-weight: 700;">
+          <span>👤</span> <span id="adminUserEmail">Owner</span>
+        </div>
+
+        <a href="index.html" class="btn-customer-store" title="Return to Public Customer Website">
+          <span>🛍️</span> <span>Customer Website →</span>
+        </a>
       </div>
-
-      <button type="button" class="btn btn-light" id="soundToggleBtn" onclick="toggleSoundAlerts()">
-        <span id="soundIcon">🔔</span> Sound Alerts: <strong id="soundState">ON</strong>
-      </button>
-
-      <button type="button" class="btn btn-accent" onclick="loadAdminOrders(true)">
-        🔄 Refresh Orders
-      </button>
-
-      <div id="adminUserPill" style="display: none; align-items: center; gap: 6px; background: rgba(6, 78, 59, 0.08); border: 1px solid rgba(6, 78, 59, 0.2); padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; color: #064e3b; font-weight: 700;">
-        <span>👤</span> <span id="adminUserEmail">Owner</span>
-      </div>
-
-      <button type="button" class="btn btn-light" onclick="adminSignOut()" title="Sign Out of Admin Portal" style="color: #dc2626; border-color: #fecaca; background: #fff5f5;">
-        🔒 Sign Out
-      </button>
-
-      <a href="index.html" class="btn btn-light" title="Return to Public Customer Website">
-        ← Customer Website
-      </a>
     </div>
   </header>
 
@@ -1141,10 +1566,16 @@
     <!-- Top View Switcher Tabs -->
     <div class="view-switcher-bar">
       <button type="button" class="view-tab-btn active" id="tabOrdersBtn" onclick="switchAdminView('orders')">
-        <span>📦</span> Orders & Dispatch Operations (<span id="tabOrdersCount" class="view-tab-badge">0</span>)
+        <span class="tab-icon">📦</span>
+        <span class="tab-text-desktop">Orders &amp; Dispatch Operations</span>
+        <span class="tab-text-mobile">Orders</span>
+        <span class="tab-badge-wrap">(<span id="tabOrdersCount" class="view-tab-badge">0</span>)</span>
       </button>
       <button type="button" class="view-tab-btn" id="tabFarmersBtn" onclick="switchAdminView('farmers')">
-        <span>👥</span> Signed-in Customers & Accounts (<span id="tabFarmersCount" class="view-tab-badge">0</span>)
+        <span class="tab-icon">👥</span>
+        <span class="tab-text-desktop">Signed-in Customers &amp; Accounts</span>
+        <span class="tab-text-mobile">Customers</span>
+        <span class="tab-badge-wrap">(<span id="tabFarmersCount" class="view-tab-badge">0</span>)</span>
       </button>
     </div>
 
