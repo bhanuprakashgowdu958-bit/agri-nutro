@@ -2200,9 +2200,6 @@
                 <button type="button" class="btn btn-sm btn-light" style="color: #0f172a; padding: 6px 12px; font-size: 0.82rem;" onclick="printOrderInvoice('${order.orderId}')">
                   <span>🖨️</span> Invoice
                 </button>
-                <button type="button" class="btn btn-sm" onclick="deleteAdminOrder('${order.orderId}')" style="background: #fff5f5; border: 1.5px solid #fecaca; color: #dc2626; font-weight: 700; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.82rem; display: inline-flex; align-items: center; gap: 4px;" title="Permanently delete order">
-                  <span>🗑️</span> Delete
-                </button>
               </div>
             </div>
           `;
@@ -2220,9 +2217,6 @@
                 </a>
                 <button type="button" class="btn btn-sm btn-light" style="color: #0f172a;" onclick="printOrderInvoice('${order.orderId}')">
                   <span>🖨️</span> Print Invoice
-                </button>
-                <button type="button" class="btn btn-sm" onclick="deleteAdminOrder('${order.orderId}')" style="background: #fff5f5; border: 1.5px solid #fecaca; color: #dc2626; font-weight: 700; padding: 6px 12px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" title="Permanently delete order">
-                  <span>🗑️</span> Delete
                 </button>
               </div>
             </div>
@@ -2247,9 +2241,6 @@
                 <button type="button" class="btn btn-sm btn-light" style="color: #0f172a;" onclick="printOrderInvoice('${order.orderId}')">
                   <span>🖨️</span> Print Invoice
                 </button>
-                <button type="button" class="btn btn-sm" onclick="deleteAdminOrder('${order.orderId}')" style="background: #fff5f5; border: 1.5px solid #fecaca; color: #dc2626; font-weight: 700; padding: 6px 12px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" title="Permanently delete order">
-                  <span>🗑️</span> Delete
-                </button>
               </div>
             </div>
           `;
@@ -2265,9 +2256,6 @@
               </div>
               <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 ${statusBadgeHtml}
-                <button type="button" class="btn btn-sm" onclick="deleteAdminOrder('${order.orderId}')" title="Permanently delete this order" style="background: #fff5f5; border: 1px solid #fecaca; color: #dc2626; border-radius: 6px; padding: 4px 10px; font-size: 0.74rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                  <span>🗑️</span> Delete
-                </button>
               </div>
             </div>
 
