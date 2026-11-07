@@ -470,6 +470,15 @@
       margin-bottom: 22px;
     }
 
+    @keyframes consentShake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .consent-error-shake {
+      animation: consentShake 0.4s ease-in-out;
+    }
+
     @media (max-width: 480px) {
       .auth-card {
         padding: 30px 20px 24px;
@@ -515,6 +524,16 @@
     <!-- Quick Switch Saved Device Account (Optional Chip) -->
     <div class="saved-accounts-chip-wrap" id="savedAccountsChipWrap">
       <!-- Populated if saved accounts exist -->
+    </div>
+
+    <!-- Mandatory Terms & Privacy Consent Checkbox -->
+    <div class="auth-consent-wrap" id="authConsentWrap" style="margin: 0 0 18px 0; padding: 11px 14px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; text-align: left; transition: all 0.2s ease;">
+      <label for="signupTermsConsent" style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: 0.82rem; color: #475569; line-height: 1.45; user-select: none; margin: 0;">
+        <input type="checkbox" id="signupTermsConsent" style="margin-top: 2px; width: 17px; height: 17px; accent-color: #059669; cursor: pointer; flex-shrink: 0;" />
+        <span>
+          I agree to NutriAgro's <a href="terms.html" target="_blank" rel="noopener noreferrer" style="color: #059669; font-weight: 600; text-decoration: underline; text-underline-offset: 2px;">Terms & Conditions</a> and <a href="terms.html#privacy" target="_blank" rel="noopener noreferrer" style="color: #059669; font-weight: 600; text-decoration: underline; text-underline-offset: 2px;">Privacy Policy</a>.
+        </span>
+      </label>
     </div>
 
     <!-- Official Google Button -->
@@ -985,6 +1004,22 @@
     }
 
     async function handleGoogleSignIn() {
+      // Enforce mandatory Terms & Conditions and Privacy Policy consent
+      const consent = document.getElementById('signupTermsConsent');
+      const wrap = document.getElementById('authConsentWrap');
+      if (consent && !consent.checked) {
+        showAlert('error', 'Please check the box to agree to our Terms & Conditions and Privacy Policy to continue.');
+        if (wrap) {
+          wrap.style.borderColor = '#ef4444';
+          wrap.style.background = '#fef2f2';
+          wrap.classList.remove('consent-error-shake');
+          void wrap.offsetWidth;
+          wrap.classList.add('consent-error-shake');
+        }
+        consent.focus();
+        return;
+      }
+
       // 1. Official Firebase Google Sign-In with Popup
       if (typeof firebase !== 'undefined' && firebase.auth) {
         try {
@@ -1076,6 +1111,22 @@
 
     // ── Check URL Parameters on Load ──────────────────────────────────────
     window.addEventListener('DOMContentLoaded', () => {
+      const consent = document.getElementById('signupTermsConsent');
+      const wrap = document.getElementById('authConsentWrap');
+      if (consent && wrap) {
+        consent.addEventListener('change', () => {
+          if (consent.checked) {
+            wrap.style.borderColor = '#10b981';
+            wrap.style.background = '#f0fdf4';
+            const box = document.getElementById('authAlertBox');
+            if (box) box.style.display = 'none';
+          } else {
+            wrap.style.borderColor = '#e2e8f0';
+            wrap.style.background = '#f8fafc';
+          }
+        });
+      }
+
       try {
         const params = new URLSearchParams(window.location.search);
         if (params.get('tab') === 'login' || params.get('mode') === 'login') {

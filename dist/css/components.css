@@ -5321,4 +5321,14 @@ body.mobile-drawer-open {
   -webkit-overflow-scrolling: touch;
 }
 
+@keyframes consentShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+.consent-error-shake {
+  animation: consentShake 0.4s ease-in-out;
+}
+
 
