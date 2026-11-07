@@ -570,42 +570,230 @@ function onCustomerLocationPinMoved(lat, lon, shouldReverseGeocode = true) {
   }
 }
 
+// Comprehensive regional postal PIN lookup directory covering 50km Koturu radius & surrounding mandals
+const REGIONAL_PIN_CACHE = {
+  'koturu': '517416',
+  'nallamgadu': '517416',
+  'bangarupalem': '517416',
+  'bangarupalyam': '517416',
+  'mogili': '517416',
+  'ragimanupenta': '517416',
+  'thavanampalle': '517131',
+  'tavanampalle': '517131',
+  'kanipakam': '517131',
+  'aragonda': '517129',
+  'irala': '517130',
+  'iral': '517130',
+  'puthalapattu': '517124',
+  'chittoor': '517001',
+  'chitturu': '517001',
+  'murukambattu': '517127',
+  'palamaner': '517408',
+  'palamaneru': '517408',
+  'baireddipalle': '517415',
+  'baireddipalli': '517415',
+  'venkatagirikota': '517424',
+  'v.kota': '517424',
+  'gangavaram': '517432',
+  'peddapanjani': '517408',
+  'somala': '517257',
+  'chowdepalle': '517257',
+  'sodam': '517123',
+  'rompicherla': '517192',
+  'pulicherla': '517113',
+  'kallur': '517113',
+  'pakala': '517112',
+  'damalcheruvu': '517152',
+  'chandragiri': '517101',
+  'tirupati': '517501',
+  'penumuru': '517126',
+  'gd nellore': '517125',
+  'gangadhara nellore': '517125',
+  'sr puram': '517167',
+  'srirangarajapuram': '517167',
+  'karvetinagar': '517582',
+  'vedurukuppam': '517569',
+  'nagari': '517590',
+  'yadamari': '517422',
+  'yadamarri': '517422',
+  'gudipala': '517247',
+  'kuppam': '517425',
+  'shanthipuram': '517423',
+  'ramakuppam': '517401',
+  'gudiyatham': '632602',
+  'peranambuttu': '635810',
+  'pernambut': '635810',
+  'katpadi': '632007',
+  'vellore': '632001',
+  'paradarami': '632603'
+};
+
+async function resolvePostalPin(village, mandal, district, locality) {
+  const keys = [village, mandal, locality, district];
+  for (const k of keys) {
+    if (!k) continue;
+    const clean = k.toLowerCase().replace(/ mandal| taluk| tehsil| district/g, '').trim();
+    if (REGIONAL_PIN_CACHE[clean]) {
+      return REGIONAL_PIN_CACHE[clean];
+    }
+  }
+
+  // Live India Post Office PIN lookup fallback
+  for (const k of [village, mandal]) {
+    if (!k) continue;
+    const clean = k.replace(/ Mandal| Taluk| Tehsil| District/i, '').trim();
+    if (!clean || clean.length < 3) continue;
+    try {
+      const res = await fetch(`https://api.postalpincode.in/postoffice/${encodeURIComponent(clean)}`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json && json[0] && json[0].Status === 'Success' && json[0].PostOffice && json[0].PostOffice.length > 0) {
+          return json[0].PostOffice[0].Pincode;
+        }
+      }
+    } catch (e) {}
+  }
+  return '';
+}
+
+// E-commerce (Amazon / Flipkart) Indian address formatter:
+// Formats into: [Hamlet/Landmark], [Village/Town], [Mandal/Taluk], [District], [State] - [PIN Code]
+function formatECommerceAddress(addr, displayName) {
+  if (!addr) return { formattedAddress: displayName || '', village: '', pin: '' };
+
+  const hamlet = addr.hamlet || addr.isolated_dwelling || addr.allotments || '';
+  const road = addr.road || addr.footway || addr.path || '';
+  const neighbourhood = addr.neighbourhood || addr.suburb || '';
+  const localSpot = hamlet || neighbourhood || road || '';
+
+  let village = addr.village || addr.town || addr.city_district || addr.city || '';
+  if (localSpot && village && localSpot.toLowerCase() === village.toLowerCase()) {
+    village = '';
+  }
+
+  let mandal = addr.county || addr.subdistrict || '';
+  let district = addr.state_district || addr.district || '';
+  let state = addr.state || '';
+  let pin = addr.postcode || '';
+
+  if (!pin) {
+    const searchKeys = [village, mandal, localSpot, district];
+    for (const key of searchKeys) {
+      if (!key) continue;
+      const cleanKey = key.toLowerCase().replace(/ mandal| taluk| tehsil| district/g, '').trim();
+      if (REGIONAL_PIN_CACHE[cleanKey]) {
+        pin = REGIONAL_PIN_CACHE[cleanKey];
+        break;
+      }
+    }
+  }
+
+  const parts = [];
+  if (localSpot) parts.push(localSpot);
+  if (village && !parts.some(p => p.toLowerCase() === village.toLowerCase())) parts.push(village);
+  if (mandal && !parts.some(p => p.toLowerCase() === mandal.toLowerCase())) parts.push(mandal);
+  if (district && !parts.some(p => p.toLowerCase() === district.toLowerCase())) parts.push(district);
+  if (state && !parts.some(p => p.toLowerCase() === state.toLowerCase())) parts.push(state);
+
+  let formatted = parts.join(', ');
+  if (pin) {
+    formatted += ' - ' + pin;
+  }
+  return {
+    formattedAddress: formatted || displayName || '',
+    village: village || localSpot || '',
+    mandal: mandal || '',
+    district: district || '',
+    pin: pin || ''
+  };
+}
+
+// Authoritative reverse geocoding returning full Amazon / Flipkart village + PIN format
+async function resolveECommerceAddressFromCoords(lat, lon) {
+  // 1. Primary: OpenStreetMap Nominatim with full address details
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.address) {
+        const parsed = formatECommerceAddress(data.address, data.display_name);
+        if (!parsed.pin) {
+          const lookedUpPin = await resolvePostalPin(parsed.village, parsed.mandal, parsed.district);
+          if (lookedUpPin) {
+            parsed.formattedAddress += ' - ' + lookedUpPin;
+            parsed.pin = lookedUpPin;
+          }
+        }
+        if (parsed.formattedAddress) {
+          return parsed.formattedAddress;
+        }
+      } else if (data && data.display_name) {
+        return data.display_name;
+      }
+    }
+  } catch (err) {
+    console.warn('Nominatim reverse geocode error, attempting BigDataCloud fallback:', err);
+  }
+
+  // 2. Secondary: BigDataCloud Reverse Geocoding with administrative structure
+  try {
+    const res2 = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
+    if (res2.ok) {
+      const bdcData = await res2.json();
+      const admin = (bdcData.localityInfo && bdcData.localityInfo.administrative) || [];
+      let village = '';
+      let mandal = '';
+      let district = '';
+      let state = bdcData.principalSubdivision || '';
+      let pin = bdcData.postcode || '';
+
+      admin.forEach(item => {
+        const name = item.name || '';
+        const desc = (item.description || '').toLowerCase();
+        if (desc.includes('village') || (!village && (item.adminLevel >= 6 || desc.includes('locality')))) {
+          if (!name.toLowerCase().includes('mandal') && !name.toLowerCase().includes('district') && !name.toLowerCase().includes('india')) {
+            village = name;
+          }
+        }
+        if (name.toLowerCase().includes('mandal') || desc.includes('mandal') || name.toLowerCase().includes('taluk')) {
+          mandal = name;
+        }
+        if (name.toLowerCase().includes('district') || desc.includes('district')) {
+          district = name;
+        }
+      });
+
+      if (!village && bdcData.locality) village = bdcData.locality;
+      if (!village && bdcData.city) village = bdcData.city;
+
+      if (!pin) {
+        pin = await resolvePostalPin(village, mandal, district);
+      }
+
+      const parts = [];
+      if (village) parts.push(village);
+      if (mandal && !parts.some(p => p.toLowerCase() === mandal.toLowerCase())) parts.push(mandal);
+      if (district && !parts.some(p => p.toLowerCase() === district.toLowerCase())) parts.push(district);
+      if (state && !parts.some(p => p.toLowerCase() === state.toLowerCase())) parts.push(state);
+
+      let formatted = parts.join(', ');
+      if (pin) formatted += ' - ' + pin;
+      if (formatted) return formatted;
+    }
+  } catch (err2) {
+    console.warn('BigDataCloud fallback error:', err2);
+  }
+
+  return `Farm Location: ${lat.toFixed(5)}°N, ${lon.toFixed(5)}°E (PIN on map)`;
+}
+
 async function reverseGeocodeCoordinates(lat, lon) {
   const addrInput = document.getElementById('checkoutAddress');
   if (!addrInput) return;
 
-  try {
-    const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
-    if (res.ok) {
-      const data = await res.json();
-      const parts = [];
-      if (data.locality) parts.push(data.locality);
-      if (data.city && data.city !== data.locality) parts.push(data.city);
-      if (data.principalSubdivision) parts.push(data.principalSubdivision);
-      if (data.postcode) parts.push(`PIN: ${data.postcode}`);
-      const fullText = parts.join(', ');
-      if (fullText) {
-        addrInput.value = fullText;
-        updateDeliveryRadiusUI(currentDeliveryDistanceKm, fullText);
-        return;
-      }
-    }
-  } catch (e) {}
-
-  try {
-    const res2 = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-    if (res2.ok) {
-      const data2 = await res2.json();
-      if (data2 && data2.display_name) {
-        addrInput.value = data2.display_name;
-        updateDeliveryRadiusUI(currentDeliveryDistanceKm, data2.display_name);
-        return;
-      }
-    }
-  } catch (e2) {}
-
-  addrInput.value = `Farm Location: ${lat.toFixed(5)}°N, ${lon.toFixed(5)}°E (PIN on map)`;
-  updateDeliveryRadiusUI(currentDeliveryDistanceKm, addrInput.value);
+  const formattedAddr = await resolveECommerceAddressFromCoords(lat, lon);
+  addrInput.value = formattedAddr;
+  updateDeliveryRadiusUI(currentDeliveryDistanceKm, formattedAddr);
 }
 
 function centerMapOnCustomerPin() {
@@ -846,39 +1034,14 @@ async function autoDetectDeliveryAddress() {
         const lat = pos.coords.latitude;
         const lon = pos.coords.longitude;
 
-        // Try BigDataCloud reverse geocode client (fast, client-side, zero API key)
         try {
-          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
-          if (res.ok) {
-            const data = await res.json();
-            const parts = [];
-            if (data.locality) parts.push(data.locality);
-            if (data.city && data.city !== data.locality) parts.push(data.city);
-            if (data.principalSubdivision) parts.push(data.principalSubdivision);
-            if (data.postcode) parts.push(`PIN: ${data.postcode}`);
-            if (data.countryName) parts.push(data.countryName);
-
-            if (parts.length > 0) {
-              setConfirmedAddress(parts.join(', '), lat, lon);
-              return;
-            }
+          const formatted = await resolveECommerceAddressFromCoords(lat, lon);
+          if (formatted) {
+            setConfirmedAddress(formatted, lat, lon);
+            return;
           }
         } catch (e) {
-          console.warn('BigDataCloud geocode failed, trying Nominatim fallback:', e);
-        }
-
-        // Try OpenStreetMap Nominatim reverse geocode
-        try {
-          const res2 = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-          if (res2.ok) {
-            const data2 = await res2.json();
-            if (data2 && data2.display_name) {
-              setConfirmedAddress(data2.display_name, lat, lon);
-              return;
-            }
-          }
-        } catch (e2) {
-          console.warn('Nominatim reverse geocode failed:', e2);
+          console.warn('High-accuracy GPS reverse geocode error:', e);
         }
 
         // Coordinates fallback
@@ -899,17 +1062,14 @@ async function autoDetectDeliveryAddress() {
       const res = await fetch('https://ipwho.is/');
       const ipData = await res.json();
       if (ipData && ipData.success !== false) {
-        const parts = [];
-        if (ipData.city) parts.push(ipData.city);
-        if (ipData.region) parts.push(ipData.region);
-        if (ipData.postal) parts.push(`PIN: ${ipData.postal}`);
-        if (ipData.country) parts.push(ipData.country);
-        const addr = parts.join(', ');
-        if (addr) {
-          const lat = parseFloat(ipData.latitude);
-          const lon = parseFloat(ipData.longitude);
-          setConfirmedAddress(addr, lat, lon);
-          return;
+        const lat = parseFloat(ipData.latitude);
+        const lon = parseFloat(ipData.longitude);
+        if (!isNaN(lat) && !isNaN(lon)) {
+          const formatted = await resolveECommerceAddressFromCoords(lat, lon);
+          if (formatted) {
+            setConfirmedAddress(formatted, lat, lon);
+            return;
+          }
         }
       }
     } catch (e) {
@@ -917,7 +1077,7 @@ async function autoDetectDeliveryAddress() {
     }
 
     // Default regional sample within Koturu dispatch zone
-    setConfirmedAddress('Koturu, Nallamgadu, Bangarupalem Mandal, Chittoor District, Andhra Pradesh, PIN: 517416', hub.lat, hub.lng);
+    setConfirmedAddress('Koturu, Nallamgadu, Bangarupalem Mandal, Chittoor District, Andhra Pradesh - 517416', hub.lat, hub.lng);
   }
 }
 
