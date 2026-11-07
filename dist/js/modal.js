@@ -361,6 +361,11 @@ function openCheckoutModal() {
   if (addressInput && !addressInput.value.trim()) {
     autoDetectDeliveryAddress();
   }
+
+  // Initialize or re-center interactive 50km Leaflet Delivery Map
+  setTimeout(() => {
+    initCheckoutDeliveryMap();
+  }, 250);
 }
 
 function closeCheckoutModal() {
@@ -372,11 +377,20 @@ function closeCheckoutModal() {
 }
 
 // ========================================================
-// 50 KM DELIVERY RADIUS VERIFICATION (KOTURU HUB 517416)
+// 50 KM DELIVERY RADIUS & INTERACTIVE MAP (KOTURU HUB 517416)
 // ========================================================
 let currentDeliveryDistanceKm = null;
 let isDeliveryEligible = true;
 let addressGeocodeDebounceTimer = null;
+let reverseGeocodeDebounceTimer = null;
+
+let checkoutMap = null;
+let koturuHubMarker = null;
+let deliveryRadiusCircle = null;
+let customerDeliveryMarker = null;
+let distancePolyline = null;
+let customerLat = 13.2521036;
+let customerLng = 78.9177864;
 
 // Haversine formula to compute great-circle distance between two GPS coordinates
 function calculateDistanceKm(lat1, lon1, lat2, lon2) {
@@ -389,6 +403,215 @@ function calculateDistanceKm(lat1, lon1, lat2, lon2) {
     Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return Math.round(R * c * 10) / 10;
+}
+
+function initCheckoutDeliveryMap() {
+  const mapContainer = document.getElementById('checkoutDeliveryMap');
+  if (!mapContainer || typeof L === 'undefined') return;
+
+  const hub = (typeof DISPATCH_HUB_CONFIG !== 'undefined') ? DISPATCH_HUB_CONFIG : {
+    lat: 13.2521036,
+    lng: 78.9177864,
+    maxRadiusKm: 50
+  };
+
+  if (checkoutMap) {
+    try {
+      checkoutMap.invalidateSize();
+      if (customerDeliveryMarker && koturuHubMarker) {
+        const bounds = L.latLngBounds([
+          [hub.lat, hub.lng],
+          customerDeliveryMarker.getLatLng()
+        ]);
+        checkoutMap.fitBounds(bounds.pad(0.35));
+      }
+    } catch (e) {}
+    return;
+  }
+
+  // Create Leaflet Map
+  checkoutMap = L.map('checkoutDeliveryMap', {
+    center: [hub.lat, hub.lng],
+    zoom: 10,
+    minZoom: 7,
+    maxZoom: 18,
+    scrollWheelZoom: false
+  });
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap',
+    maxZoom: 19
+  }).addTo(checkoutMap);
+
+  // Koturu Hub Marker
+  const hubIcon = L.divIcon({
+    className: 'custom-hub-marker',
+    html: `<div style="background: #124d32; color: #fff; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; border: 2.5px solid #fff; box-shadow: 0 3px 8px rgba(0,0,0,0.35);">🌾</div>`,
+    iconSize: [34, 34],
+    iconAnchor: [17, 17]
+  });
+
+  koturuHubMarker = L.marker([hub.lat, hub.lng], { icon: hubIcon })
+    .addTo(checkoutMap)
+    .bindTooltip("<b>🌾 NutriAgro Central Mill Hub</b><br>Koturu, AP (517416)", {
+      permanent: false,
+      direction: 'top'
+    });
+
+  // 50 km Delivery Circle
+  deliveryRadiusCircle = L.circle([hub.lat, hub.lng], {
+    radius: hub.maxRadiusKm * 1000,
+    color: '#10b981',
+    fillColor: '#10b981',
+    fillOpacity: 0.12,
+    weight: 2,
+    dashArray: '6, 6'
+  }).addTo(checkoutMap);
+
+  deliveryRadiusCircle.bindTooltip("<b>50 km Guaranteed Delivery Zone</b>", {
+    sticky: true
+  });
+
+  // Customer Draggable Delivery Pin
+  const customerIcon = L.divIcon({
+    className: 'custom-customer-pin',
+    html: `<div style="background: #ef4444; color: #fff; width: 32px; height: 32px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; border: 2px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.35);"><span style="transform: rotate(45deg); font-size: 1rem; line-height: 1;">📍</span></div>`,
+    iconSize: [32, 32],
+    iconAnchor: [16, 32]
+  });
+
+  customerDeliveryMarker = L.marker([customerLat, customerLng], {
+    icon: customerIcon,
+    draggable: true
+  }).addTo(checkoutMap);
+
+  customerDeliveryMarker.bindTooltip("<b>🚜 Your Farm Delivery Gate</b><br>Drag to your exact gate or shed", {
+    permanent: false,
+    direction: 'top'
+  });
+
+  // Polyline
+  distancePolyline = L.polyline([
+    [hub.lat, hub.lng],
+    [customerLat, customerLng]
+  ], {
+    color: '#047857',
+    weight: 2.5,
+    dashArray: '5, 5',
+    opacity: 0.8
+  }).addTo(checkoutMap);
+
+  // Drag listeners
+  customerDeliveryMarker.on('drag', function(e) {
+    const pos = e.target.getLatLng();
+    customerLat = pos.lat;
+    customerLng = pos.lng;
+    if (distancePolyline) {
+      distancePolyline.setLatLngs([[hub.lat, hub.lng], [customerLat, customerLng]]);
+    }
+  });
+
+  customerDeliveryMarker.on('dragend', function(e) {
+    const pos = e.target.getLatLng();
+    onCustomerLocationPinMoved(pos.lat, pos.lng, true);
+  });
+
+  // Map click listener: move pin directly to clicked spot
+  checkoutMap.on('click', function(e) {
+    if (customerDeliveryMarker) {
+      customerDeliveryMarker.setLatLng(e.latlng);
+    }
+    onCustomerLocationPinMoved(e.latlng.lat, e.latlng.lng, true);
+  });
+
+  // Fit bounds initially
+  const initialBounds = L.latLngBounds([
+    [hub.lat, hub.lng],
+    [customerLat, customerLng]
+  ]);
+  checkoutMap.fitBounds(initialBounds.pad(0.35));
+
+  // Initial calculation
+  onCustomerLocationPinMoved(customerLat, customerLng, false);
+}
+
+function onCustomerLocationPinMoved(lat, lon, shouldReverseGeocode = true) {
+  customerLat = lat;
+  customerLng = lon;
+
+  const hub = (typeof DISPATCH_HUB_CONFIG !== 'undefined') ? DISPATCH_HUB_CONFIG : {
+    lat: 13.2521036,
+    lng: 78.9177864,
+    maxRadiusKm: 50
+  };
+
+  if (distancePolyline) {
+    distancePolyline.setLatLngs([[hub.lat, hub.lng], [lat, lon]]);
+  }
+
+  const dist = calculateDistanceKm(hub.lat, hub.lng, lat, lon);
+  currentDeliveryDistanceKm = dist;
+
+  if (distancePolyline) {
+    distancePolyline.setStyle({
+      color: dist <= hub.maxRadiusKm ? '#047857' : '#ef4444'
+    });
+  }
+
+  const addrInput = document.getElementById('checkoutAddress');
+  const currentAddress = addrInput ? addrInput.value : '';
+  updateDeliveryRadiusUI(dist, currentAddress);
+
+  if (shouldReverseGeocode) {
+    clearTimeout(reverseGeocodeDebounceTimer);
+    reverseGeocodeDebounceTimer = setTimeout(() => {
+      reverseGeocodeCoordinates(lat, lon);
+    }, 450);
+  }
+}
+
+async function reverseGeocodeCoordinates(lat, lon) {
+  const addrInput = document.getElementById('checkoutAddress');
+  if (!addrInput) return;
+
+  try {
+    const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
+    if (res.ok) {
+      const data = await res.json();
+      const parts = [];
+      if (data.locality) parts.push(data.locality);
+      if (data.city && data.city !== data.locality) parts.push(data.city);
+      if (data.principalSubdivision) parts.push(data.principalSubdivision);
+      if (data.postcode) parts.push(`PIN: ${data.postcode}`);
+      const fullText = parts.join(', ');
+      if (fullText) {
+        addrInput.value = fullText;
+        updateDeliveryRadiusUI(currentDeliveryDistanceKm, fullText);
+        return;
+      }
+    }
+  } catch (e) {}
+
+  try {
+    const res2 = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+    if (res2.ok) {
+      const data2 = await res2.json();
+      if (data2 && data2.display_name) {
+        addrInput.value = data2.display_name;
+        updateDeliveryRadiusUI(currentDeliveryDistanceKm, data2.display_name);
+        return;
+      }
+    }
+  } catch (e2) {}
+
+  addrInput.value = `Farm Location: ${lat.toFixed(5)}°N, ${lon.toFixed(5)}°E (PIN on map)`;
+  updateDeliveryRadiusUI(currentDeliveryDistanceKm, addrInput.value);
+}
+
+function centerMapOnCustomerPin() {
+  if (checkoutMap && customerDeliveryMarker) {
+    checkoutMap.setView(customerDeliveryMarker.getLatLng(), 13);
+  }
 }
 
 function updateDeliveryRadiusUI(distKm, addressText, isChecking = false) {
@@ -496,8 +719,20 @@ async function geocodeAddressAndVerify(queryText) {
       if (data && data.length > 0) {
         const destLat = parseFloat(data[0].lat);
         const destLon = parseFloat(data[0].lon);
-        const dist = calculateDistanceKm(hub.lat, hub.lng, destLat, destLon);
-        updateDeliveryRadiusUI(dist, queryText);
+        
+        // Update map marker and polyline
+        if (checkoutMap && customerDeliveryMarker) {
+          customerDeliveryMarker.setLatLng([destLat, destLon]);
+          onCustomerLocationPinMoved(destLat, destLon, false);
+          const bounds = L.latLngBounds([
+            [hub.lat, hub.lng],
+            [destLat, destLon]
+          ]);
+          checkoutMap.fitBounds(bounds.pad(0.35));
+        } else {
+          const dist = calculateDistanceKm(hub.lat, hub.lng, destLat, destLon);
+          updateDeliveryRadiusUI(dist, queryText);
+        }
         return;
       }
     }
@@ -545,6 +780,9 @@ function toggleManualAddressEdit() {
   }
 }
 
+window.centerMapOnCustomerPin = centerMapOnCustomerPin;
+window.initCheckoutDeliveryMap = initCheckoutDeliveryMap;
+window.onCustomerLocationPinMoved = onCustomerLocationPinMoved;
 window.toggleManualAddressEdit = toggleManualAddressEdit;
 window.handleAddressManualInput = handleAddressManualInput;
 window.geocodeAddressAndVerify = geocodeAddressAndVerify;
@@ -584,8 +822,18 @@ async function autoDetectDeliveryAddress() {
     }
 
     if (lat !== undefined && lon !== undefined) {
-      const dist = calculateDistanceKm(hub.lat, hub.lng, lat, lon);
-      updateDeliveryRadiusUI(dist, fullText);
+      if (checkoutMap && customerDeliveryMarker) {
+        customerDeliveryMarker.setLatLng([lat, lon]);
+        onCustomerLocationPinMoved(lat, lon, false);
+        const bounds = L.latLngBounds([
+          [hub.lat, hub.lng],
+          [lat, lon]
+        ]);
+        checkoutMap.fitBounds(bounds.pad(0.35));
+      } else {
+        const dist = calculateDistanceKm(hub.lat, hub.lng, lat, lon);
+        updateDeliveryRadiusUI(dist, fullText);
+      }
     } else {
       geocodeAddressAndVerify(fullText);
     }
