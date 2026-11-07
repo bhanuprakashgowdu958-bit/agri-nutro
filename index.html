@@ -1112,7 +1112,19 @@
     <div class="modal-content-grid">
       <!-- Left Image Column -->
       <div class="modal-gallery">
-        <img src="" alt="" id="modalProductImg" class="modal-big-img" />
+        <div class="modal-gallery-main">
+          <img src="" alt="" id="modalProductImg" class="modal-big-img" />
+        </div>
+        <div class="modal-gallery-thumbs">
+          <button type="button" class="modal-thumb-btn active" id="modalThumbOpen" onclick="setModalSlideView('open')" title="Inspect Open Bag & Feed Texture">
+            <span style="font-size: 1.1rem;">🌾</span>
+            <span>Open Bag (Pellets)</span>
+          </button>
+          <button type="button" class="modal-thumb-btn" id="modalThumbClosed" onclick="setModalSlideView('closed')" title="View Sealed 50kg Bag">
+            <span style="font-size: 1.1rem;">📦</span>
+            <span>Sealed 50kg Bag</span>
+          </button>
+        </div>
       </div>
 
       <!-- Right Details Column -->
@@ -1673,14 +1685,14 @@
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- Scripts -->
-  <script src="js/data.js?v=5.4"></script>
-  <script src="js/cart.js?v=5.4"></script>
-  <script src="js/modal.js?v=5.4"></script>
-  <script src="js/weather.js?v=5.4"></script>
-  <script src="js/gemini.js?v=5.4"></script>
-  <script src="js/hero-slider.js?v=5.4"></script>
-  <script src="js/animal-slider.js?v=5.4"></script>
-  <script src="js/app.js?v=5.4"></script>
+  <script src="js/data.js?v=5.5"></script>
+  <script src="js/cart.js?v=5.5"></script>
+  <script src="js/modal.js?v=5.5"></script>
+  <script src="js/weather.js?v=5.5"></script>
+  <script src="js/gemini.js?v=5.5"></script>
+  <script src="js/hero-slider.js?v=5.5"></script>
+  <script src="js/animal-slider.js?v=5.5"></script>
+  <script src="js/app.js?v=5.5"></script>
 
 </body>
 </html>

@@ -2185,29 +2185,150 @@ button, input, select, textarea {
   border-bottom: 1px solid rgba(18, 77, 50, 0.08);
 }
 
+.product-card-slider-track {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .product-card-img {
   max-height: 230px;
+  width: 100%;
   object-fit: contain;
-  transition: transform var(--transition-smooth);
+  transition: transform var(--transition-smooth), opacity 0.3s ease;
   filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.12));
 }
 
-.product-card-img-wrap:hover .product-card-img {
-  transform: scale(1.08);
+.product-card-img.slide-img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.product-card-img.slide-img.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.product-card-img-wrap:hover .product-card-img.slide-img.active {
+  transform: translate(-50%, -50%) scale(1.06);
+}
+
+/* Slide Pills (Open Bag vs Sealed Bag) */
+.card-slide-pills {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 3px 5px;
+  border-radius: 20px;
+  z-index: 5;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.card-slide-pill-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.70rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.card-slide-pill-btn.active {
+  background: #2ed573;
+  color: #092116;
+  font-weight: 800;
+  box-shadow: 0 2px 6px rgba(46, 213, 115, 0.4);
+}
+
+.card-slide-pill-btn:hover:not(.active) {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Card slide navigation arrows (Amazon style) */
+.card-slide-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: #1e293b;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 6;
+  opacity: 0;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.product-card-img-wrap:hover .card-slide-nav-btn {
+  opacity: 1;
+}
+
+.card-slide-nav-btn.prev {
+  left: 8px;
+}
+
+.card-slide-nav-btn.next {
+  right: 8px;
+}
+
+.card-slide-nav-btn:hover {
+  background: #ffffff;
+  color: var(--color-primary);
+  transform: translateY(-50%) scale(1.1);
+}
+
+@media (max-width: 768px) {
+  .card-slide-nav-btn {
+    opacity: 0.85;
+  }
 }
 
 .product-card-overlay-hint {
   position: absolute;
-  bottom: 12px;
-  background: rgba(18, 28, 23, 0.85);
+  top: 10px;
+  right: 10px;
+  background: rgba(18, 28, 23, 0.82);
   color: #fff;
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 600;
-  padding: 4px 12px;
+  padding: 3px 10px;
   border-radius: var(--radius-full);
   opacity: 0;
-  transform: translateY(6px);
+  transform: translateY(-4px);
   transition: all var(--transition-fast);
+  z-index: 4;
 }
 
 .product-card-img-wrap:hover .product-card-overlay-hint {
@@ -3125,18 +3246,28 @@ button, input, select, textarea {
   border-radius: var(--radius-lg);
   padding: 24px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   border: 1px solid var(--color-gray-200);
   position: sticky;
   top: 24px;
   align-self: start;
   height: fit-content;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  gap: 16px;
+}
+
+.modal-gallery-main {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
 }
 
 .modal-big-img {
-  max-height: 380px;
+  max-height: 360px;
   width: 100%;
   object-fit: contain;
   transition: transform var(--transition-smooth);
@@ -3145,6 +3276,41 @@ button, input, select, textarea {
 
 .modal-gallery:hover .modal-big-img {
   transform: scale(1.04);
+}
+
+.modal-gallery-thumbs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  justify-content: center;
+}
+
+.modal-thumb-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--color-gray-300);
+  background: #ffffff;
+  font-size: 0.80rem;
+  font-weight: 700;
+  color: var(--color-dark-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.modal-thumb-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
+}
+
+.modal-thumb-btn.active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  color: var(--color-primary-dark);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.18);
 }
 
 .modal-info-col h2 {
@@ -3228,6 +3394,21 @@ button, input, select, textarea {
 .check-icon {
   color: var(--color-success);
   font-weight: 800;
+}
+
+@media (max-width: 768px) {
+  .modal-content-grid {
+    grid-template-columns: 1fr;
+    padding: 24px 16px;
+    gap: 20px;
+  }
+  .modal-gallery {
+    position: static;
+    top: 0;
+  }
+  .modal-gallery-thumbs {
+    flex-wrap: wrap;
+  }
 }
 
 /* 13. CHECKOUT MODAL */
@@ -7105,7 +7286,19 @@ html, body {
     <div class="modal-content-grid">
       <!-- Left Image Column -->
       <div class="modal-gallery">
-        <img src="" alt="" id="modalProductImg" class="modal-big-img" />
+        <div class="modal-gallery-main">
+          <img src="" alt="" id="modalProductImg" class="modal-big-img" />
+        </div>
+        <div class="modal-gallery-thumbs">
+          <button type="button" class="modal-thumb-btn active" id="modalThumbOpen" onclick="setModalSlideView('open')" title="Inspect Open Bag & Feed Texture">
+            <span style="font-size: 1.1rem;">🌾</span>
+            <span>Open Bag (Pellets)</span>
+          </button>
+          <button type="button" class="modal-thumb-btn" id="modalThumbClosed" onclick="setModalSlideView('closed')" title="View Sealed 50kg Bag">
+            <span style="font-size: 1.1rem;">📦</span>
+            <span>Sealed 50kg Bag</span>
+          </button>
+        </div>
       </div>
 
       <!-- Right Details Column -->
@@ -7666,14 +7859,14 @@ html, body {
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- Scripts -->
-  <script src="js/data.js?v=5.4"></script>
-  <script src="js/cart.js?v=5.4"></script>
-  <script src="js/modal.js?v=5.4"></script>
-  <script src="js/weather.js?v=5.4"></script>
-  <script src="js/gemini.js?v=5.4"></script>
-  <script src="js/hero-slider.js?v=5.4"></script>
-  <script src="js/animal-slider.js?v=5.4"></script>
-  <script src="js/app.js?v=5.4"></script>
+  <script src="js/data.js?v=5.5"></script>
+  <script src="js/cart.js?v=5.5"></script>
+  <script src="js/modal.js?v=5.5"></script>
+  <script src="js/weather.js?v=5.5"></script>
+  <script src="js/gemini.js?v=5.5"></script>
+  <script src="js/hero-slider.js?v=5.5"></script>
+  <script src="js/animal-slider.js?v=5.5"></script>
+  <script src="js/app.js?v=5.5"></script>
 
 </body>
 </html>

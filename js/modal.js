@@ -2,6 +2,29 @@
 let selectedModalProduct = null;
 let selectedModalBagSize = '50kg';
 
+function setModalSlideView(view) {
+  if (!selectedModalProduct) return;
+  const modalImg = document.getElementById('modalProductImg');
+  const thumbOpen = document.getElementById('modalThumbOpen');
+  const thumbClosed = document.getElementById('modalThumbClosed');
+
+  if (view === 'closed') {
+    if (modalImg) {
+      modalImg.src = selectedModalProduct.image;
+      modalImg.alt = `${selectedModalProduct.name} - Sealed 50kg Bag`;
+    }
+    if (thumbOpen) thumbOpen.classList.remove('active');
+    if (thumbClosed) thumbClosed.classList.add('active');
+  } else {
+    if (modalImg) {
+      modalImg.src = selectedModalProduct.openImage || selectedModalProduct.image;
+      modalImg.alt = `${selectedModalProduct.name} - Open Bag & Feed Texture`;
+    }
+    if (thumbOpen) thumbOpen.classList.add('active');
+    if (thumbClosed) thumbClosed.classList.remove('active');
+  }
+}
+
 function openProductModal(productId) {
   const product = PRODUCTS_DATA.find(p => p.id === productId);
   if (!product) return;
@@ -13,9 +36,10 @@ function openProductModal(productId) {
   const overlay = document.getElementById('modalOverlay');
   if (!modal || !overlay) return;
 
+  // Set default view to open feed pellets bag
+  setModalSlideView('open');
+
   // Populate data
-  document.getElementById('modalProductImg').src = product.image;
-  document.getElementById('modalProductImg').alt = product.name;
   document.getElementById('modalProductCategory').textContent = product.categoryLabel;
   document.getElementById('modalProductForm').textContent = product.form;
   document.getElementById('modalProductName').textContent = product.name;

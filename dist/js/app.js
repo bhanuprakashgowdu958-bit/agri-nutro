@@ -1396,10 +1396,29 @@ function renderCatalog() {
           <span class="badge badge-protein">${product.nutritionalAnalysis.crudeProtein} Protein</span>
         </div>
 
-        <div class="product-card-img-wrap" onclick="openProductModal('${product.id}')" title="Click to view lab specs">
-          <img src="${product.image}" alt="${product.name}" class="product-card-img" loading="lazy" />
-          <div class="product-card-overlay-hint">
-            <span>🔬 View Lab Specs</span>
+        <div class="product-card-img-wrap" data-id="${product.id}" title="Tap Specs or image to inspect feed formulation">
+          <!-- Slide Navigation Arrows -->
+          <button type="button" class="card-slide-nav-btn prev" onclick="switchCardSlide('${product.id}', 'open', event)" title="Open Bag (View Feed)" aria-label="Open Bag">‹</button>
+          <button type="button" class="card-slide-nav-btn next" onclick="switchCardSlide('${product.id}', 'closed', event)" title="Sealed 50kg Bag" aria-label="Sealed Bag">›</button>
+
+          <!-- Dual Slide Track (Open Pellets vs Sealed 50kg Bag) -->
+          <div class="product-card-slider-track" id="cardTrack_${product.id}">
+            <img src="${product.openImage || product.image}" alt="${product.name} (Open Bag - Pellets Visible)" class="product-card-img slide-img active" id="cardImgOpen_${product.id}" loading="lazy" onclick="openProductModal('${product.id}')" />
+            <img src="${product.image}" alt="${product.name} (Sealed 50kg Bag)" class="product-card-img slide-img" id="cardImgClosed_${product.id}" loading="lazy" onclick="openProductModal('${product.id}')" />
+          </div>
+
+          <!-- Amazon-Style Slide Pills -->
+          <div class="card-slide-pills" onclick="event.stopPropagation();">
+            <button type="button" class="card-slide-pill-btn active" id="pillOpen_${product.id}" onclick="switchCardSlide('${product.id}', 'open', event)" title="Open Bag (Inspect Pellets)">
+              <span>🌾</span> Open Bag
+            </button>
+            <button type="button" class="card-slide-pill-btn" id="pillClosed_${product.id}" onclick="switchCardSlide('${product.id}', 'closed', event)" title="Sealed 50kg Bag">
+              <span>📦</span> Sealed
+            </button>
+          </div>
+
+          <div class="product-card-overlay-hint" onclick="openProductModal('${product.id}')">
+            <span>🔬 Specs</span>
           </div>
         </div>
 
@@ -1456,6 +1475,70 @@ function renderCatalog() {
       </article>
     `;
   }).join('');
+
+  // Attach touch swipe handlers for card image slider
+  initCardSwipeListeners();
+}
+
+function switchCardSlide(productId, view, event) {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+  const imgOpen = document.getElementById(`cardImgOpen_${productId}`);
+  const imgClosed = document.getElementById(`cardImgClosed_${productId}`);
+  const pillOpen = document.getElementById(`pillOpen_${productId}`);
+  const pillClosed = document.getElementById(`pillClosed_${productId}`);
+
+  if (view === 'closed') {
+    if (imgOpen) imgOpen.classList.remove('active');
+    if (imgClosed) imgClosed.classList.add('active');
+    if (pillOpen) pillOpen.classList.remove('active');
+    if (pillClosed) pillClosed.classList.add('active');
+  } else {
+    if (imgOpen) imgOpen.classList.add('active');
+    if (imgClosed) imgClosed.classList.remove('active');
+    if (pillOpen) pillOpen.classList.add('active');
+    if (pillClosed) pillClosed.classList.remove('active');
+  }
+}
+
+function initCardSwipeListeners() {
+  const tracks = document.querySelectorAll('.product-card-slider-track');
+  tracks.forEach(track => {
+    let startX = 0;
+    let startY = 0;
+    let swiping = false;
+
+    track.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches.length === 1) {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        swiping = true;
+      }
+    }, { passive: true });
+
+    track.addEventListener('touchend', (e) => {
+      if (!swiping || !e.changedTouches || e.changedTouches.length === 0) return;
+      swiping = false;
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      const diffX = endX - startX;
+      const diffY = endY - startY;
+
+      // Ensure horizontal swipe
+      if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
+        const id = track.id.replace('cardTrack_', '');
+        if (diffX < 0) {
+          // Swiped left -> show sealed 50kg bag
+          switchCardSlide(id, 'closed');
+        } else {
+          // Swiped right -> show open feed bag
+          switchCardSlide(id, 'open');
+        }
+      }
+    }, { passive: true });
+  });
 }
 
 function changeCardBagSize(productId, size) {
