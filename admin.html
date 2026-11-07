@@ -1255,9 +1255,6 @@
         </div>
 
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <button type="button" class="btn btn-sm" style="background:#059669; color:#fff;" onclick="logManualFarmerOrder()">
-            📝 Log Phone/WhatsApp Order
-          </button>
           <button type="button" class="btn btn-sm btn-light" style="background:#e2e8f0; color:#334155;" onclick="exportOrdersToCSV()">
             📥 Export CSV
           </button>
@@ -3253,9 +3250,9 @@
                   📦 View Orders (${f.ordersCount})
                 </button>
               ` : `
-                <button type="button" class="btn btn-sm btn-secondary" onclick="triggerFarmerOrder('${encodedCustomer}')" style="flex: 1; justify-content: center; font-size: 0.76rem;">
-                  📝 Log First Order
-                </button>
+                <div style="flex: 1; font-size: 0.74rem; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; justify-content: center; background: #f8fafc; border-radius: 6px; border: 1px dashed #cbd5e1; padding: 5px 8px;">
+                  0 Orders Placed
+                </div>
               `}
               ${cleanPhone ? `
                 <a href="https://wa.me/91${cleanPhone}?text=${waMsg}" target="_blank" class="btn btn-sm btn-whatsapp" style="padding: 5px 12px; font-size: 0.74rem;">

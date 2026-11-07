@@ -7911,16 +7911,8 @@ html, body {
       <button type="button" id="closeWhatsappPopup" style="background:none; border:none; color:#fff; font-size:1.2rem; cursor:pointer;">✕</button>
     </div>
     <div class="whatsapp-popup-body">
-      <p style="font-size:0.84rem; color:var(--color-dark-muted); margin-bottom:12px;">
-        Need instant feeding advice or want to confirm your order details directly on WhatsApp?
-      </p>
-
-      <button type="button" class="whatsapp-btn-action" onclick="sendCartViaWhatsApp()">
-        <span>📲 Send Current Cart to WhatsApp</span>
-      </button>
-
-      <div style="border-top: 1px dashed var(--color-gray-300); padding-top: 10px; margin-top: 10px;">
-        <label style="display:block; font-size:0.78rem; font-weight:700; margin-bottom:4px; color:var(--color-dark);">Ask a Feeding Question:</label>
+      <div>
+        <label style="display:block; font-size:0.78rem; font-weight:700; margin-bottom:6px; color:var(--color-dark);">Ask a Feeding Question:</label>
         <input type="text" id="whatsappAgronomistQuery" placeholder="e.g. Broiler starter to finisher ratio..." style="width:100%; padding:8px; border:1px solid var(--color-gray-300); border-radius:var(--radius-sm); font-size:0.82rem; margin-bottom:8px;" onkeydown="if(event.key==='Enter'){event.preventDefault();openGeminiChat(this.value);}" />
         <button type="button" class="btn btn-secondary btn-sm" onclick="openGeminiChat(document.getElementById('whatsappAgronomistQuery').value)" style="width:100%; display:flex; align-items:center; justify-content:center; gap:6px;">
           <span>✨</span> Chat with Agronomist
