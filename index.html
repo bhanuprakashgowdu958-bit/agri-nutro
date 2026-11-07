@@ -1260,12 +1260,9 @@
                   <button type="button" id="detectLocationBtn" onclick="autoDetectDeliveryAddress()" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.4); color: #065f46; font-size: 0.74rem; font-weight: 700; padding: 3px 10px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s ease;">
                     <span>📍</span> Detect GPS
                   </button>
-                  <button type="button" id="editAddressManualBtn" onclick="toggleManualAddressEdit()" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; font-size: 0.74rem; font-weight: 700; padding: 3px 8px; border-radius: 12px; cursor: pointer;" title="Type village or PIN code manually">
-                    ✏️ Edit
-                  </button>
                 </div>
               </div>
-              <textarea id="checkoutAddress" required rows="2" class="calc-input" oninput="handleAddressManualInput()" style="background: #f8fafc; border: 1.5px solid #cbd5e1; color: #1e293b; resize: none; min-height: 56px; font-size: 0.83rem; line-height: 1.4;" placeholder="Auto-detecting village & postal PIN code (e.g. Irala, 517130)..."></textarea>
+              <textarea id="checkoutAddress" readonly required rows="2" class="calc-input" style="background: #f8fafc; border: 1.5px solid #cbd5e1; color: #1e293b; resize: none; min-height: 56px; font-size: 0.83rem; line-height: 1.4; cursor: default;" placeholder="Detecting farm village & postal PIN code via GPS / map pin..."></textarea>
               
               <!-- Interactive 50km Delivery Location Pin Map -->
               <div class="checkout-map-container" style="margin-top: 10px;">
@@ -1710,14 +1707,14 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <!-- Scripts -->
-  <script src="js/data.js?v=6.1"></script>
-  <script src="js/cart.js?v=6.1"></script>
-  <script src="js/modal.js?v=6.1"></script>
-  <script src="js/weather.js?v=6.1"></script>
-  <script src="js/gemini.js?v=6.1"></script>
-  <script src="js/hero-slider.js?v=6.1"></script>
-  <script src="js/animal-slider.js?v=6.1"></script>
-  <script src="js/app.js?v=6.1"></script>
+  <script src="js/data.js?v=6.2"></script>
+  <script src="js/cart.js?v=6.2"></script>
+  <script src="js/modal.js?v=6.2"></script>
+  <script src="js/weather.js?v=6.2"></script>
+  <script src="js/gemini.js?v=6.2"></script>
+  <script src="js/hero-slider.js?v=6.2"></script>
+  <script src="js/animal-slider.js?v=6.2"></script>
+  <script src="js/app.js?v=6.2"></script>
 
 </body>
 </html>

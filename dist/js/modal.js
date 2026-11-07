@@ -358,8 +358,12 @@ function openCheckoutModal() {
 
   // Automatically detect customer delivery address upon opening if still empty
   const addressInput = document.getElementById('checkoutAddress');
-  if (addressInput && !addressInput.value.trim()) {
-    autoDetectDeliveryAddress();
+  if (addressInput) {
+    addressInput.readOnly = true;
+    addressInput.style.cursor = 'default';
+    if (!addressInput.value.trim()) {
+      autoDetectDeliveryAddress();
+    }
   }
 
   // Initialize or re-center interactive 50km Leaflet Delivery Map
@@ -793,6 +797,9 @@ async function reverseGeocodeCoordinates(lat, lon) {
 
   const formattedAddr = await resolveECommerceAddressFromCoords(lat, lon);
   addrInput.value = formattedAddr;
+  addrInput.readOnly = true;
+  addrInput.style.backgroundColor = '#f8fafc';
+  addrInput.style.cursor = 'default';
   updateDeliveryRadiusUI(currentDeliveryDistanceKm, formattedAddr);
 }
 
@@ -957,14 +964,8 @@ function handleAddressManualInput() {
 }
 
 function toggleManualAddressEdit() {
-  const addressInput = document.getElementById('checkoutAddress');
-  if (!addressInput) return;
-  addressInput.readOnly = false;
-  addressInput.style.backgroundColor = '#ffffff';
-  addressInput.style.cursor = 'text';
-  addressInput.focus();
   if (window.cart && window.cart.showToast) {
-    window.cart.showToast('You can now type your farm village, town or 6-digit PIN code.', 'info');
+    window.cart.showToast('Farm location is auto-detected via GPS. You can drag the map pin 📍 to pinpoint your delivery gate.', 'info');
   }
 }
 
@@ -1000,9 +1001,10 @@ async function autoDetectDeliveryAddress() {
   function setConfirmedAddress(fullText, lat, lon) {
     if (!addressInput) return;
     addressInput.value = fullText;
-    addressInput.readOnly = false;
+    addressInput.readOnly = true;
     addressInput.style.backgroundColor = '#f8fafc';
     addressInput.style.color = '#1e293b';
+    addressInput.style.cursor = 'default';
 
     if (detectBtn) {
       detectBtn.innerHTML = '<span>📍</span> Detect GPS';
