@@ -1441,11 +1441,12 @@
           <input type="hidden" id="rejectOrderHiddenId" value="" />
           <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 8px;">Select Reason for Rejection:</label>
           <select id="rejectPresetSelect" onchange="handleRejectPresetChange(this.value)" style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.88rem; margin-bottom: 14px; outline: none; background: #fff;">
+            <option value="Customer requested order cancellation">Customer requested order cancellation</option>
+            <option value="Test / Internal Demo Order">Test / Internal Demo Order</option>
             <option value="Out of deliverable farm logistics zone">Out of deliverable farm logistics zone</option>
             <option value="Feed formulation batch temporarily out of stock">Feed formulation batch temporarily out of stock</option>
             <option value="Commercial minimum order tonnage requirement not met">Minimum order tonnage requirement not met</option>
             <option value="Incorrect or unverified contact / delivery location">Incorrect or unverified contact / delivery location</option>
-            <option value="Customer requested order cancellation">Customer requested order cancellation</option>
             <option value="custom">Other / Custom Reason...</option>
           </select>
 
@@ -1511,7 +1512,7 @@
       }
     }
 
-    const DEFAULT_PURGED_ORDERS = ['nutri-495921', 'nutri-917758', 'nutri-270946', 'nutri-842915', 'nutri-205819'];
+    const DEFAULT_PURGED_ORDERS = ['nutri-495921', 'nutri-917758', 'nutri-270946', 'nutri-724579', 'nutri-842915', 'nutri-205819'];
 
     // Purge test orders from local caches on script evaluation
     try {
@@ -2206,6 +2207,7 @@
                   <option value="2" ${step === 2 ? 'selected' : ''}>📦 2. Packing</option>
                   <option value="3" ${step === 3 ? 'selected' : ''}>🚚 3. Dispatch</option>
                   <option value="4">🏡 4. Delivered</option>
+                  <option value="reject" style="color: #dc2626; font-weight: 700;">✕ Cancel / Reject Order</option>
                 </select>
               </div>
 
@@ -2287,6 +2289,10 @@
     }
 
     async function updateAdminOrderStatus(orderId, newStepVal) {
+      if (newStepVal === 'reject' || newStepVal === '-1') {
+        promptRejectAdminOrder(orderId);
+        return;
+      }
       const step = parseInt(newStepVal, 10);
       const match = allOrders.find(o => o.orderId === orderId);
       if (!match) return;
@@ -2657,18 +2663,27 @@
     }
 
     function logManualFarmerOrder(prefill = null) {
-      const defName = prefill ? (prefill.fullName + (prefill.farmName ? ' - ' + prefill.farmName : '')) : 'Ramesh Dairy Farm';
-      const defPhone = prefill ? (prefill.phone || '+91 98765 43210') : '+91 98765 43210';
-      const defAddress = prefill ? (prefill.address || ((prefill.district || '') + ', ' + (prefill.state || ''))) : 'Hosur Highway, Bengaluru';
-      const defFeed = prefill && prefill.primaryFeed ? `5x ${prefill.primaryFeed} (50kg)` : '4x NutriBov LactaMax 50kg';
-      const defPrice = prefill && prefill.primaryFeed ? '9250' : '7400';
+      const defName = prefill ? (prefill.fullName + (prefill.farmName ? ' - ' + prefill.farmName : '')) : '';
+      const defPhone = prefill ? (prefill.phone || '') : '';
+      const defAddress = prefill ? (prefill.address || ((prefill.district || '') + ', ' + (prefill.state || ''))) : '';
+      const defFeed = prefill && prefill.primaryFeed ? `5x ${prefill.primaryFeed} (50kg)` : '';
+      const defPrice = prefill && prefill.primaryFeed ? '9250' : '';
 
-      const name = prompt('Farmer / Contact Person Name:', defName);
-      if (!name) return;
-      const phone = prompt('Phone Number:', defPhone) || 'N/A';
-      const address = prompt('Delivery Address / Location:', defAddress) || 'Local Farmgate';
-      const itemsStr = prompt('Feed Product & Bags (e.g. 4x NutriBov LactaMax 50kg):', defFeed) || 'NutriAgro Feed';
-      const totalAmount = parseInt(prompt('Total Amount (₹):', defPrice) || defPrice, 10) || 7400;
+      const name = prompt('Farmer / Customer Name:', defName);
+      if (!name || !name.trim()) return;
+      const phone = prompt('Farmer Phone Number:', defPhone);
+      if (!phone || !phone.trim()) return;
+      const address = prompt('Delivery Address / Location:', defAddress);
+      if (!address || !address.trim()) return;
+      const itemsStr = prompt('Feed Products & Bags (e.g. 4x NutriBov LactaMax 50kg):', defFeed);
+      if (!itemsStr || !itemsStr.trim()) return;
+      const totalAmountInput = prompt('Total Amount (₹):', defPrice);
+      if (!totalAmountInput || !totalAmountInput.trim()) return;
+      const totalAmount = parseInt(totalAmountInput.replace(/[^0-9]/g, ''), 10);
+      if (isNaN(totalAmount) || totalAmount <= 0) {
+        alert('Please enter a valid numeric amount in Rupees.');
+        return;
+      }
 
       const randId = 'NUTRI-' + Math.floor(100000 + Math.random() * 900000);
       const newOrder = {
