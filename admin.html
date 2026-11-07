@@ -1759,9 +1759,6 @@
         </div>
 
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <button type="button" class="btn btn-sm btn-primary" onclick="openRegisterFarmerModal()">
-            ➕ Add Account
-          </button>
           <button type="button" class="btn btn-sm btn-accent" onclick="loadAdminFarmers(true)">
             🔄 Refresh Users
           </button>
@@ -1787,64 +1784,6 @@
           <!-- Injected via JavaScript -->
         </div>
       </section>
-    </div>
-
-    <!-- Modal: Add Customer Account Manually -->
-    <div id="farmerModalOverlay" class="auth-gate-overlay" style="display: none; z-index: 100000;">
-      <div class="auth-card" style="max-width: 520px; text-align: left;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-          <h3 style="font-size: 1.25rem; color: var(--primary); font-weight: 800; margin: 0;">➕ Add Customer Account</h3>
-          <button type="button" onclick="closeRegisterFarmerModal()" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-muted);">✕</button>
-        </div>
-        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 18px;">
-          Add a customer account to the central directory (saved to Firebase Cloud RTDB and accessible across store operations).
-        </p>
-
-        <form id="manualFarmerForm" onsubmit="submitNewFarmerForm(event)">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-            <div>
-              <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Customer Full Name *</label>
-              <input type="text" id="mFarmerName" required class="search-input" style="padding: 8px 12px;" placeholder="e.g. Ramesh Patel" />
-            </div>
-            <div>
-              <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Mobile / WhatsApp *</label>
-              <input type="tel" id="mFarmerPhone" required class="search-input" style="padding: 8px 12px;" placeholder="e.g. 9876543210" />
-            </div>
-          </div>
-
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-            <div>
-              <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Email Address</label>
-              <input type="email" id="mFarmerEmail" class="search-input" style="padding: 8px 12px;" placeholder="e.g. ramesh.patel@gmail.com" />
-            </div>
-            <div>
-              <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Farm / Business Name</label>
-              <input type="text" id="mFarmName" class="search-input" style="padding: 8px 12px;" placeholder="e.g. Patel Dairy Farm" />
-            </div>
-          </div>
-
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
-            <div>
-              <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">District & State</label>
-              <input type="text" id="mStateDistrict" class="search-input" style="padding: 8px 12px;" placeholder="e.g. Anand, Gujarat" />
-            </div>
-            <div>
-              <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Pincode</label>
-              <input type="text" id="mPincode" maxlength="6" class="search-input" style="padding: 8px 12px;" placeholder="e.g. 388001" />
-            </div>
-          </div>
-
-          <div style="margin-bottom: 14px;">
-            <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Delivery Address / Farm Location</label>
-            <input type="text" id="mAddress" class="search-input" style="padding: 8px 12px;" placeholder="e.g. Survey 42, Anand Bypass" />
-          </div>
-
-          <div style="display: flex; justify-content: flex-end; gap: 10px;">
-            <button type="button" class="btn btn-light" style="color: #333;" onclick="closeRegisterFarmerModal()">Cancel</button>
-            <button type="submit" class="btn btn-primary">Save Customer Account</button>
-          </div>
-        </form>
-      </div>
     </div>
 
     <!-- Modal: Reject Order Reason -->
@@ -3783,77 +3722,6 @@
       } catch (e) {
         logManualFarmerOrder();
       }
-    }
-
-    function openRegisterFarmerModal() {
-      const modal = document.getElementById('farmerModalOverlay');
-      if (modal) modal.style.display = 'flex';
-      const nameInput = document.getElementById('mFarmerName');
-      if (nameInput) setTimeout(() => nameInput.focus(), 100);
-    }
-
-    function closeRegisterFarmerModal() {
-      const modal = document.getElementById('farmerModalOverlay');
-      if (modal) modal.style.display = 'none';
-      const form = document.getElementById('manualFarmerForm');
-      if (form) form.reset();
-    }
-
-    async function submitNewFarmerForm(e) {
-      e.preventDefault();
-      const name = document.getElementById('mFarmerName')?.value.trim() || 'Customer';
-      const phone = document.getElementById('mFarmerPhone')?.value.trim() || '';
-      const email = document.getElementById('mFarmerEmail')?.value.trim() || '';
-      const farmName = document.getElementById('mFarmName')?.value.trim() || `${name}'s Farm`;
-      const stateDist = document.getElementById('mStateDistrict')?.value.trim() || '';
-      const pincode = document.getElementById('mPincode')?.value.trim() || '';
-      const address = document.getElementById('mAddress')?.value.trim() || stateDist;
-
-      const newCustomer = {
-        userId: 'FARM-' + Math.floor(100000 + Math.random() * 900000),
-        fullName: name,
-        phone: phone,
-        email: email,
-        farmName: farmName,
-        farmType: 'Commercial Livestock & Dairy',
-        state: stateDist.includes(',') ? stateDist.split(',')[1].trim() : stateDist,
-        district: stateDist.includes(',') ? stateDist.split(',')[0].trim() : stateDist,
-        pincode: pincode,
-        address: address,
-        authProvider: email ? 'email' : 'phone',
-        registeredAt: new Date().toISOString(),
-        signedInAt: new Date().toISOString(),
-        tier: 'Registered Farm Customer'
-      };
-
-      allFarmers.unshift(newCustomer);
-      try {
-        localStorage.setItem('nutriagro_users_list', JSON.stringify(allFarmers));
-      } catch (err) {}
-
-      // Push directly to Firebase Realtime Database
-      try {
-        const putUrl = await buildFirebaseUrl(FIREBASE_RTDB_USERS_URL, `/${encodeURIComponent(newCustomer.userId)}`);
-        fetch(putUrl, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newCustomer)
-        }).catch(() => {});
-      } catch (err) {}
-
-      // POST to /api/users
-      try {
-        fetch(getUsersApiEndpoint(), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newCustomer)
-        }).catch(() => {});
-      } catch (err) {}
-
-      closeRegisterFarmerModal();
-      showToast(`🎉 Customer Account "${name}" registered successfully!`, 'success');
-      updateFarmerCounters();
-      renderFarmersCards();
     }
 
     async function deleteFarmer(userIdOrPhone) {
