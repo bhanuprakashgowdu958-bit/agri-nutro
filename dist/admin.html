@@ -1821,32 +1821,39 @@
       if (!select) return;
 
       const currentVal = selectedMonthFilter || 'all';
-      const monthMap = new Map();
+      const now = new Date();
+      const currentYear = now.getFullYear();
 
+      // Collect years: default to current year (2026) and any years present in orders
+      const yearsSet = new Set([currentYear]);
       allOrders.forEach(o => {
         if (!o) return;
         const d = getOrderDate(o);
-        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-        const label = d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
-        if (!monthMap.has(key)) {
-          monthMap.set(key, label);
+        if (d && !isNaN(d.getFullYear())) {
+          yearsSet.add(d.getFullYear());
         }
       });
 
-      // Always include current month
-      const now = new Date();
-      const currentKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-      if (!monthMap.has(currentKey)) {
-        monthMap.set(currentKey, now.toLocaleString('en-US', { month: 'long', year: 'numeric' }));
-      }
-
-      // Sort months descending (newest first)
-      const sortedKeys = Array.from(monthMap.keys()).sort((a, b) => b.localeCompare(a));
+      const monthNames = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ];
 
       let html = `<option value="all" ${currentVal === 'all' ? 'selected' : ''}>🌟 All Time (Cumulative)</option>`;
-      sortedKeys.forEach(k => {
-        const isSelected = (k === currentVal) ? 'selected' : '';
-        html += `<option value="${k}" ${isSelected}>📅 ${monthMap.get(k)}</option>`;
+
+      const sortedYears = Array.from(yearsSet).sort((a, b) => b - a);
+
+      sortedYears.forEach(year => {
+        monthNames.forEach((name, idx) => {
+          const monthNum = String(idx + 1).padStart(2, '0');
+          const key = `${year}-${monthNum}`;
+          const isSelected = (key === currentVal) ? 'selected' : '';
+
+          const countForMonth = allOrders.filter(o => getOrderMonthKey(o) === key).length;
+          const countBadge = countForMonth > 0 ? ` (${countForMonth} order${countForMonth > 1 ? 's' : ''})` : '';
+
+          html += `<option value="${key}" ${isSelected}>📅 ${name} ${year}${countBadge}</option>`;
+        });
       });
 
       select.innerHTML = html;
