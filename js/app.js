@@ -742,7 +742,7 @@ function openAccountChooserModal(isCheckoutContext = false) {
       if (subtitle) subtitle.textContent = 'Commercial farmgate delivery requires an authenticated account to guarantee genuine truck freight & unlock 10% OFF.';
       if (heading) heading.textContent = '1-Click Fast Google Sign-In to Confirm Order:';
     } else {
-      if (title) title.textContent = 'Create Your Account';
+      if (title) title.textContent = 'Welcome to NutriAgro';
       if (subtitle) subtitle.textContent = 'Join us to access certified millgate pricing & direct delivery';
       if (heading) heading.textContent = 'Choose an account:';
     }
