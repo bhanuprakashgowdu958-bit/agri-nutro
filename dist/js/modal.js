@@ -79,9 +79,10 @@ function openProductModal(productId) {
   const ingEl = document.getElementById('modalIngredients');
   if (ingEl) ingEl.textContent = product.ingredients;
 
-  // Reset Quantity
+  // Reset Quantity & Scroll
   const qtyInput = document.getElementById('modalQtyInput');
   if (qtyInput) qtyInput.value = 1;
+  modal.scrollTop = 0;
 
   // Show Modal
   modal.classList.add('active');

@@ -255,6 +255,7 @@ html, body {
 
   .modal-gallery {
     padding: 12px;
+    position: static;
   }
 
   .modal-big-img {
