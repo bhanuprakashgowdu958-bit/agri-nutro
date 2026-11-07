@@ -3268,13 +3268,10 @@
                 </button>
               `}
               ${cleanPhone ? `
-                <a href="https://wa.me/91${cleanPhone}?text=${waMsg}" target="_blank" class="btn btn-sm btn-whatsapp" style="padding: 5px 10px; font-size: 0.74rem;">
+                <a href="https://wa.me/91${cleanPhone}?text=${waMsg}" target="_blank" class="btn btn-sm btn-whatsapp" style="padding: 5px 12px; font-size: 0.74rem;">
                   📲 Chat
                 </a>
               ` : ''}
-              <button type="button" class="btn-delete-badge" onclick="deleteFarmer('${f.userId || f.phone || f.email}')" title="Delete customer account">
-                🗑️
-              </button>
             </div>
           </div>
         `;
