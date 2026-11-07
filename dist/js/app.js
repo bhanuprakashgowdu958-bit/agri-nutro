@@ -1398,8 +1398,8 @@ function renderCatalog() {
 
         <div class="product-card-img-wrap" data-id="${product.id}" title="Tap Specs or image to inspect feed formulation">
           <!-- Slide Navigation Arrows -->
-          <button type="button" class="card-slide-nav-btn prev" onclick="switchCardSlide('${product.id}', 'open', event)" title="Open Bag (View Feed)" aria-label="Open Bag">‹</button>
-          <button type="button" class="card-slide-nav-btn next" onclick="switchCardSlide('${product.id}', 'closed', event)" title="Sealed 50kg Bag" aria-label="Sealed Bag">›</button>
+          <button type="button" class="card-slide-nav-btn prev" onclick="stepCardSlide('${product.id}', 'prev', event)" title="Previous View" aria-label="Previous View">‹</button>
+          <button type="button" class="card-slide-nav-btn next" onclick="stepCardSlide('${product.id}', 'next', event)" title="Next View" aria-label="Next View">›</button>
 
           <!-- Dual Slide Track (Open Pellets vs Sealed 50kg Bag) -->
           <div class="product-card-slider-track" id="cardTrack_${product.id}">
@@ -1407,14 +1407,10 @@ function renderCatalog() {
             <img src="${product.image}" alt="${product.name} (Sealed 50kg Bag)" class="product-card-img slide-img" id="cardImgClosed_${product.id}" loading="lazy" onclick="openProductModal('${product.id}')" />
           </div>
 
-          <!-- Amazon-Style Slide Pills -->
-          <div class="card-slide-pills" onclick="event.stopPropagation();">
-            <button type="button" class="card-slide-pill-btn active" id="pillOpen_${product.id}" onclick="switchCardSlide('${product.id}', 'open', event)" title="Open Bag (Inspect Pellets)">
-              <span>🌾</span> Open Bag
-            </button>
-            <button type="button" class="card-slide-pill-btn" id="pillClosed_${product.id}" onclick="switchCardSlide('${product.id}', 'closed', event)" title="Sealed 50kg Bag">
-              <span>📦</span> Sealed
-            </button>
+          <!-- Amazon-Style Subtle Indicator Dots -->
+          <div class="card-slide-dots" onclick="event.stopPropagation();">
+            <span class="card-slide-dot active" id="dotOpen_${product.id}" onclick="switchCardSlide('${product.id}', 'open', event)" title="Open Bag (Pellets View)"></span>
+            <span class="card-slide-dot" id="dotClosed_${product.id}" onclick="switchCardSlide('${product.id}', 'closed', event)" title="Sealed 50kg Bag"></span>
           </div>
 
           <div class="product-card-overlay-hint" onclick="openProductModal('${product.id}')">
@@ -1480,6 +1476,20 @@ function renderCatalog() {
   initCardSwipeListeners();
 }
 
+function stepCardSlide(productId, direction, event) {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+  const imgOpen = document.getElementById(`cardImgOpen_${productId}`);
+  const isOpenActive = imgOpen && imgOpen.classList.contains('active');
+  if (isOpenActive) {
+    switchCardSlide(productId, 'closed');
+  } else {
+    switchCardSlide(productId, 'open');
+  }
+}
+
 function switchCardSlide(productId, view, event) {
   if (event) {
     event.stopPropagation();
@@ -1487,19 +1497,19 @@ function switchCardSlide(productId, view, event) {
   }
   const imgOpen = document.getElementById(`cardImgOpen_${productId}`);
   const imgClosed = document.getElementById(`cardImgClosed_${productId}`);
-  const pillOpen = document.getElementById(`pillOpen_${productId}`);
-  const pillClosed = document.getElementById(`pillClosed_${productId}`);
+  const dotOpen = document.getElementById(`dotOpen_${productId}`);
+  const dotClosed = document.getElementById(`dotClosed_${productId}`);
 
   if (view === 'closed') {
     if (imgOpen) imgOpen.classList.remove('active');
     if (imgClosed) imgClosed.classList.add('active');
-    if (pillOpen) pillOpen.classList.remove('active');
-    if (pillClosed) pillClosed.classList.add('active');
+    if (dotOpen) dotOpen.classList.remove('active');
+    if (dotClosed) dotClosed.classList.add('active');
   } else {
     if (imgOpen) imgOpen.classList.add('active');
     if (imgClosed) imgClosed.classList.remove('active');
-    if (pillOpen) pillOpen.classList.add('active');
-    if (pillClosed) pillClosed.classList.remove('active');
+    if (dotOpen) dotOpen.classList.add('active');
+    if (dotClosed) dotClosed.classList.remove('active');
   }
 }
 
