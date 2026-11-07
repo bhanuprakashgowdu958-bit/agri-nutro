@@ -1447,6 +1447,21 @@ function updateAllOrderBadges(count) {
 
 const FIREBASE_RTDB_ORDERS_URL = 'https://nutriagro-feeds-default-rtdb.firebaseio.com/orders';
 
+async function getFirebaseAuthParam() {
+  try {
+    if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+      const token = await firebase.auth().currentUser.getIdToken(false);
+      if (token) return `&auth=${encodeURIComponent(token)}`;
+    }
+  } catch (e) {}
+  return '';
+}
+
+async function buildFirebaseOrdersUrl(suffix = '') {
+  const authQuery = await getFirebaseAuthParam();
+  return `${FIREBASE_RTDB_ORDERS_URL}${suffix}.json?_t=${Date.now()}${authQuery}`;
+}
+
 function integrateOrderIntoLocalStore(orderData) {
   if (!orderData || !orderData.orderId) return;
   const deletedIds = getDeletedOrderIds();
@@ -1481,7 +1496,8 @@ async function fetchSingleOrderLive(orderId) {
 
   // 1. Ultra-fast direct fetch from Firebase Cloud Realtime Database (Single Document)
   try {
-    const fbRes = await fetch(`${FIREBASE_RTDB_ORDERS_URL}/${encodeURIComponent(cleanId)}.json?_t=${Date.now()}`, {
+    const fbUrl = await buildFirebaseOrdersUrl(`/${encodeURIComponent(cleanId)}`);
+    const fbRes = await fetch(fbUrl, {
       method: 'GET',
       cache: 'no-store'
     });
@@ -1518,7 +1534,8 @@ async function fetchOrdersFromServer(callback) {
 
   // 1. Try Firebase Cloud Database directly (real multi-device cloud store)
   try {
-    const fbRes = await fetch(`${FIREBASE_RTDB_ORDERS_URL}.json?_t=${Date.now()}`, {
+    const fbUrl = await buildFirebaseOrdersUrl();
+    const fbRes = await fetch(fbUrl, {
       method: 'GET',
       cache: 'no-store'
     });

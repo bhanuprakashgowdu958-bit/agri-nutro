@@ -1544,6 +1544,21 @@
     const FIREBASE_RTDB_ORDERS_URL = 'https://nutriagro-feeds-default-rtdb.firebaseio.com/orders';
     const FIREBASE_RTDB_USERS_URL = 'https://nutriagro-feeds-default-rtdb.firebaseio.com/users';
 
+    async function getFirebaseAuthParam() {
+      try {
+        if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+          const token = await firebase.auth().currentUser.getIdToken(false);
+          if (token) return `&auth=${encodeURIComponent(token)}`;
+        }
+      } catch (e) {}
+      return '';
+    }
+
+    async function buildFirebaseUrl(baseUrl, suffix = '') {
+      const authQuery = await getFirebaseAuthParam();
+      return `${baseUrl}${suffix}.json?_t=${Date.now()}${authQuery}`;
+    }
+
     function getApiEndpoint() {
       if (window.location.protocol === 'file:') {
         return 'http://localhost:8080/api/orders';
@@ -1788,7 +1803,8 @@
 
       // 1. Direct fetch from Firebase Cloud Realtime Database (Multi-Device sync across phones & PCs)
       try {
-        const fbRes = await fetch(`${FIREBASE_RTDB_ORDERS_URL}.json?_t=${Date.now()}`, {
+        const fbUrl = await buildFirebaseUrl(FIREBASE_RTDB_ORDERS_URL);
+        const fbRes = await fetch(fbUrl, {
           method: 'GET',
           cache: 'no-store'
         });
