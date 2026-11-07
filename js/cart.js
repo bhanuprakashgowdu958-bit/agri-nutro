@@ -517,22 +517,7 @@ class CartManager {
       }
     }
 
-    // 4. Update Discount Progress Bar & Summary
-    const progressFill = document.getElementById('freightProgressFill');
-    const progressText = document.getElementById('freightProgressText');
-    if (progressFill && progressText) {
-      const freeShippingThreshold = CURRENCY_CONFIG[currentCurrency].freeShippingBags;
-      const pct = Math.min(100, Math.round((totalBags / freeShippingThreshold) * 100));
-      progressFill.style.width = `${pct}%`;
-      if (totalBags >= freeShippingThreshold) {
-        progressText.innerHTML = `🎉 <strong>Eligible for Free Farmgate Freight Delivery!</strong>`;
-      } else {
-        const remaining = freeShippingThreshold - totalBags;
-        progressText.innerHTML = `Add <strong>${remaining} more bag${remaining > 1 ? 's' : ''}</strong> for <strong>Free Farmgate Freight</strong>`;
-      }
-    }
-
-    // 5. Update Financial Figures
+    // 4. Update Financial Figures
     const subtotalEl = document.getElementById('cartSubtotalAmount');
     const discountEl = document.getElementById('cartDiscountAmount');
     const discountRow = document.getElementById('cartDiscountRow');
