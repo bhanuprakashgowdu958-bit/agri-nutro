@@ -6,7 +6,7 @@ const path = require('path');
 let memoryOrders = null;
 
 const FIREBASE_RTDB_ORDERS_URL = process.env.FIREBASE_RTDB_ORDERS_URL || 'https://nutriagro-feeds-default-rtdb.firebaseio.com/orders';
-const DEFAULT_PURGED_ORDERS = new Set(['nutri-495921', 'nutri-917758']);
+const DEFAULT_PURGED_ORDERS = new Set(['nutri-495921', 'nutri-917758', 'nutri-270946', 'nutri-842915', 'nutri-205819']);
 
 // Helper: Get orders directly from Firebase Realtime Database
 async function getFirebaseOrders() {
@@ -120,60 +120,7 @@ function loadLocalOrders() {
     }
   } catch (e) {}
 
-  return [
-    {
-      orderId: "NUTRI-205819",
-      date: "12 Oct 2026",
-      timestamp: 1791749540403,
-      farmerName: "tharun",
-      phone: "6789054321",
-      address: "Sholinganallur, Chennai, Tamil Nadu, India",
-      paymentMethod: "Farmgate Delivery (COD / Cheque on Site)",
-      items: [
-        {
-          name: "NutriBov CalfGrow™ 20% Starter Pellets",
-          quantity: 1,
-          price: 2050,
-          bagSize: "50kg"
-        }
-      ],
-      totalBags: 1,
-      totalWeightKg: 50,
-      finalTotal: 2500,
-      status: "Order confirmed",
-      eta: "Tomorrow by 4:00 PM (Farmgate Arrival)",
-      driverName: "Ramesh Singh (Agro Hauler #HR-05-AB-4821)",
-      driverPhone: "+91 98123 45678",
-      currentStep: 1,
-      lastUpdated: "2026-10-11T20:12:20.419Z"
-    },
-    {
-      orderId: "NUTRI-842915",
-      date: "11 Oct 2026",
-      timestamp: 1791740000000,
-      farmerName: "Sri Venkateswara Dairy Farm",
-      phone: "+91 98450 12345",
-      address: "Survey 42, Hosur Road, Bengaluru, Karnataka - 560100",
-      paymentMethod: "Farmgate Delivery (COD / Cheque on Site)",
-      items: [
-        {
-          name: "NutriBov LactaMax™ High-Yield Dairy Feed",
-          quantity: 4,
-          price: 1850,
-          bagSize: "50kg"
-        }
-      ],
-      totalBags: 4,
-      totalWeightKg: 200,
-      finalTotal: 7400,
-      status: "Packing",
-      eta: "Tomorrow by 4:00 PM (Farmgate Arrival)",
-      driverName: "Ramesh Singh (Agro Hauler #HR-05-AB-4821)",
-      driverPhone: "+91 98123 45678",
-      currentStep: 2,
-      lastUpdated: "2026-10-11T23:30:00.000Z"
-    }
-  ];
+  return [];
 }
 
 function persistLocalOrders(orders) {

@@ -1255,9 +1255,6 @@
         </div>
 
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <button type="button" class="btn btn-sm btn-primary" onclick="createSampleOrderAdmin()">
-            ➕ Add Test Order
-          </button>
           <button type="button" class="btn btn-sm" style="background:#059669; color:#fff;" onclick="logManualFarmerOrder()">
             📝 Log Phone/WhatsApp Order
           </button>
@@ -1514,7 +1511,7 @@
       }
     }
 
-    const DEFAULT_PURGED_ORDERS = ['nutri-495921', 'nutri-917758'];
+    const DEFAULT_PURGED_ORDERS = ['nutri-495921', 'nutri-917758', 'nutri-270946', 'nutri-842915', 'nutri-205819'];
 
     // Purge test orders from local caches on script evaluation
     try {
@@ -1768,29 +1765,7 @@
         let rawCached = localStorage.getItem('nutriagro_orders');
         let cached = rawCached !== null ? JSON.parse(rawCached) : null;
         if (cached === null) {
-          cached = [
-            {
-              orderId: "NUTRI-842915",
-              date: "11 Oct 2026",
-              timestamp: 1791740000000,
-              farmerName: "Sri Venkateswara Dairy Farm",
-              phone: "+91 98450 12345",
-              address: "Survey 42, Hosur Road, Bengaluru, Karnataka - 560100",
-              paymentMethod: "Farmgate Delivery (COD / Cheque on Site)",
-              items: [
-                { name: "NutriBov LactaMax™ High-Yield Dairy Feed", quantity: 4, price: 1850, bagSize: "50kg" }
-              ],
-              totalBags: 4,
-              totalWeightKg: 200,
-              finalTotal: 7400,
-              status: "Packing",
-              eta: "Tomorrow by 4:00 PM (Farmgate Arrival)",
-              driverName: "Ramesh Singh (Agro Hauler #HR-05-AB-4821)",
-              driverPhone: "+91 98123 45678",
-              currentStep: 2,
-              lastUpdated: new Date().toISOString()
-            }
-          ];
+          cached = [];
         }
         cached = (cached || []).filter(o => 
           o && o.orderId && 
