@@ -7223,7 +7223,7 @@ html, body {
             Receive seasonal grain price outlooks, harvest updates, and special commercial discounts.
           </p>
           <form onsubmit="event.preventDefault(); window.cart.showToast('Thank you for subscribing to NutriAgro Farm Dispatch!', 'success');" style="display: flex; gap: 8px;">
-            <input type="email" required placeholder="Enter farm email..." style="flex:1; padding: 10px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); color: #fff; font-size: 0.85rem;" />
+            <input type="email" id="newsletterEmail" name="newsletterEmail" aria-label="Enter farm email" required placeholder="Enter farm email..." style="flex:1; padding: 10px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); color: #fff; font-size: 0.85rem;" />
             <button type="submit" class="btn btn-gold" style="padding: 10px 14px;">Join</button>
           </form>
         </div>

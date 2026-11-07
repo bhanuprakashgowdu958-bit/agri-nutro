@@ -9,7 +9,8 @@ const FIREBASE_RTDB_USERS_URL = process.env.FIREBASE_RTDB_USERS_URL || 'https://
 
 async function getFirebaseUsers() {
   try {
-    const res = await fetch(`${FIREBASE_RTDB_USERS_URL}.json?_t=${Date.now()}`);
+    const authParam = process.env.FIREBASE_RTDB_SECRET ? `&auth=${encodeURIComponent(process.env.FIREBASE_RTDB_SECRET)}` : '';
+    const res = await fetch(`${FIREBASE_RTDB_USERS_URL}.json?_t=${Date.now()}${authParam}`);
     if (res.ok) {
       const data = await res.json();
       if (data && typeof data === 'object') {
@@ -25,7 +26,8 @@ async function saveFirebaseUser(user) {
   if (!user || (!user.userId && !user.email)) return;
   const key = user.userId || user.email.replace(/[\.\$#\[\]\/]/g, '_');
   try {
-    await fetch(`${FIREBASE_RTDB_USERS_URL}/${encodeURIComponent(key)}.json`, {
+    const authQuery = process.env.FIREBASE_RTDB_SECRET ? `?auth=${encodeURIComponent(process.env.FIREBASE_RTDB_SECRET)}` : '';
+    await fetch(`${FIREBASE_RTDB_USERS_URL}/${encodeURIComponent(key)}.json${authQuery}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(user)
@@ -36,7 +38,8 @@ async function saveFirebaseUser(user) {
 async function deleteFirebaseUser(userId) {
   if (!userId) return;
   try {
-    await fetch(`${FIREBASE_RTDB_USERS_URL}/${encodeURIComponent(userId)}.json`, {
+    const authQuery = process.env.FIREBASE_RTDB_SECRET ? `?auth=${encodeURIComponent(process.env.FIREBASE_RTDB_SECRET)}` : '';
+    await fetch(`${FIREBASE_RTDB_USERS_URL}/${encodeURIComponent(userId)}.json${authQuery}`, {
       method: 'DELETE'
     });
   } catch (e) {}

@@ -11,7 +11,8 @@ const DEFAULT_PURGED_ORDERS = new Set(['nutri-495921', 'nutri-917758', 'nutri-27
 // Helper: Get orders directly from Firebase Realtime Database
 async function getFirebaseOrders() {
   try {
-    const res = await fetch(`${FIREBASE_RTDB_ORDERS_URL}.json`);
+    const authQuery = process.env.FIREBASE_RTDB_SECRET ? `?auth=${encodeURIComponent(process.env.FIREBASE_RTDB_SECRET)}` : '';
+    const res = await fetch(`${FIREBASE_RTDB_ORDERS_URL}.json${authQuery}`);
     if (res.ok) {
       const data = await res.json();
       if (data && typeof data === 'object') {
@@ -27,7 +28,8 @@ async function getFirebaseOrders() {
 async function saveFirebaseOrder(order) {
   if (!order || !order.orderId) return;
   try {
-    await fetch(`${FIREBASE_RTDB_ORDERS_URL}/${encodeURIComponent(order.orderId)}.json`, {
+    const authQuery = process.env.FIREBASE_RTDB_SECRET ? `?auth=${encodeURIComponent(process.env.FIREBASE_RTDB_SECRET)}` : '';
+    await fetch(`${FIREBASE_RTDB_ORDERS_URL}/${encodeURIComponent(order.orderId)}.json${authQuery}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(order)
@@ -39,7 +41,8 @@ async function saveFirebaseOrder(order) {
 async function patchFirebaseOrder(orderId, patch) {
   if (!orderId) return;
   try {
-    await fetch(`${FIREBASE_RTDB_ORDERS_URL}/${encodeURIComponent(orderId)}.json`, {
+    const authQuery = process.env.FIREBASE_RTDB_SECRET ? `?auth=${encodeURIComponent(process.env.FIREBASE_RTDB_SECRET)}` : '';
+    await fetch(`${FIREBASE_RTDB_ORDERS_URL}/${encodeURIComponent(orderId)}.json${authQuery}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(patch)
@@ -51,7 +54,8 @@ async function patchFirebaseOrder(orderId, patch) {
 async function deleteFirebaseOrder(orderId) {
   if (!orderId) return;
   try {
-    await fetch(`${FIREBASE_RTDB_ORDERS_URL}/${encodeURIComponent(orderId)}.json`, {
+    const authQuery = process.env.FIREBASE_RTDB_SECRET ? `?auth=${encodeURIComponent(process.env.FIREBASE_RTDB_SECRET)}` : '';
+    await fetch(`${FIREBASE_RTDB_ORDERS_URL}/${encodeURIComponent(orderId)}.json${authQuery}`, {
       method: 'DELETE'
     });
   } catch (e) {}
