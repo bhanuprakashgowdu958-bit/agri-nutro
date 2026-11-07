@@ -2587,6 +2587,8 @@
   opacity: 0;
   visibility: hidden;
   transition: all var(--transition-normal);
+  overscroll-behavior: contain !important;
+  touch-action: none !important;
 }
 
 .cart-drawer-overlay.active {
@@ -2607,6 +2609,8 @@
   display: flex;
   flex-direction: column;
   transition: right var(--transition-smooth);
+  overscroll-behavior: contain !important;
+  overscroll-behavior-y: contain !important;
 }
 
 .cart-drawer.active {
@@ -2886,6 +2890,8 @@
   opacity: 0;
   visibility: hidden;
   transition: all var(--transition-normal);
+  overscroll-behavior: contain !important;
+  touch-action: none !important;
 }
 
 .modal-overlay.active {
@@ -2909,6 +2915,9 @@
   opacity: 0;
   visibility: hidden;
   transition: all var(--transition-smooth);
+  overscroll-behavior: contain !important;
+  overscroll-behavior-y: contain !important;
+  -webkit-overflow-scrolling: touch;
 }
 
 .product-modal.active {
@@ -3135,6 +3144,9 @@
   opacity: 0;
   visibility: hidden;
   transition: all var(--transition-smooth);
+  overscroll-behavior: contain !important;
+  overscroll-behavior-y: contain !important;
+  -webkit-overflow-scrolling: touch;
 }
 
 .checkout-modal.active {
@@ -5182,6 +5194,32 @@ body.mobile-drawer-open {
   font-weight: 700;
   color: var(--color-primary);
   touch-action: none;
+}
+
+/* ====================================================
+   MODAL SCROLL ISOLATION & PREVENT BACKGROUND SCROLL
+   ==================================================== */
+.modal-overlay,
+.cart-drawer-overlay,
+.mobile-drawer-overlay,
+.google-auth-overlay {
+  overscroll-behavior: contain !important;
+  touch-action: none !important;
+}
+
+.product-modal,
+.checkout-modal,
+.order-tracker-modal,
+.compare-modal,
+.bulk-modal,
+.gemini-chat-modal,
+.cart-drawer,
+.mobile-nav-drawer,
+.google-auth-gateway,
+.google-auth-card {
+  overscroll-behavior: contain !important;
+  overscroll-behavior-y: contain !important;
+  -webkit-overflow-scrolling: touch;
 }
 
 

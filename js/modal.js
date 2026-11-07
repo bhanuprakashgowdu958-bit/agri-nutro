@@ -2,6 +2,56 @@
 let selectedModalProduct = null;
 let selectedModalBagSize = '50kg';
 
+// Universal Modal Background Scroll Lock Manager
+function lockModalScroll() {
+  document.documentElement.classList.add('modal-open');
+  document.body.classList.add('modal-open');
+}
+
+function unlockModalScroll() {
+  const activeDialog = document.querySelector(
+    '.product-modal.active, .checkout-modal.active, .compare-modal.active, .bulk-modal.active, .gemini-chat-modal.active, .cart-drawer.active, .mobile-nav-drawer.active, .google-auth-gateway[style*="display: flex"], .google-auth-gateway[style*="display: block"]'
+  );
+  if (!activeDialog) {
+    document.documentElement.classList.remove('modal-open');
+    document.body.classList.remove('modal-open');
+  }
+}
+
+window.lockModalScroll = lockModalScroll;
+window.unlockModalScroll = unlockModalScroll;
+
+// Intercept wheel and touchmove events when any modal is open to eliminate background scroll bleed
+document.addEventListener('wheel', function(e) {
+  if (document.body.classList.contains('modal-open') || document.documentElement.classList.contains('modal-open')) {
+    const scrollableModal = e.target.closest(
+      '.product-modal, .checkout-modal, .order-tracker-modal, .compare-modal, .bulk-modal, .gemini-chat-modal, .cart-drawer, .mobile-nav-drawer, .google-auth-gateway, .google-auth-card'
+    );
+    if (!scrollableModal) {
+      e.preventDefault();
+      return;
+    }
+
+    // Inside the modal, prevent chaining when scrolling past boundaries
+    const isAtTop = scrollableModal.scrollTop <= 0 && e.deltaY < 0;
+    const isAtBottom = (scrollableModal.scrollTop + scrollableModal.clientHeight >= scrollableModal.scrollHeight - 1) && e.deltaY > 0;
+    if (isAtTop || isAtBottom) {
+      e.preventDefault();
+    }
+  }
+}, { passive: false });
+
+document.addEventListener('touchmove', function(e) {
+  if (document.body.classList.contains('modal-open') || document.documentElement.classList.contains('modal-open')) {
+    const scrollableModal = e.target.closest(
+      '.product-modal, .checkout-modal, .order-tracker-modal, .compare-modal, .bulk-modal, .gemini-chat-modal, .cart-drawer, .mobile-nav-drawer, .google-auth-gateway, .google-auth-card'
+    );
+    if (!scrollableModal) {
+      e.preventDefault();
+    }
+  }
+}, { passive: false });
+
 function setModalSlideView(view) {
   if (!selectedModalProduct) return;
   const modalImg = document.getElementById('modalProductImg');
@@ -111,7 +161,7 @@ function openProductModal(productId) {
   // Show Modal
   modal.classList.add('active');
   overlay.classList.add('active');
-  document.body.classList.add('modal-open');
+  lockModalScroll();
 }
 
 function updateModalPriceUI() {
@@ -193,7 +243,7 @@ function closeProductModal() {
   const overlay = document.getElementById('modalOverlay');
   if (modal) modal.classList.remove('active');
   if (overlay) overlay.classList.remove('active');
-  document.body.classList.remove('modal-open');
+  unlockModalScroll();
 }
 
 // ==========================================
@@ -243,7 +293,7 @@ function openCheckoutModal() {
 
   modal.classList.add('active');
   overlay.classList.add('active');
-  document.body.classList.add('modal-open');
+  lockModalScroll();
 
   // Auto-fill details if registered farmer is logged in, or ensure guest isolation
   try {
@@ -318,7 +368,7 @@ function closeCheckoutModal() {
   const overlay = document.getElementById('modalOverlay');
   if (modal) modal.classList.remove('active');
   if (overlay) overlay.classList.remove('active');
-  document.body.classList.remove('modal-open');
+  unlockModalScroll();
 }
 
 // Automatically detect Customer Delivery Address via GPS & Reverse Geocoding
@@ -1526,7 +1576,7 @@ function openOrderTrackerModal(targetOrderId) {
 
   modal.classList.add('active');
   overlay.classList.add('active');
-  document.body.classList.add('modal-open');
+  lockModalScroll();
 
   startActiveTrackerLivePolling();
 }
@@ -1536,7 +1586,7 @@ function closeOrderTrackerModal() {
   const overlay = document.getElementById('modalOverlay');
   if (modal) modal.classList.remove('active');
   if (overlay) overlay.classList.remove('active');
-  document.body.classList.remove('modal-open');
+  unlockModalScroll();
   stopActiveTrackerLivePolling();
 }
 

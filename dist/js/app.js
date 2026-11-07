@@ -1792,7 +1792,11 @@ function openCompareModal() {
 
   modal.classList.add('active');
   overlay.classList.add('active');
-  document.body.classList.add('modal-open');
+  if (typeof window.lockModalScroll === 'function') window.lockModalScroll();
+  else {
+    document.documentElement.classList.add('modal-open');
+    document.body.classList.add('modal-open');
+  }
 }
 
 function closeCompareModal() {
@@ -1800,7 +1804,11 @@ function closeCompareModal() {
   const overlay = document.getElementById('modalOverlay');
   if (modal) modal.classList.remove('active');
   if (overlay) overlay.classList.remove('active');
-  document.body.classList.remove('modal-open');
+  if (typeof window.unlockModalScroll === 'function') window.unlockModalScroll();
+  else {
+    document.documentElement.classList.remove('modal-open');
+    document.body.classList.remove('modal-open');
+  }
 }
 
 // ==========================================
@@ -1947,7 +1955,11 @@ function openBulkTonnageModal() {
   if (modal && overlay) {
     modal.classList.add('active');
     overlay.classList.add('active');
-    document.body.classList.add('modal-open');
+    if (typeof window.lockModalScroll === 'function') window.lockModalScroll();
+    else {
+      document.documentElement.classList.add('modal-open');
+      document.body.classList.add('modal-open');
+    }
   }
 }
 
@@ -1957,7 +1969,11 @@ function closeBulkTonnageModal() {
   if (modal && overlay) {
     modal.classList.remove('active');
     overlay.classList.remove('active');
-    document.body.classList.remove('modal-open');
+    if (typeof window.unlockModalScroll === 'function') window.unlockModalScroll();
+    else {
+      document.documentElement.classList.remove('modal-open');
+      document.body.classList.remove('modal-open');
+    }
   }
 }
 

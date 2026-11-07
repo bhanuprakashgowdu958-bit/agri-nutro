@@ -80,8 +80,13 @@ body {
   overflow-x: hidden;
 }
 
-body.modal-open {
-  overflow: hidden;
+html.modal-open,
+body.modal-open,
+html:has(body.modal-open) {
+  overflow: hidden !important;
+  height: 100% !important;
+  overscroll-behavior: none !important;
+  touch-action: none !important;
 }
 
 /* Typography Defaults */

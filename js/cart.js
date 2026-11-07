@@ -408,7 +408,11 @@ class CartManager {
     if (drawer && overlay) {
       drawer.classList.add('active');
       overlay.classList.add('active');
-      document.body.classList.add('modal-open');
+      if (typeof window.lockModalScroll === 'function') window.lockModalScroll();
+      else {
+        document.documentElement.classList.add('modal-open');
+        document.body.classList.add('modal-open');
+      }
     }
   }
 
@@ -418,7 +422,11 @@ class CartManager {
     if (drawer && overlay) {
       drawer.classList.remove('active');
       overlay.classList.remove('active');
-      document.body.classList.remove('modal-open');
+      if (typeof window.unlockModalScroll === 'function') window.unlockModalScroll();
+      else {
+        document.documentElement.classList.remove('modal-open');
+        document.body.classList.remove('modal-open');
+      }
     }
   }
 

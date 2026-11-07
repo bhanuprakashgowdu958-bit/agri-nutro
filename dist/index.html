@@ -100,8 +100,13 @@ body {
   overflow-x: hidden;
 }
 
-body.modal-open {
-  overflow: hidden;
+html.modal-open,
+body.modal-open,
+html:has(body.modal-open) {
+  overflow: hidden !important;
+  height: 100% !important;
+  overscroll-behavior: none !important;
+  touch-action: none !important;
 }
 
 /* Typography Defaults */
@@ -2876,6 +2881,8 @@ button, input, select, textarea {
   opacity: 0;
   visibility: hidden;
   transition: all var(--transition-normal);
+  overscroll-behavior: contain !important;
+  touch-action: none !important;
 }
 
 .cart-drawer-overlay.active {
@@ -2896,6 +2903,8 @@ button, input, select, textarea {
   display: flex;
   flex-direction: column;
   transition: right var(--transition-smooth);
+  overscroll-behavior: contain !important;
+  overscroll-behavior-y: contain !important;
 }
 
 .cart-drawer.active {
@@ -3175,6 +3184,8 @@ button, input, select, textarea {
   opacity: 0;
   visibility: hidden;
   transition: all var(--transition-normal);
+  overscroll-behavior: contain !important;
+  touch-action: none !important;
 }
 
 .modal-overlay.active {
@@ -3198,6 +3209,9 @@ button, input, select, textarea {
   opacity: 0;
   visibility: hidden;
   transition: all var(--transition-smooth);
+  overscroll-behavior: contain !important;
+  overscroll-behavior-y: contain !important;
+  -webkit-overflow-scrolling: touch;
 }
 
 .product-modal.active {
@@ -3424,6 +3438,9 @@ button, input, select, textarea {
   opacity: 0;
   visibility: hidden;
   transition: all var(--transition-smooth);
+  overscroll-behavior: contain !important;
+  overscroll-behavior-y: contain !important;
+  -webkit-overflow-scrolling: touch;
 }
 
 .checkout-modal.active {
@@ -5471,6 +5488,32 @@ body.mobile-drawer-open {
   font-weight: 700;
   color: var(--color-primary);
   touch-action: none;
+}
+
+/* ====================================================
+   MODAL SCROLL ISOLATION & PREVENT BACKGROUND SCROLL
+   ==================================================== */
+.modal-overlay,
+.cart-drawer-overlay,
+.mobile-drawer-overlay,
+.google-auth-overlay {
+  overscroll-behavior: contain !important;
+  touch-action: none !important;
+}
+
+.product-modal,
+.checkout-modal,
+.order-tracker-modal,
+.compare-modal,
+.bulk-modal,
+.gemini-chat-modal,
+.cart-drawer,
+.mobile-nav-drawer,
+.google-auth-gateway,
+.google-auth-card {
+  overscroll-behavior: contain !important;
+  overscroll-behavior-y: contain !important;
+  -webkit-overflow-scrolling: touch;
 }
 
 
@@ -7855,14 +7898,14 @@ html, body {
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- Scripts -->
-  <script src="js/data.js?v=5.6"></script>
-  <script src="js/cart.js?v=5.6"></script>
-  <script src="js/modal.js?v=5.6"></script>
-  <script src="js/weather.js?v=5.6"></script>
-  <script src="js/gemini.js?v=5.6"></script>
-  <script src="js/hero-slider.js?v=5.6"></script>
-  <script src="js/animal-slider.js?v=5.6"></script>
-  <script src="js/app.js?v=5.6"></script>
+  <script src="js/data.js?v=5.7"></script>
+  <script src="js/cart.js?v=5.7"></script>
+  <script src="js/modal.js?v=5.7"></script>
+  <script src="js/weather.js?v=5.7"></script>
+  <script src="js/gemini.js?v=5.7"></script>
+  <script src="js/hero-slider.js?v=5.7"></script>
+  <script src="js/animal-slider.js?v=5.7"></script>
+  <script src="js/app.js?v=5.7"></script>
 
 </body>
 </html>
