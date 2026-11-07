@@ -1423,19 +1423,6 @@ function renderCatalog() {
             <span class="reviews-count">(${product.reviewsCount} verified farms)</span>
           </div>
 
-          <p class="product-card-desc">${product.shortDesc}</p>
-
-          <div class="product-card-bullets">
-            <div class="bullet-item">
-              <span class="bullet-dot"></span>
-              <span><strong>Stage:</strong> ${product.stage}</span>
-            </div>
-            <div class="bullet-item">
-              <span class="bullet-dot"></span>
-              <span><strong>Key:</strong> ${product.highlight}</span>
-            </div>
-          </div>
-
           <!-- Bag Size Selector -->
           <div class="card-size-selector">
             <span class="size-label">Packaging:</span>
