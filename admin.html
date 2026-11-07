@@ -1065,31 +1065,69 @@
 </head>
 <body>
 
-  <!-- Security Authorization Modal Gate: Google Owner Authentication -->
+  <!-- Security Authorization Modal Gate: Owner Phone SMS OTP Gate -->
   <div id="authGateOverlay" class="auth-gate-overlay" style="display: flex;">
     <div class="auth-card" style="max-width: 440px; text-align: center; padding: 36px 28px;">
       <div class="auth-badge" style="width: 68px; height: 68px; font-size: 2rem; margin: 0 auto 16px auto; background: rgba(6, 78, 59, 0.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(6, 78, 59, 0.2);">
-        🔐
+        📱
       </div>
       <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.45rem; color: #064e3b; margin-bottom: 6px;">NutriAgro Dispatch Hub</h2>
-      <p class="auth-sub" style="font-size: 0.85rem; color: #64748b; margin-bottom: 22px;">Restricted Store Operations Portal • Owner Authorization Required</p>
+      <p class="auth-sub" style="font-size: 0.85rem; color: #64748b; margin-bottom: 20px;">Restricted Store Operations Portal • Owner Phone OTP Required</p>
 
       <div id="adminAuthAlert" style="display: none; padding: 12px; border-radius: 8px; font-size: 0.82rem; margin-bottom: 18px; text-align: left; line-height: 1.4;"></div>
 
-      <button type="button" id="googleSignInBtn" class="google-auth-btn" onclick="signInAdminWithGoogle()" style="width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 12px; background: #ffffff; color: #1e293b; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 14px 20px; font-size: 0.96rem; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: all 0.2s ease;">
-        <svg width="22" height="22" viewBox="0 0 24 24">
-          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-        </svg>
-        <span>Sign In with Google</span>
-      </button>
+      <!-- Step 1: Owner Phone Number Input -->
+      <div id="adminPhoneStep">
+        <label style="display: block; text-align: left; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+          Store Owner Mobile Number:
+        </label>
+        <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+          <div style="background: #f1f5f9; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 12px 14px; font-weight: 700; color: #475569; font-size: 0.95rem; display: flex; align-items: center; gap: 4px;">
+            <span>🇮🇳</span> +91
+          </div>
+          <input type="tel" id="adminPhoneInput" placeholder="Enter owner mobile (10 digits)" maxlength="10" 
+            style="flex: 1; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 12px 14px; font-size: 1rem; font-weight: 600; color: #1e293b; outline: none; transition: border-color 0.2s;"
+            onkeypress="if(event.key==='Enter') sendAdminPhoneOtp()" />
+        </div>
 
-      <div style="margin-top: 22px; font-size: 0.78rem; color: #94a3b8; line-height: 1.5;">
-        <span>Authorized Store Owner:</span><br/>
-        <strong style="color: #064e3b; font-family: monospace; font-size: 0.85rem;">bhanuprakashgowdu958@gmail.com</strong>
+        <button type="button" id="sendOtpBtn" onclick="sendAdminPhoneOtp()" 
+          style="width: 100%; background: #064e3b; color: #ffffff; border: none; border-radius: 12px; padding: 14px 20px; font-size: 0.96rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(6,78,59,0.25); transition: all 0.2s;">
+          <span>📲 Send SMS OTP to Owner</span>
+        </button>
+
+        <div style="margin-top: 18px; font-size: 0.76rem; color: #64748b; line-height: 1.5; text-align: left; background: #f8fafc; padding: 12px 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
+          🔒 <strong>Owner Protection Policy:</strong><br/>
+          SMS OTP is <em>only</em> sent to the authorized owner mobile (<strong>ending in ...8492</strong>). Entering any other number will be strictly blocked without triggering an SMS.
+        </div>
       </div>
+
+      <!-- Step 2: 6-Digit OTP Verification -->
+      <div id="adminOtpStep" style="display: none;">
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 12px; margin-bottom: 16px; font-size: 0.82rem; color: #166534; text-align: left; line-height: 1.5;">
+          ✅ <strong>SMS OTP Sent!</strong><br/>
+          A 6-digit code was sent to the owner's mobile (<strong>+91 75697 48492</strong>). Please enter the code below to log in.
+        </div>
+
+        <label style="display: block; text-align: left; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px;">
+          Enter 6-Digit OTP Code:
+        </label>
+        <input type="text" id="adminOtpInput" placeholder="• • • • • •" maxlength="6" inputmode="numeric"
+          style="width: 100%; text-align: center; letter-spacing: 10px; font-size: 1.5rem; font-weight: 800; font-family: monospace; border: 2px solid #064e3b; border-radius: 10px; padding: 12px; margin-bottom: 14px; outline: none; box-sizing: border-box;"
+          onkeypress="if(event.key==='Enter') verifyAdminPhoneOtp()" />
+
+        <button type="button" id="verifyOtpBtn" onclick="verifyAdminPhoneOtp()" 
+          style="width: 100%; background: #064e3b; color: #ffffff; border: none; border-radius: 12px; padding: 14px 20px; font-size: 0.96rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(6,78,59,0.25);">
+          <span>🔓 Verify OTP & Unlock Dispatch Hub</span>
+        </button>
+
+        <div style="margin-top: 14px; display: flex; justify-content: space-between; font-size: 0.82rem; padding: 0 4px;">
+          <a href="javascript:void(0)" onclick="resendAdminPhoneOtp()" style="color: #064e3b; font-weight: 700; text-decoration: none;">🔄 Resend SMS</a>
+          <a href="javascript:void(0)" onclick="resetAdminAuthStep()" style="color: #64748b; text-decoration: none;">Change Number</a>
+        </div>
+      </div>
+
+      <!-- Invisible reCAPTCHA container for Firebase Phone Auth -->
+      <div id="recaptcha-container"></div>
 
       <div style="margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 16px;">
         <a href="index.html" style="font-size: 0.82rem; color: #d97706; text-decoration: none; font-weight: 600;">← Return to Customer Store</a>
@@ -1594,10 +1632,12 @@
       }, 3500);
     }
 
-    // Owner Security: Google Firebase Authentication Whitelist
-    const AUTHORIZED_ADMIN_EMAILS = [
-      'bhanuprakashgowdu958@gmail.com'
-    ];
+    // Owner Security: Dedicated Owner Mobile Number (+91 75697 48492)
+    const AUTHORIZED_OWNER_PHONE_RAW = '7569748492';
+    const AUTHORIZED_OWNER_PHONE_INTL = '+917569748492';
+    const AUTHORIZED_OWNER_PHONE_DISPLAY = '+91 75697 48492';
+    let confirmationResult = null;
+    let recaptchaVerifier = null;
 
     function isAuthorized() {
       return sessionStorage.getItem('nutri_admin_auth') === 'true';
@@ -1612,19 +1652,19 @@
       } else {
         if (overlay) overlay.style.display = 'none';
         document.body.style.overflow = 'auto';
-        const savedEmail = sessionStorage.getItem('nutri_admin_email') || 'Owner';
-        const savedName = sessionStorage.getItem('nutri_admin_name') || 'Store Owner';
-        updateAdminNavbarUser(savedEmail, savedName);
+        const savedPhone = sessionStorage.getItem('nutri_admin_phone') || sessionStorage.getItem('nutri_admin_email') || AUTHORIZED_OWNER_PHONE_DISPLAY;
+        const savedName = sessionStorage.getItem('nutri_admin_name') || 'Store Owner (Bhanu Prakash)';
+        updateAdminNavbarUser(savedPhone, savedName);
         return true;
       }
     }
 
-    function updateAdminNavbarUser(email, name) {
+    function updateAdminNavbarUser(phoneOrEmail, name) {
       const pill = document.getElementById('adminUserPill');
       const emailSpan = document.getElementById('adminUserEmail');
       if (pill && emailSpan) {
         pill.style.display = 'inline-flex';
-        emailSpan.textContent = name || email;
+        emailSpan.textContent = name || phoneOrEmail;
       }
     }
 
@@ -1648,10 +1688,50 @@
       el.innerHTML = msg;
     }
 
-    async function signInAdminWithGoogle() {
+    function initRecaptcha() {
+      if (typeof firebase === 'undefined' || !firebase.auth) return null;
+      if (!recaptchaVerifier) {
+        try {
+          recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+            size: 'invisible',
+            callback: function () {}
+          });
+        } catch (e) {
+          console.warn('reCAPTCHA init notice:', e);
+        }
+      }
+      return recaptchaVerifier;
+    }
+
+    function resetAdminAuthStep() {
+      const phoneStep = document.getElementById('adminPhoneStep');
+      const otpStep = document.getElementById('adminOtpStep');
       const alertEl = document.getElementById('adminAuthAlert');
-      const btn = document.getElementById('googleSignInBtn');
+      if (phoneStep) phoneStep.style.display = 'block';
+      if (otpStep) otpStep.style.display = 'none';
       if (alertEl) alertEl.style.display = 'none';
+      const otpInput = document.getElementById('adminOtpInput');
+      if (otpInput) otpInput.value = '';
+    }
+
+    async function sendAdminPhoneOtp() {
+      const phoneInput = document.getElementById('adminPhoneInput');
+      const btn = document.getElementById('sendOtpBtn');
+      const alertEl = document.getElementById('adminAuthAlert');
+      if (alertEl) alertEl.style.display = 'none';
+
+      if (!phoneInput) return;
+      const rawInput = phoneInput.value.replace(/\D/g, '');
+
+      // Strict Owner Security: Only the owner's phone (7569748492) can trigger OTP
+      const isOwner = (rawInput === AUTHORIZED_OWNER_PHONE_RAW) || 
+                      (rawInput.length === 12 && rawInput.startsWith('91') && rawInput.slice(2) === AUTHORIZED_OWNER_PHONE_RAW);
+
+      if (!isOwner) {
+        showAdminAuthAlert(`⛔ <strong>Access Denied:</strong> Unauthorized mobile number.<br/>Only the registered store owner's mobile can access the dispatch admin hub.<br/><strong>No SMS OTP was sent.</strong>`, 'error');
+        phoneInput.focus();
+        return; // Strictly stop here! No OTP triggered.
+      }
 
       if (typeof firebase === 'undefined' || !firebase.auth) {
         showAdminAuthAlert('Firebase Auth is still initializing. Please wait a second and retry...', 'warning');
@@ -1661,79 +1741,110 @@
       try {
         if (btn) {
           btn.disabled = true;
-          btn.style.opacity = '0.7';
-          btn.innerHTML = '<span>Verifying Google Account...</span>';
+          btn.innerHTML = '<span>⏳ Sending SMS to Owner Phone...</span>';
         }
-        const provider = new firebase.auth.GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: 'select_account' });
-        const result = await firebase.auth().signInWithPopup(provider);
-        if (result && result.user) {
-          verifyAdminUser(result.user);
+
+        const appVerifier = initRecaptcha();
+        confirmationResult = await firebase.auth().signInWithPhoneNumber(AUTHORIZED_OWNER_PHONE_INTL, appVerifier);
+        
+        // Show OTP entry step
+        document.getElementById('adminPhoneStep').style.display = 'none';
+        document.getElementById('adminOtpStep').style.display = 'block';
+        showToast(`📲 SMS OTP sent to ${AUTHORIZED_OWNER_PHONE_DISPLAY}`, 'success');
+        const otpInput = document.getElementById('adminOtpInput');
+        if (otpInput) {
+          otpInput.value = '';
+          otpInput.focus();
         }
       } catch (err) {
-        console.warn('Google Admin Sign-in notice:', err);
-        if (err.code === 'auth/popup-closed-by-user') {
-          return;
+        console.warn('Phone Auth Error:', err);
+        let msg = err.message || 'Failed to send SMS OTP. Please try again.';
+        if (err.code === 'auth/operation-not-allowed') {
+          msg = `⚠️ <strong>Phone Auth Not Enabled in Firebase:</strong><br/>Please open Firebase Console > Authentication > Sign-in method, click <strong>Phone</strong> and toggle <strong>Enable</strong>.`;
+        } else if (err.code === 'auth/quota-exceeded') {
+          msg = `⚠️ SMS verification quota reached for today. Please wait or check your Firebase plan.`;
+        } else if (err.code === 'auth/captcha-check-failed') {
+          msg = `reCAPTCHA verification check failed. Please refresh the page and try again.`;
         }
-        if (err.code === 'auth/unauthorized-domain') {
-          const host = window.location.hostname;
-          showAdminAuthAlert(`Domain "${host}" is not authorized in Firebase Console. Go to Firebase Console > Authentication > Settings > Authorized domains and add "${host}".`, 'error');
-        } else if (err.code === 'auth/popup-blocked') {
-          showAdminAuthAlert('Popup was blocked by your browser. Please allow popups for this site.', 'error');
-        } else {
-          showAdminAuthAlert(err.message || 'Error signing in with Google. Please try again.', 'error');
-        }
+        showAdminAuthAlert(msg, 'error');
       } finally {
         if (btn) {
           btn.disabled = false;
-          btn.style.opacity = '1';
-          btn.innerHTML = `
-            <svg width="22" height="22" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-            </svg>
-            <span>Sign In with Google</span>
-          `;
+          btn.innerHTML = '<span>📲 Send SMS OTP to Owner</span>';
         }
       }
     }
 
-    function verifyAdminUser(user) {
-      if (!user || !user.email) {
-        showAdminAuthAlert('No email detected from Google sign-in.', 'error');
+    async function verifyAdminPhoneOtp() {
+      const otpInput = document.getElementById('adminOtpInput');
+      const btn = document.getElementById('verifyOtpBtn');
+      const alertEl = document.getElementById('adminAuthAlert');
+      if (alertEl) alertEl.style.display = 'none';
+
+      if (!otpInput) return;
+      const code = otpInput.value.trim().replace(/\D/g, '');
+
+      if (code.length < 6) {
+        showAdminAuthAlert('Please enter the complete 6-digit OTP code received on the owner\'s phone.', 'warning');
+        otpInput.focus();
         return;
       }
 
-      const emailNorm = user.email.trim().toLowerCase();
-      const isAllowed = AUTHORIZED_ADMIN_EMAILS.some(a => a.toLowerCase() === emailNorm);
+      if (!confirmationResult) {
+        showAdminAuthAlert('Session expired. Please request a new OTP.', 'error');
+        resetAdminAuthStep();
+        return;
+      }
 
-      if (isAllowed) {
+      try {
+        if (btn) {
+          btn.disabled = true;
+          btn.innerHTML = '<span>⏳ Verifying Code...</span>';
+        }
+
+        const result = await confirmationResult.confirm(code);
+        const user = result.user;
+
+        // Unlock Admin Portal!
         sessionStorage.setItem('nutri_admin_auth', 'true');
-        sessionStorage.setItem('nutri_admin_email', user.email);
-        sessionStorage.setItem('nutri_admin_name', user.displayName || 'Store Owner');
+        sessionStorage.setItem('nutri_admin_phone', AUTHORIZED_OWNER_PHONE_DISPLAY);
+        sessionStorage.setItem('nutri_admin_name', 'Store Owner (Bhanu Prakash)');
 
         const overlay = document.getElementById('authGateOverlay');
         if (overlay) overlay.style.display = 'none';
         document.body.style.overflow = 'auto';
 
-        updateAdminNavbarUser(user.email, user.displayName);
-        showToast(`👋 Welcome back, ${user.displayName || 'Owner'}!`, 'success');
+        updateAdminNavbarUser(AUTHORIZED_OWNER_PHONE_DISPLAY, 'Store Owner (Bhanu Prakash)');
+        showToast('🔓 Owner Phone Verified! Welcome to NutriAgro Dispatch Hub.', 'success');
         loadAdminOrders(false);
-      } else {
-        sessionStorage.removeItem('nutri_admin_auth');
-        showAdminAuthAlert(`⛔ <strong>Access Denied:</strong> "${user.email}" is not an authorized administrator. Only the store owner (${AUTHORIZED_ADMIN_EMAILS[0]}) can access this portal.<br/><br/><button type="button" class="btn btn-sm btn-secondary" onclick="adminSignOut()" style="font-size:0.75rem;">Switch Google Account</button>`, 'error');
-        if (typeof firebase !== 'undefined' && firebase.auth) {
-          firebase.auth().signOut().catch(() => {});
+      } catch (err) {
+        console.warn('OTP Verification Error:', err);
+        showAdminAuthAlert(`❌ <strong>Invalid or Expired OTP:</strong> The code you entered does not match. Please verify the code on the owner's mobile (+91 75697 48492) or click "Resend SMS".`, 'error');
+        if (otpInput) otpInput.focus();
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>🔓 Verify OTP & Unlock Dispatch Hub</span>';
         }
       }
+    }
+
+    function resendAdminPhoneOtp() {
+      confirmationResult = null;
+      if (window.recaptchaVerifier) {
+        try { window.recaptchaVerifier.clear(); } catch(e){}
+        window.recaptchaVerifier = null;
+      }
+      sendAdminPhoneOtp();
     }
 
     function adminSignOut() {
       sessionStorage.removeItem('nutri_admin_auth');
       sessionStorage.removeItem('nutri_admin_email');
+      sessionStorage.removeItem('nutri_admin_phone');
       sessionStorage.removeItem('nutri_admin_name');
+      confirmationResult = null;
+      resetAdminAuthStep();
       if (typeof firebase !== 'undefined' && firebase.auth) {
         firebase.auth().signOut().catch(() => {});
       }
@@ -1753,10 +1864,13 @@
       setTimeout(() => {
         if (typeof firebase !== 'undefined' && firebase.auth) {
           firebase.auth().onAuthStateChanged((user) => {
-            if (user && user.email) {
-              const emailNorm = user.email.trim().toLowerCase();
-              if (AUTHORIZED_ADMIN_EMAILS.some(a => a.toLowerCase() === emailNorm)) {
-                verifyAdminUser(user);
+            if (user && user.phoneNumber) {
+              const digits = user.phoneNumber.replace(/\D/g, '');
+              if (digits.endsWith(AUTHORIZED_OWNER_PHONE_RAW)) {
+                sessionStorage.setItem('nutri_admin_auth', 'true');
+                sessionStorage.setItem('nutri_admin_phone', AUTHORIZED_OWNER_PHONE_DISPLAY);
+                sessionStorage.setItem('nutri_admin_name', 'Store Owner (Bhanu Prakash)');
+                checkAdminAuth();
               }
             }
           });
