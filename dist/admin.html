@@ -1161,7 +1161,7 @@
             <span>📊</span> Dispatch &amp; Revenue Analytics
           </span>
           <span id="activeMonthBadge" style="font-size: 0.74rem; font-weight: 700; padding: 3px 10px; border-radius: 12px; background: rgba(16, 185, 129, 0.12); color: #047857; border: 1px solid rgba(16, 185, 129, 0.3);">
-            🌟 All Time
+            📅 Current Month
           </span>
         </div>
         <div class="month-filter-wrap">
@@ -1169,6 +1169,7 @@
             <span>📅</span> Filter Month:
           </label>
           <select id="adminMonthFilter" class="month-filter-select" onchange="handleMonthFilterChange(this.value)">
+            <option value="current">📅 Current Month</option>
             <option value="all">🌟 All Time (Cumulative)</option>
           </select>
         </div>
@@ -1790,7 +1791,12 @@
       } catch (e) {}
     }
 
-    let selectedMonthFilter = 'all';
+    function getCurrentMonthKey() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    let selectedMonthFilter = getCurrentMonthKey();
 
     function getOrderDate(order) {
       if (!order) return new Date();
@@ -1820,7 +1826,8 @@
       const select = document.getElementById('adminMonthFilter');
       if (!select) return;
 
-      const currentVal = selectedMonthFilter || 'all';
+      const currentMonthKey = getCurrentMonthKey();
+      const currentVal = selectedMonthFilter || currentMonthKey;
       const now = new Date();
       const currentYear = now.getFullYear();
 
@@ -1839,7 +1846,7 @@
         'July', 'August', 'September', 'October', 'November', 'December'
       ];
 
-      let html = `<option value="all" ${currentVal === 'all' ? 'selected' : ''}>🌟 All Time (Cumulative)</option>`;
+      let html = '';
 
       const sortedYears = Array.from(yearsSet).sort((a, b) => b - a);
 
@@ -1851,17 +1858,21 @@
 
           const countForMonth = allOrders.filter(o => getOrderMonthKey(o) === key).length;
           const countBadge = countForMonth > 0 ? ` (${countForMonth} order${countForMonth > 1 ? 's' : ''})` : '';
+          const currentTag = (key === currentMonthKey) ? ' (Current Month)' : '';
 
-          html += `<option value="${key}" ${isSelected}>📅 ${name} ${year}${countBadge}</option>`;
+          html += `<option value="${key}" ${isSelected}>📅 ${name} ${year}${currentTag}${countBadge}</option>`;
         });
       });
+
+      // All Time option at the end
+      html += `<option value="all" ${currentVal === 'all' ? 'selected' : ''}>🌟 All Time (Cumulative)</option>`;
 
       select.innerHTML = html;
       select.value = currentVal;
     }
 
     function handleMonthFilterChange(val) {
-      selectedMonthFilter = val || 'all';
+      selectedMonthFilter = val || getCurrentMonthKey();
       renderDashboard();
     }
 
@@ -1887,7 +1898,13 @@
 
       const activeBadge = document.getElementById('activeMonthBadge');
       if (activeBadge) {
-        activeBadge.textContent = selectedMonthFilter === 'all' ? '🌟 All Time' : `📅 ${monthLabel}`;
+        if (selectedMonthFilter === 'all') {
+          activeBadge.textContent = '🌟 All Time';
+        } else if (selectedMonthFilter === getCurrentMonthKey()) {
+          activeBadge.textContent = `📅 ${monthLabel} (Current)`;
+        } else {
+          activeBadge.textContent = `📅 ${monthLabel}`;
+        }
       }
 
       const isRejectedOrder = o => o.adminApproval === 'rejected' || o.currentStep === -1;
