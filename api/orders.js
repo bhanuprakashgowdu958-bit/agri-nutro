@@ -6,6 +6,7 @@ const path = require('path');
 let memoryOrders = null;
 
 const FIREBASE_RTDB_ORDERS_URL = process.env.FIREBASE_RTDB_ORDERS_URL || 'https://nutriagro-feeds-default-rtdb.firebaseio.com/orders';
+const DEFAULT_PURGED_ORDERS = new Set(['nutri-495921', 'nutri-917758']);
 
 // Helper: Get orders directly from Firebase Realtime Database
 async function getFirebaseOrders() {
@@ -15,7 +16,7 @@ async function getFirebaseOrders() {
       const data = await res.json();
       if (data && typeof data === 'object') {
         const list = Array.isArray(data) ? data : Object.values(data);
-        return list.filter(o => o && o.orderId && !o.action).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        return list.filter(o => o && o.orderId && !o.action && !DEFAULT_PURGED_ORDERS.has(String(o.orderId).toLowerCase())).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
       }
     }
   } catch (e) {}
@@ -105,7 +106,7 @@ function loadLocalOrders() {
     if (fs.existsSync(tmpFile)) {
       const content = fs.readFileSync(tmpFile, 'utf8');
       const parsed = JSON.parse(content);
-      if (Array.isArray(parsed)) return parsed;
+      if (Array.isArray(parsed)) return parsed.filter(o => o && o.orderId && !DEFAULT_PURGED_ORDERS.has(String(o.orderId).toLowerCase()));
     }
   } catch (e) {}
 
@@ -115,7 +116,7 @@ function loadLocalOrders() {
     if (fs.existsSync(bundledPath)) {
       const content = fs.readFileSync(bundledPath, 'utf8');
       const parsed = JSON.parse(content);
-      if (Array.isArray(parsed)) return parsed;
+      if (Array.isArray(parsed)) return parsed.filter(o => o && o.orderId && !DEFAULT_PURGED_ORDERS.has(String(o.orderId).toLowerCase()));
     }
   } catch (e) {}
 
