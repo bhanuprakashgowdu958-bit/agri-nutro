@@ -251,6 +251,56 @@
       margin-top: 3px;
     }
 
+    .kpi-header-strip {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 0 4px;
+    }
+
+    .month-filter-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      padding: 6px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow);
+    }
+
+    .month-filter-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #334155;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .month-filter-select {
+      background: #f8fafc;
+      border: 1px solid var(--border-dark);
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #0f172a;
+      cursor: pointer;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .month-filter-select:focus {
+      border-color: var(--primary);
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(6, 78, 59, 0.1);
+    }
+
     /* Controls Bar: Search, Filters, Add Sample */
     .controls-strip {
       background: var(--surface);
@@ -1104,6 +1154,26 @@
 
     <!-- VIEW 1: ORDERS & DISPATCH -->
     <div id="ordersSectionView">
+      <!-- Month Filter & Revenue Analytics Bar -->
+      <div class="kpi-header-strip">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
+            <span>📊</span> Dispatch &amp; Revenue Analytics
+          </span>
+          <span id="activeMonthBadge" style="font-size: 0.74rem; font-weight: 700; padding: 3px 10px; border-radius: 12px; background: rgba(16, 185, 129, 0.12); color: #047857; border: 1px solid rgba(16, 185, 129, 0.3);">
+            🌟 All Time
+          </span>
+        </div>
+        <div class="month-filter-wrap">
+          <label for="adminMonthFilter" class="month-filter-label">
+            <span>📅</span> Filter Month:
+          </label>
+          <select id="adminMonthFilter" class="month-filter-select" onchange="handleMonthFilterChange(this.value)">
+            <option value="all">🌟 All Time (Cumulative)</option>
+          </select>
+        </div>
+      </div>
+
       <!-- KPI Metric Cards Grid -->
       <section class="kpi-grid">
         <div class="kpi-card">
@@ -1111,14 +1181,16 @@
           <div>
             <div class="kpi-val" id="kpiTotalOrders">0</div>
             <div class="kpi-label">Total Placed Orders</div>
+            <div id="kpiOrdersSub" style="font-size: 0.68rem; color: #64748b; margin-top: 2px;">All status stages</div>
           </div>
         </div>
 
-        <div class="kpi-card">
-          <div class="kpi-icon-box" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-dark);">💰</div>
+        <div class="kpi-card" style="border-left: 4px solid #10b981;">
+          <div class="kpi-icon-box" style="background: rgba(16, 185, 129, 0.15); color: #047857;">💰</div>
           <div>
-            <div class="kpi-val" id="kpiTotalRevenue">₹0</div>
-            <div class="kpi-label">Total Revenue Value</div>
+            <div class="kpi-val" id="kpiTotalRevenue" style="color: #047857;">₹0</div>
+            <div class="kpi-label" style="color: #065f46; font-weight: 800;">Delivered Revenue</div>
+            <div id="kpiRevenueSub" style="font-size: 0.68rem; color: #64748b; margin-top: 2px;">Calculated on delivered orders</div>
           </div>
         </div>
 
@@ -1126,7 +1198,8 @@
           <div class="kpi-icon-box" style="background: rgba(16, 185, 129, 0.12); color: var(--success);">🌾</div>
           <div>
             <div class="kpi-val" id="kpiTotalBags">0</div>
-            <div class="kpi-label">Total 50kg Bags</div>
+            <div class="kpi-label">Delivered 50kg Bags</div>
+            <div id="kpiBagsSub" style="font-size: 0.68rem; color: #64748b; margin-top: 2px;">Fulfilled volume</div>
           </div>
         </div>
 
@@ -1717,32 +1790,145 @@
       } catch (e) {}
     }
 
+    let selectedMonthFilter = 'all';
+
+    function getOrderDate(order) {
+      if (!order) return new Date();
+      if (order.timestamp) {
+        const t = Number(order.timestamp);
+        if (!isNaN(t) && t > 0) return new Date(t);
+      }
+      if (order.lastUpdated) {
+        const d = new Date(order.lastUpdated);
+        if (!isNaN(d.getTime())) return d;
+      }
+      if (order.date) {
+        const d = new Date(order.date);
+        if (!isNaN(d.getTime())) return d;
+      }
+      return new Date();
+    }
+
+    function getOrderMonthKey(order) {
+      const d = getOrderDate(order);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      return `${year}-${month}`;
+    }
+
+    function populateMonthFilterDropdown() {
+      const select = document.getElementById('adminMonthFilter');
+      if (!select) return;
+
+      const currentVal = selectedMonthFilter || 'all';
+      const monthMap = new Map();
+
+      allOrders.forEach(o => {
+        if (!o) return;
+        const d = getOrderDate(o);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        const label = d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+        if (!monthMap.has(key)) {
+          monthMap.set(key, label);
+        }
+      });
+
+      // Always include current month
+      const now = new Date();
+      const currentKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      if (!monthMap.has(currentKey)) {
+        monthMap.set(currentKey, now.toLocaleString('en-US', { month: 'long', year: 'numeric' }));
+      }
+
+      // Sort months descending (newest first)
+      const sortedKeys = Array.from(monthMap.keys()).sort((a, b) => b.localeCompare(a));
+
+      let html = `<option value="all" ${currentVal === 'all' ? 'selected' : ''}>🌟 All Time (Cumulative)</option>`;
+      sortedKeys.forEach(k => {
+        const isSelected = (k === currentVal) ? 'selected' : '';
+        html += `<option value="${k}" ${isSelected}>📅 ${monthMap.get(k)}</option>`;
+      });
+
+      select.innerHTML = html;
+      select.value = currentVal;
+    }
+
+    function handleMonthFilterChange(val) {
+      selectedMonthFilter = val || 'all';
+      renderDashboard();
+    }
+
     function renderDashboard() {
+      populateMonthFilterDropdown();
       updateKPICounters();
       renderOrdersCards();
     }
 
     function updateKPICounters() {
-      const totalOrders = allOrders.length;
-      const totalRevenue = allOrders.reduce((sum, o) => sum + (o.finalTotal || 0), 0);
-      const totalBags = allOrders.reduce((sum, o) => sum + (o.totalBags || 1), 0);
+      // 1. Scoped orders for active month filter
+      let scopedOrders = allOrders;
+      let monthLabel = 'All Time';
+
+      if (selectedMonthFilter !== 'all') {
+        scopedOrders = allOrders.filter(o => getOrderMonthKey(o) === selectedMonthFilter);
+        const parts = selectedMonthFilter.split('-');
+        if (parts.length === 2) {
+          const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, 1);
+          monthLabel = d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+        }
+      }
+
+      const activeBadge = document.getElementById('activeMonthBadge');
+      if (activeBadge) {
+        activeBadge.textContent = selectedMonthFilter === 'all' ? '🌟 All Time' : `📅 ${monthLabel}`;
+      }
 
       const isRejectedOrder = o => o.adminApproval === 'rejected' || o.currentStep === -1;
       const isDeliveredOrder = o => (o.currentStep || 1) === 4;
       const isAcceptedOrder = o => !isRejectedOrder(o) && (o.adminApproval === 'accepted' || (o.currentStep !== undefined && o.currentStep >= 1));
       const isPendingOrder = o => !isRejectedOrder(o) && !isAcceptedOrder(o);
 
-      const pending = allOrders.filter(isPendingOrder).length;
-      const confirmed = allOrders.filter(o => isAcceptedOrder(o) && !isDeliveredOrder(o) && (o.currentStep || 1) === 1).length;
-      const milling = allOrders.filter(o => isAcceptedOrder(o) && !isDeliveredOrder(o) && (o.currentStep || 1) === 2).length;
-      const dispatched = allOrders.filter(o => isAcceptedOrder(o) && !isDeliveredOrder(o) && (o.currentStep || 1) === 3).length;
-      const delivered = allOrders.filter(isDeliveredOrder).length;
-      const rejected = allOrders.filter(isRejectedOrder).length;
-      const activeCount = allOrders.filter(o => !isRejectedOrder(o) && !isDeliveredOrder(o)).length;
+      // Total orders in this scoped month/period
+      const totalOrders = scopedOrders.length;
+
+      // REVENUE: CALCULATE STRICTLY ON DELIVERED ORDERS
+      const deliveredOrders = scopedOrders.filter(isDeliveredOrder);
+      const deliveredRevenue = deliveredOrders.reduce((sum, o) => sum + (o.finalTotal || 0), 0);
+
+      // Pipeline revenue (in transit / milling / confirmed) for admin visibility
+      const pipelineOrders = scopedOrders.filter(o => !isRejectedOrder(o) && !isDeliveredOrder(o));
+      const pipelineRevenue = pipelineOrders.reduce((sum, o) => sum + (o.finalTotal || 0), 0);
+
+      // Delivered bags fulfilled vs total placed bags
+      const deliveredBags = deliveredOrders.reduce((sum, o) => sum + (o.totalBags || 1), 0);
+      const totalPlacedBags = scopedOrders.reduce((sum, o) => sum + (o.totalBags || 1), 0);
+
+      const pending = scopedOrders.filter(isPendingOrder).length;
+      const confirmed = scopedOrders.filter(o => isAcceptedOrder(o) && !isDeliveredOrder(o) && (o.currentStep || 1) === 1).length;
+      const milling = scopedOrders.filter(o => isAcceptedOrder(o) && !isDeliveredOrder(o) && (o.currentStep || 1) === 2).length;
+      const dispatched = scopedOrders.filter(o => isAcceptedOrder(o) && !isDeliveredOrder(o) && (o.currentStep || 1) === 3).length;
+      const delivered = deliveredOrders.length;
+      const rejected = scopedOrders.filter(isRejectedOrder).length;
+      const activeCount = scopedOrders.filter(o => !isRejectedOrder(o) && !isDeliveredOrder(o)).length;
 
       document.getElementById('kpiTotalOrders').textContent = totalOrders;
-      document.getElementById('kpiTotalRevenue').textContent = '₹' + Math.round(totalRevenue).toLocaleString('en-IN');
-      document.getElementById('kpiTotalBags').textContent = totalBags;
+      const ordersSub = document.getElementById('kpiOrdersSub');
+      if (ordersSub) {
+        ordersSub.textContent = selectedMonthFilter === 'all' ? 'All status stages' : `Placed in ${monthLabel}`;
+      }
+
+      document.getElementById('kpiTotalRevenue').textContent = '₹' + Math.round(deliveredRevenue).toLocaleString('en-IN');
+      const revenueSub = document.getElementById('kpiRevenueSub');
+      if (revenueSub) {
+        revenueSub.textContent = `${delivered} delivered` + (pipelineRevenue > 0 ? ` • (₹${Math.round(pipelineRevenue).toLocaleString('en-IN')} in transit)` : '');
+      }
+
+      document.getElementById('kpiTotalBags').textContent = deliveredBags;
+      const bagsSub = document.getElementById('kpiBagsSub');
+      if (bagsSub) {
+        bagsSub.textContent = `${deliveredBags} bags fulfilled` + (totalPlacedBags > deliveredBags ? ` of ${totalPlacedBags}` : '');
+      }
+
       document.getElementById('kpiConfirmed').textContent = confirmed;
       document.getElementById('kpiMilling').textContent = milling;
       document.getElementById('kpiDispatched').textContent = dispatched;
@@ -1759,7 +1945,7 @@
       if (countRejectedEl) countRejectedEl.textContent = rejected;
 
       const tabOrdersBadge = document.getElementById('tabOrdersCount');
-      if (tabOrdersBadge) tabOrdersBadge.textContent = totalOrders;
+      if (tabOrdersBadge) tabOrdersBadge.textContent = allOrders.length;
     }
 
     function setFilter(filter) {
@@ -1783,6 +1969,11 @@
       deletedOrderIds = getDeletedOrderIds();
       let filtered = allOrders.filter(o => o && o.orderId && !deletedOrderIds.has(String(o.orderId).toLowerCase()));
 
+      // Filter by selected month if not 'all'
+      if (selectedMonthFilter !== 'all') {
+        filtered = filtered.filter(o => getOrderMonthKey(o) === selectedMonthFilter);
+      }
+
       const isRej = o => o.adminApproval === 'rejected' || o.currentStep === -1;
       const isDelivered = o => (o.currentStep || 1) === 4;
       const isAcc = o => !isRej(o) && (o.adminApproval === 'accepted' || (o.currentStep !== undefined && o.currentStep >= 1));
@@ -1792,28 +1983,38 @@
       const titleIcon = document.getElementById('ordersSectionIcon');
       const titleText = document.getElementById('ordersSectionTitleText');
       if (titleText) {
+        let baseTitle = '';
         if (currentFilter === '4') {
           if (titleIcon) titleIcon.textContent = '🏡';
-          titleText.textContent = 'Delivered Farmgate Orders Archive';
+          baseTitle = 'Delivered Farmgate Orders Archive';
         } else if (currentFilter === 'pending') {
           if (titleIcon) titleIcon.textContent = '⏳';
-          titleText.textContent = 'Orders Awaiting Mill Review & Acceptance';
+          baseTitle = 'Orders Awaiting Mill Review & Acceptance';
         } else if (currentFilter === 'rejected') {
           if (titleIcon) titleIcon.textContent = '✕';
-          titleText.textContent = 'Rejected Customer Orders Archive';
+          baseTitle = 'Rejected Customer Orders Archive';
         } else if (currentFilter === '1') {
           if (titleIcon) titleIcon.textContent = '🌾';
-          titleText.textContent = 'Order confirmed';
+          baseTitle = 'Order confirmed';
         } else if (currentFilter === '2') {
           if (titleIcon) titleIcon.textContent = '📦';
-          titleText.textContent = 'Packing Orders';
+          baseTitle = 'Packing Orders';
         } else if (currentFilter === '3') {
           if (titleIcon) titleIcon.textContent = '🚚';
-          titleText.textContent = 'Dispatch Orders';
+          baseTitle = 'Dispatch Orders';
         } else {
           if (titleIcon) titleIcon.textContent = '📋';
-          titleText.textContent = 'Active Customer Orders (In Production & Transit)';
+          baseTitle = 'Active Customer Orders (In Production & Transit)';
         }
+
+        if (selectedMonthFilter !== 'all') {
+          const parts = selectedMonthFilter.split('-');
+          if (parts.length === 2) {
+            const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, 1);
+            baseTitle += ` • ${d.toLocaleString('en-US', { month: 'short', year: 'numeric' })}`;
+          }
+        }
+        titleText.textContent = baseTitle;
       }
 
       // Filter by stage / status
@@ -2508,13 +2709,17 @@
     }
 
     function exportOrdersToCSV() {
-      if (allOrders.length === 0) {
-        showToast('No orders to export', 'info');
+      const exportList = (selectedMonthFilter !== 'all')
+        ? allOrders.filter(o => getOrderMonthKey(o) === selectedMonthFilter)
+        : allOrders;
+
+      if (exportList.length === 0) {
+        showToast('No orders to export for the selected period', 'info');
         return;
       }
 
       let csv = 'Order ID,Date,Customer Name,Phone,Address,Payment Method,Total Bags,Weight (kg),Total Amount (INR),Status,Stage\n';
-      allOrders.forEach(o => {
+      exportList.forEach(o => {
         csv += `"${o.orderId}","${o.date}","${(o.farmerName||'').replace(/"/g,'""')}","${o.phone}","${(o.address||'').replace(/"/g,'""')}","${o.paymentMethod}",${o.totalBags||1},${o.totalWeightKg||50},${o.finalTotal||0},"${o.status}",${o.currentStep||1}\n`;
       });
 
@@ -2522,11 +2727,12 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.setAttribute('href', url);
-      link.setAttribute('download', `NutriAgro_Orders_Export_${new Date().toISOString().slice(0,10)}.csv`);
+      const filenameSuffix = selectedMonthFilter !== 'all' ? selectedMonthFilter : new Date().toISOString().slice(0, 10);
+      link.setAttribute('download', `NutriAgro_Orders_Export_${filenameSuffix}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      showToast('Exported orders CSV successfully!', 'success');
+      showToast(`Exported ${exportList.length} orders CSV successfully!`, 'success');
     }
 
     function printOrderInvoice(orderId) {
