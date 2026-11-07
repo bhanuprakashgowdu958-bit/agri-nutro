@@ -1643,7 +1643,8 @@ async function saveOrder(orderObj) {
 
     // 1. Direct Cloud Sync to Firebase Realtime Database (Multi-Device Worldwide Instant Delivery)
     try {
-      await fetch(`${FIREBASE_RTDB_ORDERS_URL}/${encodeURIComponent(orderObj.orderId)}.json`, {
+      const putUrl = await buildFirebaseOrdersUrl(`/${encodeURIComponent(orderObj.orderId)}`);
+      await fetch(putUrl, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderObj)
@@ -1694,7 +1695,8 @@ async function updateOrderStatus(orderId, newStepVal) {
   localStorage.setItem('nutriagro_orders', JSON.stringify(orders));
 
   try {
-    fetch(`${FIREBASE_RTDB_ORDERS_URL}/${encodeURIComponent(orderId)}.json`, {
+    const patchUrl = await buildFirebaseOrdersUrl(`/${encodeURIComponent(orderId)}`);
+    fetch(patchUrl, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -2908,7 +2910,6 @@ window.closeOrderTrackerModal = closeOrderTrackerModal;
 window.switchTrackerTab = switchTrackerTab;
 window.renderOrdersListView = renderOrdersListView;
 window.updateOrderStatus = updateOrderStatus;
-window.generateSampleOrder = generateSampleOrder;
 window.trackOrderSubmit = trackOrderSubmit;
 window.manualRefreshOrders = manualRefreshOrders;
 window.dismissCustomerStatusBanner = dismissCustomerStatusBanner;

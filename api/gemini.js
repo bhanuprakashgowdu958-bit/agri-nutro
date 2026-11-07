@@ -244,7 +244,7 @@ async function callGeminiWithFailover(payload, apiKey) {
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, x-gemini-key');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, x-gemini-key, Cache-Control, Pragma, X-Requested-With');
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
   if (req.method === 'OPTIONS') {

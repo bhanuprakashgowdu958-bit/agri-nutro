@@ -543,8 +543,6 @@
 
   </div>
 
-  </div>
-
   <!-- Success Modal -->
   <div class="success-modal-overlay" id="successModal">
     <div class="success-modal-card">
@@ -627,35 +625,33 @@
       const footerActionBtn = document.getElementById('footerActionBtn');
 
       if (mode === 'signup') {
-        title.textContent = 'Create Your Account';
-        subtitle.textContent = 'Join us to access certified millgate pricing & direct delivery';
-        signupForm.style.display = 'block';
-        loginForm.style.display = 'none';
-        forgotForm.style.display = 'none';
-        footerPrompt.textContent = 'Already have an account?';
-        footerActionBtn.textContent = 'Login';
-        footerActionBtn.setAttribute('onclick', "switchAuthMode('login', event)");
-        setTimeout(() => document.getElementById('signupFullName')?.focus(), 50);
+        if (title) title.textContent = 'Welcome to NutriAgro';
+        if (subtitle) subtitle.textContent = 'Sign in to access certified millgate pricing & direct farm delivery';
+        if (signupForm) signupForm.style.display = 'block';
+        if (loginForm) loginForm.style.display = 'none';
+        if (forgotForm) forgotForm.style.display = 'none';
+        if (footerPrompt) footerPrompt.textContent = 'Already have an account?';
+        if (footerActionBtn) {
+          footerActionBtn.textContent = 'Login';
+          footerActionBtn.setAttribute('onclick', "switchAuthMode('login', event)");
+        }
       } else if (mode === 'login') {
-        title.textContent = 'Welcome Back';
-        subtitle.textContent = 'Sign in to access your farm orders & wholesale discounts';
-        signupForm.style.display = 'none';
-        loginForm.style.display = 'block';
-        forgotForm.style.display = 'none';
-        footerPrompt.textContent = "Don't have an account?";
-        footerActionBtn.textContent = 'Sign Up';
-        footerActionBtn.setAttribute('onclick', "switchAuthMode('signup', event)");
-        setTimeout(() => document.getElementById('loginIdentifier')?.focus(), 50);
+        if (title) title.textContent = 'Welcome Back';
+        if (subtitle) subtitle.textContent = 'Sign in to access your farm orders & wholesale discounts';
+        if (signupForm) signupForm.style.display = 'none';
+        if (loginForm) loginForm.style.display = 'block';
+        if (forgotForm) forgotForm.style.display = 'none';
+        if (footerPrompt) footerPrompt.textContent = "Don't have an account?";
+        if (footerActionBtn) {
+          footerActionBtn.textContent = 'Sign Up';
+          footerActionBtn.setAttribute('onclick', "switchAuthMode('signup', event)");
+        }
       } else if (mode === 'forgot') {
-        title.textContent = 'Reset Password';
-        subtitle.textContent = 'Enter your email or phone and choose a new password';
-        signupForm.style.display = 'none';
-        loginForm.style.display = 'none';
-        forgotForm.style.display = 'block';
-        footerPrompt.textContent = 'Remembered your password?';
-        footerActionBtn.textContent = 'Back to Login';
-        footerActionBtn.setAttribute('onclick', "switchAuthMode('login', event)");
-        setTimeout(() => document.getElementById('forgotIdentifier')?.focus(), 50);
+        if (title) title.textContent = 'Account Access';
+        if (subtitle) subtitle.textContent = 'Sign in with Google to access your account securely';
+        if (signupForm) signupForm.style.display = 'none';
+        if (loginForm) loginForm.style.display = 'none';
+        if (forgotForm) forgotForm.style.display = 'none';
       }
     }
 

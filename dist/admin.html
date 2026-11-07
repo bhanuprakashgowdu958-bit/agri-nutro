@@ -2463,7 +2463,8 @@
 
       // 1. Direct Cloud Sync to Firebase Realtime Database
       try {
-        fetch(`${FIREBASE_RTDB_ORDERS_URL}/${encodeURIComponent(orderId)}.json`, {
+        const patchUrl = await buildFirebaseUrl(FIREBASE_RTDB_ORDERS_URL, `/${encodeURIComponent(orderId)}`);
+        fetch(patchUrl, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -2530,7 +2531,8 @@
 
       // 1. Direct Cloud Sync to Firebase Realtime Database
       try {
-        fetch(`${FIREBASE_RTDB_ORDERS_URL}/${encodeURIComponent(orderId)}.json`, {
+        const patchUrl = await buildFirebaseUrl(FIREBASE_RTDB_ORDERS_URL, `/${encodeURIComponent(orderId)}`);
+        fetch(patchUrl, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -2640,7 +2642,8 @@
 
       // 1. Direct Cloud Sync to Firebase Realtime Database
       try {
-        fetch(`${FIREBASE_RTDB_ORDERS_URL}/${encodeURIComponent(orderId)}.json`, {
+        const patchUrl = await buildFirebaseUrl(FIREBASE_RTDB_ORDERS_URL, `/${encodeURIComponent(orderId)}`);
+        fetch(patchUrl, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -2706,7 +2709,8 @@
 
       // 1. Remove from Firebase Realtime Database
       try {
-        fetch(`${FIREBASE_RTDB_ORDERS_URL}/${encodeURIComponent(orderId)}.json`, {
+        const delUrl = await buildFirebaseUrl(FIREBASE_RTDB_ORDERS_URL, `/${encodeURIComponent(orderId)}`);
+        fetch(delUrl, {
           method: 'DELETE'
         }).catch(() => {});
       } catch (fbErr) {}
@@ -2740,7 +2744,7 @@
       }
     }
 
-    function createSampleOrderAdmin() {
+    async function createSampleOrderAdmin() {
       const randId = 'NUTRI-' + Math.floor(100000 + Math.random() * 900000);
       const sample = {
         orderId: randId,
@@ -2749,7 +2753,7 @@
         farmerName: 'Kaveri Green Pastures Dairy Farm',
         phone: '+91 98452 77890',
         address: 'Sy No. 88, Sompura Industrial Agro Hub, Nelamangala, Bengaluru, PIN: 562123',
-        paymentMethod: 'Farmgate Delivery (COD / Cheque on Site)',
+        paymentMethod: 'Cash on Delivery (COD)',
         items: [
           { name: 'NutriBov LactaMax™ High-Yield Dairy Feed', quantity: 5, price: 1850, bagSize: '50kg' },
           { name: 'NutriBov HeiferGrow™ 18% Developer Pellets', quantity: 2, price: 1950, bagSize: '50kg' }
@@ -2772,7 +2776,8 @@
 
       // Push to Firebase Realtime Database
       try {
-        fetch(`${FIREBASE_RTDB_ORDERS_URL}/${encodeURIComponent(sample.orderId)}.json`, {
+        const putUrl = await buildFirebaseUrl(FIREBASE_RTDB_ORDERS_URL, `/${encodeURIComponent(sample.orderId)}`);
+        fetch(putUrl, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(sample)
@@ -2791,7 +2796,7 @@
       renderDashboard();
     }
 
-    function logManualFarmerOrder(prefill = null) {
+    async function logManualFarmerOrder(prefill = null) {
       const defName = prefill ? (prefill.fullName + (prefill.farmName ? ' - ' + prefill.farmName : '')) : '';
       const defPhone = prefill ? (prefill.phone || '') : '';
       const defAddress = prefill ? (prefill.address || ((prefill.district || '') + ', ' + (prefill.state || ''))) : '';
@@ -2822,7 +2827,7 @@
         farmerName: name,
         phone: phone,
         address: address,
-        paymentMethod: 'Phone / Farmgate Delivery (COD)',
+        paymentMethod: 'Cash on Delivery (COD)',
         items: [{ name: itemsStr, quantity: 1, price: totalAmount, bagSize: '50kg' }],
         totalBags: 1,
         totalWeightKg: 50,
@@ -2841,7 +2846,8 @@
 
       // Push to Firebase Realtime Database
       try {
-        fetch(`${FIREBASE_RTDB_ORDERS_URL}/${encodeURIComponent(newOrder.orderId)}.json`, {
+        const putUrl = await buildFirebaseUrl(FIREBASE_RTDB_ORDERS_URL, `/${encodeURIComponent(newOrder.orderId)}`);
+        fetch(putUrl, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newOrder)
@@ -2993,7 +2999,8 @@
 
       // 1. Direct Realtime Database (Firebase RTDB)
       try {
-        const fbRes = await fetch(`${FIREBASE_RTDB_USERS_URL}.json?_t=${Date.now()}`, { cache: 'no-store' });
+        const fbUrl = await buildFirebaseUrl(FIREBASE_RTDB_USERS_URL);
+        const fbRes = await fetch(fbUrl, { cache: 'no-store' });
         if (fbRes.ok) {
           const fbData = await fbRes.json();
           if (fbData && typeof fbData === 'object') {
@@ -3174,9 +3181,9 @@
       if (cActive) cActive.textContent = activeToday;
       const cGoogle = document.getElementById('countFarmersGoogle');
       if (cGoogle) cGoogle.textContent = googleUsers;
-      const cOrders = document.getElementById('countFarmersOrders');
+      const cOrders = document.getElementById('countFarmersWithOrders') || document.getElementById('countFarmersOrders');
       if (cOrders) cOrders.textContent = orderUsers;
-      const cCart = document.getElementById('countFarmersCart');
+      const cCart = document.getElementById('countFarmersWithCart') || document.getElementById('countFarmersCart');
       if (cCart) cCart.textContent = cartUsers;
     }
 
@@ -3455,7 +3462,8 @@
 
       // Push directly to Firebase Realtime Database
       try {
-        fetch(`${FIREBASE_RTDB_USERS_URL}/${encodeURIComponent(newCustomer.userId)}.json`, {
+        const putUrl = await buildFirebaseUrl(FIREBASE_RTDB_USERS_URL, `/${encodeURIComponent(newCustomer.userId)}`);
+        fetch(putUrl, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newCustomer)
@@ -3477,7 +3485,7 @@
       renderFarmersCards();
     }
 
-    function deleteFarmer(userIdOrPhone) {
+    async function deleteFarmer(userIdOrPhone) {
       if (!confirm('Are you sure you want to delete this customer account from the directory?')) return;
       const targetKey = (userIdOrPhone || '').toString().toLowerCase();
       deletedFarmerKeys.add(targetKey);
@@ -3501,7 +3509,8 @@
 
       // Delete from Firebase RTDB directly
       try {
-        fetch(`${FIREBASE_RTDB_USERS_URL}/${encodeURIComponent(userIdOrPhone)}.json`, {
+        const delUrl = await buildFirebaseUrl(FIREBASE_RTDB_USERS_URL, `/${encodeURIComponent(userIdOrPhone)}`);
+        fetch(delUrl, {
           method: 'DELETE'
         }).catch(() => {});
       } catch (e) {}
@@ -3541,7 +3550,7 @@
       showToast('Exported Customer Accounts CSV successfully!', 'success');
     }
 
-    function editFarmerPhone(userIdOrPhone) {
+    async function editFarmerPhone(userIdOrPhone) {
       const f = allFarmers.find(x => (x.userId && x.userId === userIdOrPhone) || (x.phone && x.phone === userIdOrPhone) || (x.email && x.email === userIdOrPhone));
       if (!f) return;
       const newPhone = prompt(`Update Mobile Number for ${f.fullName || 'Customer'}:`, f.phone || '');
@@ -3558,7 +3567,8 @@
       localStorage.setItem('nutriagro_users_list', JSON.stringify(allFarmers));
 
       try {
-        fetch(`${FIREBASE_RTDB_USERS_URL}/${encodeURIComponent(f.userId || f.phone)}.json`, {
+        const patchUrl = await buildFirebaseUrl(FIREBASE_RTDB_USERS_URL, `/${encodeURIComponent(f.userId || f.phone)}`);
+        fetch(patchUrl, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ phone: trimmed, lastUpdated: f.lastUpdated })
@@ -3578,7 +3588,7 @@
       showToast(`Mobile number updated to ${trimmed} for ${f.fullName || 'Customer'}!`, 'success');
     }
 
-    function editOrderPhone(orderId) {
+    async function editOrderPhone(orderId) {
       const order = allOrders.find(o => o.orderId === orderId);
       if (!order) return;
       const newPhone = prompt(`Update Customer Phone for Order #${orderId} (${order.farmerName || 'Customer'}):`, order.phone || '');
@@ -3594,7 +3604,8 @@
       localStorage.setItem('nutriagro_orders', JSON.stringify(allOrders));
 
       try {
-        fetch(`${FIREBASE_RTDB_ORDERS_URL}/${encodeURIComponent(orderId)}.json`, {
+        const patchUrl = await buildFirebaseUrl(FIREBASE_RTDB_ORDERS_URL, `/${encodeURIComponent(orderId)}`);
+        fetch(patchUrl, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ phone: trimmed, lastUpdated: order.lastUpdated })
