@@ -1092,7 +1092,7 @@ function handleCheckoutSubmit(e) {
   const address = document.getElementById('checkoutAddress').value.trim();
   const additionalAddress = (document.getElementById('checkoutAdditionalAddress')?.value || '').trim();
   const fullAddress = additionalAddress ? `${address} | Unloading Point: ${additionalAddress}` : address;
-  const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+  const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'Cash on Delivery (COD)';
 
   if (!farmerName || !phone || !address) {
     if (window.cart) window.cart.showToast('Please provide your Contact Person, Phone, and Delivery Address', 'error');
