@@ -6,7 +6,7 @@ const path = require('path');
 let memoryOrders = null;
 
 const FIREBASE_RTDB_ORDERS_URL = process.env.FIREBASE_RTDB_ORDERS_URL || 'https://nutriagro-feeds-default-rtdb.firebaseio.com/orders';
-const DEFAULT_PURGED_ORDERS = new Set(['nutri-495921', 'nutri-917758', 'nutri-270946', 'nutri-724579', 'nutri-842915', 'nutri-205819']);
+const DEFAULT_PURGED_ORDERS = new Set(['nutri-495921', 'nutri-917758', 'nutri-270946', 'nutri-724579', 'nutri-842915', 'nutri-205819', 'nutri-248006', 'nutri-554946']);
 
 // Helper: Get orders directly from Firebase Realtime Database
 async function getFirebaseOrders() {
