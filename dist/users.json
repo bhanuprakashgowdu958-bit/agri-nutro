@@ -1,1 +1,15 @@
-[]
+[
+  {
+    "userId": "GOOGLE-646776",
+    "registeredAt": "2026-11-21T18:54:58.697Z",
+    "fullName": "Bhanu Prakash",
+    "email": "bhanuprakashgowdu958@gmail.com",
+    "picture": "https://lh3.googleusercontent.com/a/ACg8ocK9zToYcBQPTJJ6_t-ZnxAiiuGI1NW9H4OtPKcAuVJitKsUBKL7=s96-c",
+    "phone": "9876543210",
+    "authProvider": "google",
+    "farmName": "Bhanu's Commercial Farm",
+    "farmType": "Dairy Cattle & Livestock",
+    "tier": "Verified Google Member (10% Rebate)",
+    "signedInAt": "2026-11-21T18:54:58.682Z"
+  }
+]
