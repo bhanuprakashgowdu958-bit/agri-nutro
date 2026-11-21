@@ -1,0 +1,25 @@
+# Vercel Deployment Ignore - Optimizes deployment size & prevents storage bloat
+
+# Ignore offline build distribution folder (duplicate assets)
+dist/
+
+# Ignore local zip bundles & executables
+*.zip
+*.exe
+*.bat
+*.ps1
+
+# Ignore test screenshots in root
+/*.png
+
+# Ignore node modules & development logs
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ignore verification reports & test scripts
+gemini_agent_verification_report.json
+verify_gemini_suite.js
+.env
+.env.example
